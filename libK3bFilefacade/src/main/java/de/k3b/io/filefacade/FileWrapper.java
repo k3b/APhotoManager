@@ -148,6 +148,11 @@ public class FileWrapper implements IFile {
     }
 
     @Override
+    public IFile[] listDirs() {
+        return child.listDirs();
+    }
+
+    @Override
     public boolean copy(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
         return child.copy(targetFullPath, deleteSourceWhenSuccess);
     }

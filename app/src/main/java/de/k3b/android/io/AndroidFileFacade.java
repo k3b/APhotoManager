@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 by k3b.
+ * Copyright (c) 2020-2921 by k3b.
  *
  * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *              and #toGoZip (https://github.com/k3b/ToGoZip/).
@@ -31,6 +31,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.io.Converter;
@@ -259,6 +261,22 @@ public class AndroidFileFacade extends FileFacade {
         return new IFile[0];
     }
 
+    public IFile[] listDirs() {
+        List<IFile> found = new ArrayList<>();
+        final DocumentFile androidFile = getAndroidFile(false);
+        if (androidFile != null) {
+            final File parent = getFile();
+            for (DocumentFile file : androidFile.listFiles()) {
+                if (file != null &&
+                        (file.isDirectory() || accept(file.getName().toLowerCase()))) {
+                    found.add(new AndroidFileFacade(
+                            file, new File(parent, file.getName())));
+                }
+            }
+        }
+        return found.toArray(new IFile[found.size()]);
+    }
+
     @Override
     public long length() {
         final DocumentFile androidFile = getAndroidFile(false);
@@ -311,7 +329,7 @@ public class AndroidFileFacade extends FileFacade {
     }
 
     private IFile[] get(DocumentFile[] docs) {
-        AndroidFileFacade f[] = new AndroidFileFacade[docs.length];
+        AndroidFileFacade[] f = new AndroidFileFacade[docs.length];
         final File parent = getFile();
         for (int i = 0; i < docs.length; i++) {
             final DocumentFile doc = docs[i];

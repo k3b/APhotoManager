@@ -32,9 +32,6 @@ public class LibGlobal extends LibGlobalFile {
     /** if debugEnabledJpgMetaIo debug read/write jpg/exif/iptc/xmp io */
     public static boolean debugEnabledJpgMetaIo = false;
 
-    /** false do not follow symlinks when scanning Directories.  */
-    public static final boolean ignoreSymLinks = false;
-
     /** datePickerUseDecade true add decade in date picker */
     public static boolean datePickerUseDecade = false;
 

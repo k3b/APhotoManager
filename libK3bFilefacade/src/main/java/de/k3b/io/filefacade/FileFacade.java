@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import de.k3b.io.Converter;
@@ -55,6 +56,16 @@ public class FileFacade implements IFile {
     };
 
     private File file;
+
+    private static final List<String> allowedFileSuffixesLowercase = new ArrayList<>();
+
+    static {
+        init();
+    }
+
+    public static void init() {
+        includeFileSuffixesForListDir(FileUtilsBase.MEDIA_IGNORE_FILENAME);
+    }
 
     @Override
     public void set(IFile src) {
@@ -239,6 +250,33 @@ public class FileFacade implements IFile {
     @Override
     public IFile[] listFiles() {
         return get(null, file.listFiles());
+    }
+
+    public static void includeFileSuffixesForListDir(String... allowedFileSuffixes) {
+        for (String suffix : allowedFileSuffixes) {
+            String suffixLowerCase = suffix.toLowerCase();
+            if (!allowedFileSuffixesLowercase.contains(suffixLowerCase)) {
+                allowedFileSuffixesLowercase.add(suffixLowerCase);
+            }
+        }
+    }
+
+    public static boolean accept(String nameLowerCase) {
+        for (String suffix : allowedFileSuffixesLowercase) {
+            if (nameLowerCase.endsWith(suffix)) return true;
+        }
+        return false;
+    }
+
+    public IFile[] listDirs() {
+        List<IFile> found = new ArrayList<>();
+        for (File file : file.listFiles()) {
+            if (file != null &&
+                    (file.isDirectory() || accept(file.getName().toLowerCase()))) {
+                found.add(convert(null, file));
+            }
+        }
+        return found.toArray(new IFile[found.size()]);
     }
 
     @Override

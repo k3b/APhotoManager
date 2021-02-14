@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021 by k3b.
+ * Copyright (c) 2021 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -16,21 +16,15 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
-package de.k3b;
 
-public class LibGlobalFile {
-    /**
-     * LOG_CONTEXT is used as logging source for filtering logging messages that belong to this
-     */
-    public static final String LOG_TAG = "k3bFotoLib2";
+package de.k3b.io.filefacade;
 
-    /**
-     * Global.xxxxx. Non final values may be changed from outside (SettingsActivity or commandline parameter)
-     */
-    public static boolean debugEnabled = false;
+public interface IFileCache<T extends FileCacheItem> {
+    T create(IFile file);
 
-    /**
-     * false do not follow symlinks when scanning Directories.
-     */
-    public static final boolean ignoreSymLinks = false;
+    T[] create(int size);
+
+    int size();
+
+    T put(IFile file);
 }

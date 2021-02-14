@@ -79,6 +79,8 @@ public interface IFile {
 
     IFile[] listFiles();
 
+    IFile[] listDirs();
+
     boolean copy(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException;
 
     OutputStream openOutputStream() throws FileNotFoundException;

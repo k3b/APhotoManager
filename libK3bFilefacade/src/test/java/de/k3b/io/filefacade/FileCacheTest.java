@@ -20,20 +20,24 @@
 package de.k3b.io.filefacade;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.List;
 
 import de.k3b.io.FileUtilsBase;
 
 public class FileCacheTest {
+    @BeforeClass
+    public static void init() {
+        FileFacade.init();
+    }
+
     @Test
     public void get_putOneItem_found() {
         IFile file = new StringFileFacade().absolutePath("/Path/To/diR").dir();
         FileCache sut = new FileCacheImpl();
 
         sut.put(file);
-        IFile found = sut.get("/path/to/Dir").getItem();
+        IFile found = sut.get("/path/to/Dir").getCurrent();
         Assert.assertEquals(file, found);
     }
 
@@ -44,15 +48,15 @@ public class FileCacheTest {
 
         FileCache sut = new FileCacheImpl();
 
-        FileCache.FileCacheItem root = sut.put(a);
-        FileCache.FileCacheItem[] children = sut.getChildDirs(root);
+        FileCacheItem root = sut.put(a);
+        FileCacheItem[] children = sut.getChildDirs(root);
 
-        Assert.assertEquals("len one child dir",1, children.length);
-        Assert.assertEquals("parent set",root, children[0].getParent());
-        Assert.assertEquals("child-nomedia unknown yet",null, children[0].getNomedia());
-        Assert.assertEquals("parent-nomedia without .nomedia",false, root.getNomedia());
+        Assert.assertEquals("len one child dir", 1, children.length);
+        Assert.assertEquals("parent set", root, children[0].getParent());
+        Assert.assertEquals("child-nomedia unknown yet", null, children[0].getNomedia());
+        Assert.assertEquals("parent-nomedia without .nomedia", false, root.getNomedia());
 
-        Assert.assertEquals("size dirs created",2, sut.size());
+        Assert.assertEquals("size dirs created", 2, sut.size());
     }
 
     @Test
@@ -62,13 +66,13 @@ public class FileCacheTest {
 
         FileCache sut = new FileCacheImpl();
 
-        FileCache.FileCacheItem root = sut.put(a);
-        FileCache.FileCacheItem[] children = sut.getChildDirs(root);
+        FileCacheItem root = sut.put(a);
+        FileCacheItem[] children = sut.getChildDirs(root);
 
-        Assert.assertEquals("len no child dirs",0, children.length);
-        Assert.assertEquals("parent-nomedia",true, root.getNomedia());
+        Assert.assertEquals("len no child dirs", 0, children.length);
+        Assert.assertEquals("parent-nomedia", true, root.getNomedia());
 
-        Assert.assertEquals("size only root dir without child dir",1, sut.size());
+        Assert.assertEquals("size only root dir without child dir", 1, sut.size());
     }
 
     @Test
@@ -78,27 +82,27 @@ public class FileCacheTest {
 
         FileCache sut = new FileCacheImpl();
 
-        FileCache.FileCacheItem root = sut.put(a);
-        FileCache.FileCacheItem child = sut.getChildDirs(root)[0];
+        FileCacheItem root = sut.put(a);
+        FileCacheItem child = sut.getChildDirs(root)[0];
 
         Assert.assertEquals("size dirs created", 2, sut.size());
 
         sut.remove(a);
         Assert.assertEquals("size dirs removed", 0, sut.size());
 
-        Assert.assertNull(root.childDirs);
-        Assert.assertNull(child.parent);
+        Assert.assertNull(root.getChildDirs(null));
+        Assert.assertNull(child.getParent());
     }
 
-    private static class FileCacheImpl extends FileCache<FileCache.FileCacheItem> {
+    private static class FileCacheImpl extends FileCache<FileCacheItem> {
         @Override
-        protected FileCacheItem create(IFile file) {
+        public FileCacheItem create(IFile file) {
             return new FileCacheItem(file);
         }
 
         @Override
-        protected FileCacheItem[] toArray(List<FileCacheItem> resultList) {
-            return resultList.toArray(new FileCacheItem[resultList.size()]);
+        public FileCacheItem[] create(int size) {
+            return new FileCacheItem[size];
         }
     }
 }

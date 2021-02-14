@@ -103,26 +103,6 @@ public class FileUtils extends FileUtilsBase {
         return sb.toString();
     }
 
-    /** @return true if directory is an alias of an other (symlink-dir). */
-	public static  boolean isSymlinkDir(File directory, boolean errorValue) {
-        if (LibGlobal.ignoreSymLinks || (directory == null)) {
-            return false;
-        }
-
-        // from http://stackoverflow.com/questions/813710/java-1-6-determine-symbolic-links
-        String canonicalPath = FileUtilsBase.tryGetCanonicalPath(directory, null);
-        if (canonicalPath != null) {
-            boolean result = !directory.getAbsolutePath().equals(canonicalPath);
-            if (result && LibGlobal.debugEnabled) {
-                logger.debug(DBG_CONTEXT + "isSymlinkDir('" + directory.getAbsolutePath() + "') => true because CanonicalPath='" + canonicalPath + "'");
-            }
-			
-			return result;
-        }
-        return errorValue;
-
-	}
-
     public static String getDebugString(String prefix, File file) {
         StringBuilder result = new StringBuilder();
         result.append(prefix)

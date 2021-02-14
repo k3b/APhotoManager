@@ -50,7 +50,7 @@ public class StringFileFacade implements IFile {
     private ByteArrayOutputStream byteArrayOutputStream = null;
     private String data = "";
     private IFile parent = null;
-    private List<IFile> listFiles = new ArrayList<>();
+    private final List<IFile> listFiles = new ArrayList<>();
     private String absolutePath = "";
     private boolean dir = false;
 
@@ -170,6 +170,10 @@ public class StringFileFacade implements IFile {
 
     @Override
     public String getName() {
+        if (absolutePath != null) {
+            String[] parts = absolutePath.split("/");
+            return parts[parts.length - 1];
+        }
         return "";
     }
 
@@ -191,6 +195,18 @@ public class StringFileFacade implements IFile {
     @Override
     public IFile[] listFiles() {
         return listFiles.toArray(new IFile[listFiles.size()]);
+    }
+
+    @Override
+    public IFile[] listDirs() {
+        List<IFile> found = new ArrayList<>();
+        for (IFile file : listFiles) {
+            if (file != null &&
+                    (file.isDirectory() || FileFacade.accept(file.getName().toLowerCase()))) {
+                found.add(file);
+            }
+        }
+        return found.toArray(new IFile[found.size()]);
     }
 
     @Override
