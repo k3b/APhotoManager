@@ -304,10 +304,10 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     }
 
     private Date getRenameSourceFileDate(IFile srcFile, Date[] datesLastModified, int pos) {
-        if ((datesLastModified != null) && (pos >= 0) && (pos < datesLastModified.length)) {
-            return datesLastModified[pos];
-        }
-        return new Date(srcFile.lastModified());
+        Date result = (datesLastModified != null && pos >= 0 && pos < datesLastModified.length)
+                ? datesLastModified[pos] : null;
+        if (result == null) result = new Date(srcFile.lastModified());
+        return result;
     }
 
     /**

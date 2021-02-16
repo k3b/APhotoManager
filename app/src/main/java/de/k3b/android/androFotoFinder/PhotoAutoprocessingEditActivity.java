@@ -79,7 +79,7 @@ import de.k3b.media.PhotoPropertiesUtil;
  * * default properties that every photot should receive.
  */
 public class PhotoAutoprocessingEditActivity extends BaseActivity implements Common {
-    private static final String mDebugPrefix = "AutoProcEdit-";
+    private static final String DEBUG_PREFIX = "AutoProcEdit-";
     private static final String SETTINGS_KEY = "AutoProcEditCurrent-";
     private static final int EXIF_EDIT_RESULT_ID = 86441;
     private static final String PREF_LAST_RENAME_DATE_PATTERN = "LastRenameDatePattern";
@@ -134,7 +134,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         AffUtils.putSelectedFiles(intent, selectedFiles);
 
         if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, mDebugPrefix + context.getClass().getSimpleName()
+            Log.d(Global.LOG_CONTEXT, DEBUG_PREFIX + context.getClass().getSimpleName()
                     + " > PhotoAutoprocessingEditActivity.showActivity " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
 
@@ -166,7 +166,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         mSelectedFiles = getSelectedFiles("onCreate ", intent, false);
 
         // Edit dir or edit ".apm"
-        mCurrentOutDir = FileFacade.convert(mDebugPrefix + " mCurrentOutDir",
+        mCurrentOutDir = FileFacade.convert(DEBUG_PREFIX + " mCurrentOutDir",
                 IntentUtil.getFile(intent.getData()));
         if (mCurrentOutDir != null) {
             if (mCurrentOutDir.isFile()) mCurrentOutDir = mCurrentOutDir.getParentFile();
@@ -184,7 +184,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
                 mCurrentAutoprocessingData = new PhotoAutoprocessingDto();
                 mCurrentAutoprocessingData.load(mCurrentOutDir);
             } catch (IOException e) {
-                onFatalError(mDebugPrefix + "Cannot load .apm from " + mCurrentAutoprocessingData, e);
+                onFatalError(DEBUG_PREFIX + "Cannot load .apm from " + mCurrentAutoprocessingData, e);
                 return;
             }
         }
@@ -195,15 +195,15 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
 
         if (Global.debugEnabled) {
             final String nl = "\n\t.";
-            Log.d(Global.LOG_CONTEXT, ListUtils.toString(" ", mDebugPrefix,
-                    "onCreate",intent.toUri(Intent.URI_INTENT_SCHEME),
-                    nl,mCurrentOutDir,
-                    nl,"savedInstanceState",savedInstanceState,
+            Log.d(Global.LOG_CONTEXT, ListUtils.toString(" ", DEBUG_PREFIX,
+                    "onCreate", intent.toUri(Intent.URI_INTENT_SCHEME),
+                    nl, mCurrentOutDir,
+                    nl, "savedInstanceState", savedInstanceState,
                     nl, mCurrentAutoprocessingData));
         }
 
         if ((mCurrentAutoprocessingData == null) || (mCurrentOutDir == null)) {
-            onFatalError(mDebugPrefix + "Missing Intent.data parameter. intent="
+            onFatalError(DEBUG_PREFIX + "Missing Intent.data parameter. intent="
                     + intent.toUri(Intent.URI_INTENT_SCHEME), null);
             return;
         }
@@ -218,13 +218,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         }
         this.exampleSrcfile = RuleFileNameProcessor.getFile(mSelectedFiles.getIFile(0));
 
-        final Date[] datesPhotoTaken = mSelectedFiles.getDatesPhotoTaken();
-
-        this.exampleDate = ((datesPhotoTaken != null) && (datesPhotoTaken.length > 0))
-                ? datesPhotoTaken[0]
-                : getExampleDate(RuleFileNameProcessor.getFile(this.exampleSrcfile));
-
-
+        this.exampleDate = getExampleDate(mSelectedFiles.getDatesPhotoTaken(), this.exampleSrcfile);
         defineGui(intent.getBooleanExtra(EXTRA_RENAME_MULTIBLE, false));
         toGui();
     }
@@ -340,7 +334,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         fromGui();
         savedInstanceState.putSerializable(SETTINGS_KEY, mCurrentAutoprocessingData);
         if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, mDebugPrefix
+            Log.d(Global.LOG_CONTEXT, DEBUG_PREFIX
                     + " onSaveInstanceState " + savedInstanceState);
         }
 
@@ -448,7 +442,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
 
     private List<Pattern> createDatePatterns() {
         String[] patternValues = getResources().getStringArray(R.array.date_patterns);
-        ArrayList<Pattern> result = new ArrayList<Pattern>();
+        ArrayList<Pattern> result = new ArrayList<>();
         for (String patternValue : patternValues) {
             String formattedExample = (!StringUtils.isNullOrEmpty(patternValue))
                     ? new SimpleDateFormat(patternValue).format(this.exampleDate)
@@ -456,6 +450,14 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
             result.add(new Pattern(patternValue, formattedExample, true));
         }
         return result;
+    }
+
+    private Date getExampleDate(Date[] datesPhotoTaken, IFile exampleSrcfile) {
+        Date exampleDate = (datesPhotoTaken != null && datesPhotoTaken.length > 0) ? datesPhotoTaken[0] : null;
+        if (exampleDate == null) {
+            exampleDate = getExampleDate(RuleFileNameProcessor.getFile(exampleSrcfile));
+        }
+        return exampleDate;
     }
 
     private Date getExampleDate(IFile exampleSrcfile) {
@@ -573,7 +575,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
     private void onPickExif(String debugContext) {
         fromGui();
         PhotoPropertiesEditActivity.showActivity(debugContext, this, mCurrentAutoprocessingData.getMediaDefaults(),
-                null, getSelectedFiles(mDebugPrefix+"EditExif-", getIntent(),
+                null, getSelectedFiles(DEBUG_PREFIX + "EditExif-", getIntent(),
                         false),
                 EXIF_EDIT_RESULT_ID, false);
     }
@@ -585,7 +587,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         fromGui();
         IPhotoProperties currentMediaDefaults = mCurrentAutoprocessingData.getMediaDefaults();
 
-        SelectedFiles selectedFiles = getSelectedFiles(mDebugPrefix + "EditExif-", getIntent(),
+        SelectedFiles selectedFiles = getSelectedFiles(DEBUG_PREFIX + "EditExif-", getIntent(),
                 false);
         IPhotoProperties inferedMediaDefaults = PhotoPropertiesUtil.inferAutoprocessingExifDefaults(new PhotoPropertiesDTO(), selectedFiles.getFiles());
 
@@ -621,11 +623,11 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
 
         if (result == null) {
             String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
-            IFile rootDirFile = FileFacade.convert(mDebugPrefix + ".getSelectedFiles", path);
+            IFile rootDirFile = FileFacade.convert(DEBUG_PREFIX + ".getSelectedFiles", path);
 
             IFile[] files = rootDirFile.listFiles();
             if (files != null) {
-                IFile fileNames[] = new IFile[files.length];
+                IFile[] fileNames = new IFile[files.length];
                 int itemCount = 0;
                 for (int i = 0; i < files.length; i++) {
                     if (PhotoPropertiesUtil.isImage(files[i], PhotoPropertiesUtil.IMG_TYPE_ALL)) {
@@ -651,7 +653,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
             }
 
             if (Global.debugEnabled && (intent != null)) {
-                Log.d(Global.LOG_CONTEXT, mDebugPrefix + dbgContext + intent.toUri(Intent.URI_INTENT_SCHEME));
+                Log.d(Global.LOG_CONTEXT, DEBUG_PREFIX + dbgContext + intent.toUri(Intent.URI_INTENT_SCHEME));
             }
 
         }
@@ -758,7 +760,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
 
     @Override
     protected void onResume() {
-        Global.debugMemory(mDebugPrefix, "onResume");
+        Global.debugMemory(DEBUG_PREFIX, "onResume");
         super.onResume();
     }
 
