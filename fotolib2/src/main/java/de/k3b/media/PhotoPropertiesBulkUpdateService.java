@@ -119,6 +119,12 @@ public class PhotoPropertiesBulkUpdateService {
                 if (!sameFile || (changed != null)) {
                     debugExif(sb, "assign ", exifHandler, inFilePath);
 
+                    IFile jpgFileDir = null;
+                    String jpgFileNameDeleted = null;
+                    if (!sameFile && deleteOriginalWhenFinished) {
+                        jpgFileDir = inFilePath.getParentFile();
+                        jpgFileNameDeleted = inFilePath.getName();
+                    }
 
                     exifHandler.save("PhotoPropertiesUpdateHandler save");
 
@@ -129,7 +135,7 @@ public class PhotoPropertiesBulkUpdateService {
                         inFilePath.setLastModified(lastModified);
                     }
 
-                    if (sb != null) {
+                    if (sb != null && inFilePath.exists()) {
                         PhotoPropertiesUpdateHandler exifVerify = PhotoPropertiesUpdateHandler.create(inFilePath,
                                 null, deleteOriginalWhenFinished, "dbg in PhotoPropertiesUpdateHandler", true, true, false);
                         debugExif(sb, "new ", exifVerify, inFilePath);
@@ -147,11 +153,12 @@ public class PhotoPropertiesBulkUpdateService {
                         }
                     }
 
-                    if (!sameFile && deleteOriginalWhenFinished) {
-                        IFile delete = XmpFile.getSidecar(inFilePath, false);
+                    if (jpgFileNameDeleted != null) {
+                        // jpg deleted: Also delete corresponding xmp-s if exist
+                        IFile delete = XmpFile.getSidecar(jpgFileDir, jpgFileNameDeleted, false);
                         deleteFile(delete);
 
-                        delete = XmpFile.getSidecar(inFilePath, true);
+                        delete = XmpFile.getSidecar(jpgFileDir, jpgFileNameDeleted, true);
                         deleteFile(delete);
 
                         delete = inFilePath;

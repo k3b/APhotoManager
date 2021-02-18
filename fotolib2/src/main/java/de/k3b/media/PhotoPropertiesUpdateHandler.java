@@ -48,12 +48,12 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper
         implements IPhotoProperties, IPhotoPropertyFileWriter {
     private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
-    private ExifInterfaceEx exif;   // not null if exif changes are written to jpg file
-    private PhotoPropertiesXmpSegment xmp;    // not null if exif changes are written to xmp sidecar file.
+    private final ExifInterfaceEx exif;   // not null if exif changes are written to jpg file
+    private final PhotoPropertiesXmpSegment xmp;    // not null if exif changes are written to xmp sidecar file.
     private IFile jpgInFile; // where changes are read from.
     private IFile jpgOutFile; // where changes are written to. Null meanst same as input
     private boolean deleteOriginalAfterFinish; // true: after save original jpg/mxp are deleted (move instead of copy)
-    private long    dbgLoadEndTimestamp;
+    private long dbgLoadEndTimestamp;
 
     private PhotoPropertiesUpdateHandler(
             IPhotoProperties readChild, IPhotoProperties writeChild,
@@ -108,6 +108,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper
         if (LibGlobal.debugEnabledJpgMetaIo) {
             startTimestamp = new Date().getTime();
         }
+
         PhotoPropertiesXmpSegment xmp = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(jpgInFile, dbg_context);
         if ((xmp == null) && (createXmpIfNotExist || PhotoPropertiesUtil.isImage(jpgInFile,
                 PhotoPropertiesUtil.IMG_TYPE_COMPRESSED_NON_JPG | PhotoPropertiesUtil.IMG_TYPE_UNCOMPRESSED_NON_JPG))) {
