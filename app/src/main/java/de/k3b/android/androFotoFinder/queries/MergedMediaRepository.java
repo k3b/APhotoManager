@@ -74,7 +74,7 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
     public int execUpdate(String dbgContext, String path, ContentValues values, VISIBILITY visibility) {
         int result = super.execUpdate(
                 dbgContext, path, values, visibility);
-        localDatabase.execUpdate(dbgContext, path, values, visibility);
+        result = localDatabase.execUpdate(dbgContext, path, values, visibility);
         return result;
     }
 
@@ -185,7 +185,7 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
             // insert with same pk as contentprovider does
             values.put(FotoSql.SQL_COL_PK, FotoSql.getId(result));
         }
-        localDatabase.execInsert(dbgContext, values);
+        result = localDatabase.execInsert(dbgContext, values);
         values.remove(FotoSql.SQL_COL_PK);
         return result;
     }

@@ -153,7 +153,14 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public boolean delete() {
-        return exists() && getAndroidFile(false).delete();
+        boolean result = exists() && getAndroidFile(false).delete();
+
+        if (result) {
+            // File (and reference to it) does not exist any more
+            androidFileMayExist = false;
+            androidFile = null;
+        }
+        return result;
     }
 
     @Override

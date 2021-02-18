@@ -99,7 +99,7 @@ public class PhotoPropertiesBulkUpdateService {
             PhotoPropertiesUpdateHandler exifHandler = null;
             try {
                 long lastModified = inFilePath.lastModified();
-                exifHandler = PhotoPropertiesUpdateHandler.create(inFilePath, outFile, false, "PhotoPropertiesUpdateHandler:");
+                exifHandler = PhotoPropertiesUpdateHandler.create(inFilePath, outFile, deleteOriginalWhenFinished, "PhotoPropertiesUpdateHandler:");
                 debugExif(sb, "old", exifHandler, inFilePath);
                 List<String> oldTags = exifHandler.getTags();
 
@@ -119,7 +119,10 @@ public class PhotoPropertiesBulkUpdateService {
                 if (!sameFile || (changed != null)) {
                     debugExif(sb, "assign ", exifHandler, inFilePath);
 
+
                     exifHandler.save("PhotoPropertiesUpdateHandler save");
+
+                    // After move inFilePath is invalid
 
                     if (LibGlobal.preserveJpgFileModificationDate) {
                         // preseve file modification date
@@ -128,7 +131,7 @@ public class PhotoPropertiesBulkUpdateService {
 
                     if (sb != null) {
                         PhotoPropertiesUpdateHandler exifVerify = PhotoPropertiesUpdateHandler.create(inFilePath,
-                                null, false, "dbg in PhotoPropertiesUpdateHandler", true, true, false);
+                                null, deleteOriginalWhenFinished, "dbg in PhotoPropertiesUpdateHandler", true, true, false);
                         debugExif(sb, "new ", exifVerify, inFilePath);
                     }
 

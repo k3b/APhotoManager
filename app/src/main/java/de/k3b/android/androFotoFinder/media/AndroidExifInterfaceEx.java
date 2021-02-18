@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder.media;
 
 import android.content.ContentValues;
+import android.net.Uri;
 import android.util.Log;
 
 import java.io.IOException;
@@ -61,6 +62,18 @@ public class AndroidExifInterfaceEx extends ExifInterfaceEx {
     @Override
     public void saveAttributes(IFile inFile, IFile outFile,
                                boolean deleteInFileOnFinish, Boolean hasXmp) throws IOException {
+        if (deleteInFileOnFinish) {
+            renameInDatabase(":saveAttributes", inFile.getCanonicalPath(), outFile.getCanonicalPath(), true);
+        } else {
+            if (inFile.equals(outFile)) {
+                // !!!
+                // renameSouraceFileBeforeReplaceOrThrow
+
+            } else {
+                insertIntoDatabase(outFile, hasXmp);
+            }
+        }
+        //!!! update media database
         super.saveAttributes(inFile, outFile, deleteInFileOnFinish, hasXmp);
         this.hasXmp = hasXmp;
     }
@@ -88,6 +101,26 @@ public class AndroidExifInterfaceEx extends ExifInterfaceEx {
             this.outPath = null;
         }
         super.beforeCloseSaveOutputStream();
+    }
+
+    private void insertIntoDatabase(IFile outFile, Boolean hasXmp) {
+        ContentValues values = new ContentValues();
+        PhotoPropertiesMediaDBContentValues mediaValueAdapter = new PhotoPropertiesMediaDBContentValues().set(values, null);
+
+        PhotoPropertiesUtil.copyNonEmpty(mediaValueAdapter, this);
+
+        Date lastModified = new Date();
+        TagSql.setFileModifyDate(values, lastModified);
+        if (this.hasXmp != null) {
+            if (this.hasXmp) {
+                TagSql.setXmpFileModifyDate(values, lastModified);
+            } else {
+                TagSql.setXmpFileModifyDate(values, TagSql.EXT_LAST_EXT_SCAN_NO_XMP);
+            }
+        }
+
+        values.put(FotoSql.SQL_COL_PATH, outFile.getCanonicalPath());
+        Uri result = FotoSql.getMediaDBApi().execInsert("Copy with Autoprocessing", values);
     }
 
     // TODO additional database parameters (see scanner)
@@ -138,7 +171,7 @@ public class AndroidExifInterfaceEx extends ExifInterfaceEx {
                     " is not null");
             final SelectedFiles selectedfiles = FotoSql.getSelectedfiles(sqlWhere.toString(), VISIBILITY.PRIVATE_PUBLIC);
             Log.d(Global.LOG_CONTEXT, dbgContext + "\n\t["
-                    + StringUtils.appendMessage((String[]) paths)
+                    + StringUtils.appendMessage(paths)
                     + "] :\n\t\t"
                     + selectedfiles.toIdString() + " -> " + selectedfiles.toPathListString());
         }

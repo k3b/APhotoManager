@@ -4,6 +4,7 @@ Changes from 0.8.3 to ???
 * #155: Android-10 support (experimental)
 * #173: incremental media scanner
 * #180: Fixed: Show image with uri that cannot be translated to file (i.e. WhatsApp show photo in gallery)
+* #93: Bugfix crash in Autoprocessing with date-based-rename when photo has no dateCreated
 * fixed CSV IPhotoProperties import
 * version bumbs android-9 (sdk-28), gradle-6.1.1, osmdroid-6.1.6 mapsforge:0.13.0
 * new translation eu (Basque)

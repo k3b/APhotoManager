@@ -155,7 +155,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      */
     public int applyExifChanges(boolean move, PhotoPropertiesDiffCopy exifChanges, SelectedFiles selectedFiles, IProgessListener progessListener) {
         // source files are the same as dest files.
-        final File[] destFiles = selectedFiles.getFiles();
+        final IFile[] destFiles = selectedFiles.getIFiles();
         return moveOrCopyFiles(move, "change_exif", exifChanges, selectedFiles, destFiles, progessListener);
     }
 

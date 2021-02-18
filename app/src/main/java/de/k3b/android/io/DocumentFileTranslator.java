@@ -69,7 +69,7 @@ public class DocumentFileTranslator {
     private static final File internalRootCandidate = new File("/storage/emulated/0");
     // for debugging
     private static int id = 1;
-    private String mDebugPrefix;
+    private final String mDebugPrefix;
     private static Root root = null;
 
     private DocumentFileTranslator(Context context, String namePrefix) {
@@ -228,15 +228,16 @@ public class DocumentFileTranslator {
      */
     public DocumentFile getDocumentFileOrDirOrNull(File fileOrDir, Boolean isDir) {
         DocumentFile result = null;
-        final String context = FileFacade.debugLogFacade ? (mDebugPrefix + "getDocumentFile('" + fileOrDir.getAbsolutePath() +
-                "') ") : null;
+        String path = fileOrDir != null ? fileOrDir.getAbsolutePath() : "";
+        final String context = FileFacade.debugLogFacade ? (mDebugPrefix + "getDocumentFile('"
+                + path + "') ") : null;
         try {
             result = getDocumentFileOrDirImpl(fileOrDir);
             if ((context != null) && (result == null)) {
                 Log.i(TAG, context + "not found");
             }
         } catch (Exception ex) {
-            Log.w(TAG, mDebugPrefix + "getDocumentFile('" + fileOrDir.getAbsolutePath() +
+            Log.w(TAG, mDebugPrefix + "getDocumentFile('" + path +
                     "') ", ex);
 
         }
@@ -297,7 +298,7 @@ public class DocumentFileTranslator {
 
     private static class Root {
         private final Context context;
-        private Map<String, String> dir2uri = new HashMap<>();
+        private final Map<String, String> dir2uri = new HashMap<>();
 
         public Root(Context context) {
             this.context = context.getApplicationContext();
