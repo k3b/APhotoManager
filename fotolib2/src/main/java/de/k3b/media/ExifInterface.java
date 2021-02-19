@@ -1433,11 +1433,14 @@ public class ExifInterface {
         mThumbnailBytes = null;
     }
 
+    /**
+     * Called for exif change in place (same file is modified with temporary old jpf file).
+     */
     protected IFile renameSouraceFileBeforeReplaceOrThrow(IFile oldSourcefile, String newName) throws IOException {
         logDebug(String.format("rename %s to %s", oldSourcefile, newName));
 
         if (!oldSourcefile.renameTo(newName)) {
-            throw new IOException("Could'nt rename sourcefile from " + oldSourcefile +
+            throw new IOException("Filesystem: Could'nt rename sourcefile from " + oldSourcefile +
                     " to " + newName);
         }
         return oldSourcefile.getParentFile().create(newName);
@@ -1913,7 +1916,10 @@ public class ExifInterface {
         }
     }
 
-    protected void beforeCloseSaveOutputStream() {
+    /**
+     * Hook for android for file post-processing
+     */
+    protected void beforeCloseSaveOutputStream() throws IOException {
     }
 
     // Reads the given EXIF byte area and save its tag data into attributes.

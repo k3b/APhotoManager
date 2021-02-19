@@ -106,20 +106,33 @@ public class Global {
             ? null
             : new File(Environment.getExternalStorageDirectory(), "osmdroid");
 
-    /** remember last picked geo-s */
+    /**
+     * remember last picked geo-s
+     */
     public static File pickHistoryFile = null; // initialized in app.onCreate with local database file
     public static int pickHistoryMax = 25;
 
-    /** false: cmd setGeo => form(GeoEditActivity) => mapPicker */
+    /**
+     * false: cmd setGeo => form(GeoEditActivity) => mapPicker
+     */
     public static final boolean geoNoEdit = true;
     public static final boolean saveXmpAsHumanReadable = true;
 
+    /**
+     * true: cancel exifChange if DatabaseUpdate fails by throwing IOException
+     */
+    public static final boolean cancelExifChangeIfDatabaseUpdateFails = false;
+
     public static class Media {
-        /** Support extra parameters true: experimental. Not fully implemented yet. */
+        /**
+         * Support extra parameters true: experimental. Not fully implemented yet.
+         */
         public static final boolean enableIptcMediaScanner = true;
 
-        /** true: if there is no xmp-file or entry xmp-entry in csv mark this
-         * SQL_COL_EXT_XMP_LAST_MODIFIED_DATE=EXT_LAST_EXT_SCAN_NO_XMP*. */
+        /**
+         * true: if there is no xmp-file or entry xmp-entry in csv mark this
+         * SQL_COL_EXT_XMP_LAST_MODIFIED_DATE=EXT_LAST_EXT_SCAN_NO_XMP*.
+         */
         public static final boolean enableXmpNone = enableIptcMediaScanner && true;
     }
 

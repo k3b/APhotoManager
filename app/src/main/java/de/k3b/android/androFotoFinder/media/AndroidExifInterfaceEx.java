@@ -45,9 +45,11 @@ public class AndroidExifInterfaceEx extends ExifInterfaceEx {
     // set to true to log what happens to database-ID when changing exif
     private static final boolean DBG_RENAME_IN_DB_ENABLED = true;
 
-    private boolean overwriteOriginal;
-    private String inPath;
-    private String outPath;
+    /**
+     * if not null temprary jpg rename is active while edit exif in place (src=dest-file)
+     */
+    private String outTempFilePath;
+    private String inOriginalFilePath;
     private Boolean hasXmp;
 
     public static void init() {
@@ -62,31 +64,31 @@ public class AndroidExifInterfaceEx extends ExifInterfaceEx {
     @Override
     public void saveAttributes(IFile inFile, IFile outFile,
                                boolean deleteInFileOnFinish, Boolean hasXmp) throws IOException {
-        if (deleteInFileOnFinish) {
-            renameInDatabase(":saveAttributes", inFile.getCanonicalPath(), outFile.getCanonicalPath(), true);
-        } else {
-            if (inFile.equals(outFile)) {
-                // !!!
-                // renameSouraceFileBeforeReplaceOrThrow
-
-            } else {
+        if (!inFile.equals(outFile)) {
+            // not change exif in place (same file)
+            if (deleteInFileOnFinish) { // move
+                renameInDatabase(":saveAttributes", inFile.getCanonicalPath(), outFile.getCanonicalPath(), true, Global.cancelExifChangeIfDatabaseUpdateFails);
+            } else { // copy
                 insertIntoDatabase(outFile, hasXmp);
             }
-        }
-        //!!! update media database
+        } // if (!inFile.equals(outFile)) else database update is done later in renameSouraceFileBeforeReplaceOrThrow
+
         super.saveAttributes(inFile, outFile, deleteInFileOnFinish, hasXmp);
         this.hasXmp = hasXmp;
     }
 
+    /**
+     * Called for exif change in place (same file is modified with temporary old jpf file).
+     */
     @Override
     protected IFile renameSouraceFileBeforeReplaceOrThrow(IFile oldSourcefile, String newName) throws IOException {
         debugIdPaths("renameSouraceFileBeforeReplaceOrThrow begin", oldSourcefile.getAbsolutePath(), newName);
-        this.overwriteOriginal = true;
-        this.inPath = oldSourcefile.getAbsolutePath();
-        this.outPath = this.inPath + TMP_FILE_SUFFIX;
+        this.inOriginalFilePath = oldSourcefile.getAbsolutePath();
+        this.outTempFilePath = this.inOriginalFilePath + TMP_FILE_SUFFIX;
 
-        if (!renameInDatabase(":renameSouraceFileBeforeReplaceOrThrow", this.inPath, this.outPath, false)) {
-            this.outPath = null; // failed
+        if (!renameInDatabase(":renameSouraceFileBeforeReplaceOrThrow",
+                this.inOriginalFilePath, this.outTempFilePath, false, Global.cancelExifChangeIfDatabaseUpdateFails)) {
+            this.outTempFilePath = null; // failed
         }
 
         final IFile result = super.renameSouraceFileBeforeReplaceOrThrow(oldSourcefile, newName);
@@ -95,15 +97,16 @@ public class AndroidExifInterfaceEx extends ExifInterfaceEx {
     }
 
     @Override
-    protected void beforeCloseSaveOutputStream() {
-        if (this.outPath != null) {
-            renameInDatabase(":beforeCloseSaveOutputStream", this.outPath, this.inPath, true);
-            this.outPath = null;
+    protected void beforeCloseSaveOutputStream() throws IOException {
+        if (this.outTempFilePath != null) {
+            // rename back temp file after modify exif in place
+            renameInDatabase(":beforeCloseSaveOutputStream", this.outTempFilePath, this.inOriginalFilePath, true, false);
+            this.outTempFilePath = null;
         }
         super.beforeCloseSaveOutputStream();
     }
 
-    private void insertIntoDatabase(IFile outFile, Boolean hasXmp) {
+    private void insertIntoDatabase(IFile outFile, Boolean hasXmp) throws IOException {
         ContentValues values = new ContentValues();
         PhotoPropertiesMediaDBContentValues mediaValueAdapter = new PhotoPropertiesMediaDBContentValues().set(values, null);
 
@@ -121,11 +124,23 @@ public class AndroidExifInterfaceEx extends ExifInterfaceEx {
 
         values.put(FotoSql.SQL_COL_PATH, outFile.getCanonicalPath());
         Uri result = FotoSql.getMediaDBApi().execInsert("Copy with Autoprocessing", values);
+        if (result != null) {
+            String message = " copy insertIntoDatabase('" + outFile + "') failed ";
+            if (DBG_RENAME_IN_DB_ENABLED) {
+                Log.e(Global.LOG_CONTEXT, message);
+            }
+            if (Global.cancelExifChangeIfDatabaseUpdateFails) {
+                throw new IOException(message);
+            }
+        }
+
     }
 
     // TODO additional database parameters (see scanner)
     // DateLastModified, xmpDate, ....
-    private boolean renameInDatabase(String dbgContext, String fromPath, String toPath, boolean thransferExif) {
+    private boolean renameInDatabase(
+            String dbgContext, String fromPath, String toPath,
+            boolean thransferExif, boolean throwOnErrorMessage) throws IOException {
         ContentValues values = new ContentValues();
         if (thransferExif) {
             PhotoPropertiesMediaDBContentValues mediaValueAdapter = new PhotoPropertiesMediaDBContentValues().set(values, null);
@@ -148,8 +163,16 @@ public class AndroidExifInterfaceEx extends ExifInterfaceEx {
                 execUpdate(this.getClass().getSimpleName() + dbgContext, fromPath, values, null);
 
         debugIdPaths(dbgContext + " renameInDatabase end " + execResultCount, fromPath, toPath);
-        if ((execResultCount != 1) && DBG_RENAME_IN_DB_ENABLED) {
-// !!!! debug ausgabe path+ id failed
+        if (execResultCount != 1) {
+            String message = dbgContext + " renameInDatabase('" + fromPath +
+                    "' => '" + toPath + "') returned " + execResultCount + ". Expected 1.";
+            if (DBG_RENAME_IN_DB_ENABLED) {
+                Log.e(Global.LOG_CONTEXT, message);
+            }
+            if (throwOnErrorMessage) {
+                this.outTempFilePath = null;
+                throw new IOException(message);
+            }
         }
         return 1 == execResultCount;
     }
