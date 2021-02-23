@@ -287,6 +287,7 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 
     <!-- #155: android10 -->
     <string name="load_db_menu_title">(Re)Load Media Database</string>
+    <string name="update_db_menu_title">Update Media Database</string>
 
     <!-- #169: sd-card-saf-write-permission support -->
     <string name="permission_error">Missing permisions</string>

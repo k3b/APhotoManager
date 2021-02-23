@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -207,6 +207,9 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
                 return true;
             case R.id.cmd_db_reload:
                 AndroFotoFinderApp.getMediaContent2DbUpdateService().rebuild(this, null);
+                return true;
+            case R.id.cmd_db_update:
+                AndroFotoFinderApp.getMediaContent2DbUpdateService().update(this, null);
                 return true;
             case R.id.cmd_more:
                 new Handler().postDelayed(new Runnable() {

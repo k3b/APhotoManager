@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 by k3b.
+ * Copyright (c) 2019-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -29,7 +29,7 @@ import java.util.Date;
 import de.k3b.io.IProgessListener;
 
 /**
- * #155: takes care that chages from
+ * #155: takes care that changes from
  * {@link MediaContentproviderRepository} are transfered to {@link MediaDBRepository}
  */
 public class MediaContent2DBUpdateService {
@@ -60,9 +60,19 @@ public class MediaContent2DBUpdateService {
     public void rebuild(Context context, IProgessListener progessListener) {
         long start = new Date().getTime();
         clearMediaCopy();
-        MediaDBRepository.Impl.updateMediaCopy(context, writableDatabase, null, progessListener);
+        MediaDBRepository.Impl.updateMediaCopy(context, writableDatabase, null, null, progessListener);
         start = (new Date().getTime() - start) / 1000;
         final String text = "load db " + start + " secs";
+        Toast.makeText(context, text, Toast.LENGTH_LONG).show();
+        if (progessListener != null) progessListener.onProgress(0, 0, text);
+
+    }
+
+    public void update(Context context, IProgessListener progessListener) {
+        long start = new Date().getTime();
+        MediaDBRepository.Impl.updateMediaCopy(context, writableDatabase, progessListener);
+        start = (new Date().getTime() - start) / 1000;
+        final String text = "update db " + start + " secs";
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
         if (progessListener != null) progessListener.onProgress(0, 0, text);
     }

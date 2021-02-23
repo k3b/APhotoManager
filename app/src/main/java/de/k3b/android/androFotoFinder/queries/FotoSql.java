@@ -178,6 +178,11 @@ public class FotoSql extends FotoSqlBase {
     // SQL_COL_LAST_MODIFIED in seconds since 1970; "?" in milli-seconds since 1970
     private static final String FILTER_EXPR_DATE_MODIFIED_MAX = SQL_COL_LAST_MODIFIED + " < ?";
     private static final String FILTER_EXPR_DATE_MODIFIED_MIN = SQL_COL_LAST_MODIFIED + " >= ?";
+
+    // SQL_COL_DATE_ADDED in seconds since 1970; "?" in milli-seconds since 1970
+    private static final String FILTER_EXPR_DATE_ADDED_MAX = SQL_COL_DATE_ADDED + " < ?";
+    private static final String FILTER_EXPR_DATE_ADDED_MIN = SQL_COL_DATE_ADDED + " >= ?";
+
     protected static final String FILTER_EXPR_PATH_LIKE = "(" + SQL_COL_PATH + " like ?)";
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
@@ -405,12 +410,26 @@ public class FotoSql extends FotoSqlBase {
     public static void addWhereDateModifiedMinMax(QueryParameter resultQuery, final long dateMinInMilliSecs1970, final long dateMaxInMilliSecs1970) {
 
         // SQL_COL_LAST_MODIFIED in seconds since 1970; translate from MilliSecs
-        if (dateMinInMilliSecs1970 != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MODIFIED_MIN, Long.toString(dateMinInMilliSecs1970 / LAST_MODIFIED_FACTOR));
+        if (dateMinInMilliSecs1970 != 0)
+            resultQuery.addWhere(FILTER_EXPR_DATE_MODIFIED_MIN, Long.toString(dateMinInMilliSecs1970 / LAST_MODIFIED_FACTOR));
 
-        if (dateMaxInMilliSecs1970 != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MODIFIED_MAX, Long.toString(dateMaxInMilliSecs1970 / LAST_MODIFIED_FACTOR));
+        if (dateMaxInMilliSecs1970 != 0)
+            resultQuery.addWhere(FILTER_EXPR_DATE_MODIFIED_MAX, Long.toString(dateMaxInMilliSecs1970 / LAST_MODIFIED_FACTOR));
     }
 
-    /** translates a query back to filter */
+    public static void addWhereDateAddedMinMax(QueryParameter resultQuery, final long dateMinInMilliSecs1970, final long dateMaxInMilliSecs1970) {
+
+        // SQL_COL_DATE_ADDED in seconds since 1970; translate from MilliSecs
+        if (dateMinInMilliSecs1970 != 0)
+            resultQuery.addWhere(FILTER_EXPR_DATE_ADDED_MIN, Long.toString(dateMinInMilliSecs1970 / LAST_MODIFIED_FACTOR));
+
+        if (dateMaxInMilliSecs1970 != 0)
+            resultQuery.addWhere(FILTER_EXPR_DATE_ADDED_MAX, Long.toString(dateMaxInMilliSecs1970 / LAST_MODIFIED_FACTOR));
+    }
+
+    /**
+     * translates a query back to filter
+     */
     public static IGalleryFilter parseQuery(QueryParameter query, boolean removeFromSourceQuery) {
         if (query != null) {
             GalleryFilterParameter filter = new GalleryFilterParameter();

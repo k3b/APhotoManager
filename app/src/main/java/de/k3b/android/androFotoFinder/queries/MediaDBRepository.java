@@ -20,6 +20,7 @@ package de.k3b.android.androFotoFinder.queries;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
@@ -27,10 +28,12 @@ import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 import android.os.Build;
 import android.os.CancellationSignal;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 
 import java.sql.Date;
+import java.util.Calendar;
 
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
@@ -86,7 +89,9 @@ public class MediaDBRepository implements IMediaRepositoryApi {
     public Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext,
                                        QueryParameter parameters, VISIBILITY visibility,
                                        CancellationSignal cancellationSignal) {
-        if (visibility != null) FotoSql.setWhereVisibility(parameters, visibility);
+        if (visibility != null) {
+            FotoSql.setWhereVisibility(parameters, visibility);
+        }
         return createCursorForQuery(out_debugMessage, dbgContext,
                 parameters.toWhere(), parameters.toAndroidParameters(),
                 parameters.toGroupBy(), parameters.toHaving(),
@@ -475,6 +480,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                 .addColumn(USED_MEDIA_COLUMNS)
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
                 .addWhere(FILTER_EXPR_AFFECTED_FILES);
+        private static long nextMonthTimeInSecs;
 
         private static boolean isLomg(int index) {
             return index >= intMin && index <= intMax;
@@ -517,7 +523,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
             return sql.toString();
         }
 
-        private static int bindAndExecUpdate(Cursor c, SQLiteStatement sql) {
+        private static int bindAndExecUpdate(Cursor c, SQLiteStatement sql, long dateAdded, long dateUpdated) {
             sql.clearBindings();
 
             // sql where
@@ -538,10 +544,16 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                     sql.bindDouble(i, c.getDouble(i));
                 }
             }
+            if (dateAdded != 0) {
+                sql.bindLong(colDATE_ADDED, dateAdded);
+            }
+            if (dateUpdated != 0) {
+                sql.bindLong(colLAST_MODIFIED, dateUpdated);
+            }
             return sql.executeUpdateDelete();
         }
 
-        private static void bindAndExecInsert(Cursor c, SQLiteStatement sql) {
+        private static void bindAndExecInsert(Cursor c, SQLiteStatement sql, long dateAdded, long dateUpdated) {
             sql.clearBindings();
 
             for (int i = intMin; i <= intMax; i++) {
@@ -558,6 +570,12 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                 if (!c.isNull(i)) {
                     sql.bindDouble(i + 1, c.getDouble(i));
                 }
+            }
+            if (dateAdded != 0) {
+                sql.bindLong(colDATE_ADDED + 1, dateAdded);
+            }
+            if (dateUpdated != 0) {
+                sql.bindLong(colLAST_MODIFIED + 1, dateUpdated);
             }
             sql.executeInsert();
         }
@@ -590,19 +608,37 @@ public class MediaDBRepository implements IMediaRepositoryApi {
             }
         }
 
+        public static int updateMediaCopy(
+                Context context, SQLiteDatabase db,
+                IProgessListener progessListener) {
+            SharedPreferences prefsInstance = PreferenceManager
+                    .getDefaultSharedPreferences(context.getApplicationContext());
+            long maxDateAddedSecs = prefsInstance.getLong("maxDateAddedSecs", 0l);
+            return updateMediaCopy(context, db, null, new Date(maxDateAddedSecs), progessListener);
+        }
 
-        public static int updateMediaCopy(Context context, SQLiteDatabase db, Date lastUpdate, IProgessListener progessListener) {
+        public static int updateMediaCopy(
+                Context context, SQLiteDatabase db,
+                Date filterLastUpdateMin, Date filterLastAddedMin, IProgessListener progessListener) {
             int progress = 0;
             java.util.Date startTime = new java.util.Date();
 
-            QueryParameter query = queryGetAllColumns;
-            long _lastUpdate = (lastUpdate != null) ? (lastUpdate.getTime() / 1000L) : 0L;
+            QueryParameter query = new QueryParameter().getFrom(queryGetAllColumns);
 
-            if (_lastUpdate != 0) {
-                query = new QueryParameter().getFrom(queryGetAllColumns);
-                FotoSql.addWhereDateModifiedMinMax(query, _lastUpdate, 0);
-                // FotoSql.createCursorForQuery()
+            Calendar nextMonth = Calendar.getInstance();
+            nextMonth.add(Calendar.MONTH, 1);
+            nextMonthTimeInSecs = nextMonth.getTimeInMillis() / 1000;
+
+            long filterLastUpdateMinInMillis = (filterLastUpdateMin != null) ? (filterLastUpdateMin.getTime()) : 0L;
+            if (filterLastUpdateMinInMillis != 0) {
+                FotoSql.addWhereDateModifiedMinMax(query, filterLastUpdateMinInMillis, 0);
             }
+
+            long filterLastAddedMinInMillis = (filterLastAddedMin != null) ? (filterLastAddedMin.getTime()) : 0L;
+            if (filterLastAddedMinInMillis != 0) {
+                FotoSql.addWhereDateAddedMinMax(query, filterLastAddedMinInMillis, nextMonth.getTimeInMillis());
+            }
+
             Cursor c = null;
             SQLiteStatement sqlInsert = null;
             SQLiteStatement sqlUpdate = null;
@@ -611,7 +647,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
             int itemCount = 0;
             int insertCout = 0;
             int updateCount = 0;
-            // ContentValues contentValues = new ContentValues();
+
             try {
                 db.beginTransaction(); // Performance boost: all db-inserts/updates in one transaction
 
@@ -624,26 +660,36 @@ public class MediaDBRepository implements IMediaRepositoryApi {
 
                 sqlInsert = db.compileStatement(getSqlInsertWithParams());
                 sqlUpdate = db.compileStatement(getSqlUpdateWithParams());
+                long maxDateAddedSecs = 0;
+                long maxDateUpdatedSecs = 0;
                 while (c.moveToNext()) {
-                    // getContentValues(c, contentValues);
 
-                    isUpdate = (c.getLong(colDATE_ADDED) <= _lastUpdate);
+                    long curDateAddedSecs = getDateInSecs(c, colDATE_ADDED);
+                    if (curDateAddedSecs > maxDateAddedSecs) {
+                        maxDateAddedSecs = curDateAddedSecs;
+                    }
+                    isUpdate = (curDateAddedSecs <= filterLastUpdateMinInMillis / 1000);
+
+                    long curDateUpdatedSecs = getDateInSecs(c, colLAST_MODIFIED);
+                    if (curDateUpdatedSecs > maxDateUpdatedSecs) {
+                        maxDateUpdatedSecs = curDateUpdatedSecs;
+                    }
 
                     if (isUpdate) {
                         updateCount++;
                         lastSql = sqlUpdate;
-                        isUpdate = bindAndExecUpdate(c, sqlUpdate) > 0;
+                        isUpdate = bindAndExecUpdate(c, sqlUpdate, curDateAddedSecs, curDateUpdatedSecs) > 0;
                         // 0 affected update rows: must insert
                     }
 
                     if (!isUpdate) {
                         insertCout++;
                         lastSql = sqlInsert;
-                        bindAndExecInsert(c, sqlInsert);
+                        bindAndExecInsert(c, sqlInsert, curDateAddedSecs, curDateUpdatedSecs);
                     }
 
                     lastSql = null;
-                    // save(db, c, contentValues, _lastUpdate);
+
                     if ((progessListener != null) && (progress % 100) == 0) {
                         if (!progessListener.onProgress(progress, itemCount, context.getString(R.string.scanner_update_result_format, progress))) {
                             // canceled in gui thread
@@ -651,8 +697,11 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                         }
                     }
                     progress++;
-                }
+                } // while over all old items
                 db.setTransactionSuccessful(); // This commits the transaction if there were no exceptions
+
+                saveStats(context, maxDateAddedSecs, maxDateUpdatedSecs);
+
                 if (Global.debugEnabledSql) {
                     java.util.Date endTime = new java.util.Date();
                     final String message = "MediaDBRepository.updateMedaiCopy(inserted:" + insertCout +
@@ -683,6 +732,25 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                 // Log.d(LOG_TAG, "FotoSql.execGetFotoPaths() result count=" + result.size());
             }
             return progress;
+        }
+
+        private static void saveStats(Context context, long maxDateAddedSecs, long maxDateUpdatedSecs) {
+            SharedPreferences prefsInstance = PreferenceManager
+                    .getDefaultSharedPreferences(context.getApplicationContext());
+
+            SharedPreferences.Editor prefs = prefsInstance.edit();
+            if (maxDateUpdatedSecs > 0) prefs.putLong("maxDateUpdatedSecs", maxDateUpdatedSecs + 1);
+            if (maxDateAddedSecs > 0) prefs.putLong("maxDateAddedSecs", maxDateAddedSecs + 1);
+            prefs.apply();
+        }
+
+        protected static long getDateInSecs(Cursor c, int colPosition) {
+            long curDateAdded = (c.isNull(colPosition)) ? 0 : c.getLong(colPosition);
+            if (curDateAdded > nextMonthTimeInSecs) {
+                // colDATE_ADDED: some apps/libs use milliscs instead of secs. Fix this.
+                curDateAdded = curDateAdded / 1000;
+            }
+            return curDateAdded;
         }
 
         private static void save(SQLiteDatabase db, Cursor c, ContentValues contentValues, long lastUpdate) {

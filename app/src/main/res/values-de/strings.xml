@@ -242,6 +242,7 @@ Verstecken kann über das \'Media-Scanner\' Gallery-Menü rückgängig gemacht w
     <string name="dark_theme_title">Dunkel</string>
     <!-- #155: android10 -->
     <string name="load_db_menu_title">Mediendatenbank (neu) laden</string>
+    <string name="update_db_menu_title">Mediendatenbank aktualisieren</string>
     <!-- #169: sd-card-saf-write-permission support -->
     <string name="permission_error">Fehlende Berechtigung</string>
     <string name="select_folder_root_rationale"><![CDATA["<h2>Benötigt Verzeichnisberechtigungen.</h2>
