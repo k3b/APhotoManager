@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -173,17 +173,17 @@ public abstract class Dialogs {
 	/** must be overwritten to implement dialog result. null==canceled */
     abstract protected void onDialogResult(String clickedName, Object... parameters);
 
-    public void yesNoQuestion(Activity parent, final String title, String question, final Object... parameters) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(parent);
-        builder.setTitle(title);
-        final TextView textView = new TextView(parent);
-        textView.setText(question);
-        builder.setView(textView);
-        builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                onDialogResult(null);
-                dialog.dismiss();
+	public AlertDialog yesNoQuestion(Activity parent, final String title, String question, final Object... parameters) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(parent);
+		builder.setTitle(title);
+		final TextView textView = new TextView(parent);
+		textView.setText(question);
+		builder.setView(textView);
+		builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				onDialogResult(null);
+				dialog.dismiss();
             }
         });
         builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -197,6 +197,7 @@ public abstract class Dialogs {
         alertDialog.show();
 
         fixLayout(alertDialog, textView);
+		return alertDialog;
     }
 
 	public AlertDialog editFileName(Activity parent, CharSequence title, String name, final Object... parameters) {

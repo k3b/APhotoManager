@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
@@ -614,7 +615,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
             SharedPreferences prefsInstance = PreferenceManager
                     .getDefaultSharedPreferences(context.getApplicationContext());
             long maxDateAddedSecs = prefsInstance.getLong("maxDateAddedSecs", 0l);
-            return updateMediaCopy(context, db, null, new Date(maxDateAddedSecs), progessListener);
+            return updateMediaCopy(context, db, null, new Date(maxDateAddedSecs * FotoSql.LAST_MODIFIED_FACTOR), progessListener);
         }
 
         public static int updateMediaCopy(
@@ -627,7 +628,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
 
             Calendar nextMonth = Calendar.getInstance();
             nextMonth.add(Calendar.MONTH, 1);
-            nextMonthTimeInSecs = nextMonth.getTimeInMillis() / 1000;
+            nextMonthTimeInSecs = nextMonth.getTimeInMillis() / FotoSql.LAST_MODIFIED_FACTOR;
 
             long filterLastUpdateMinInMillis = (filterLastUpdateMin != null) ? (filterLastUpdateMin.getTime()) : 0L;
             if (filterLastUpdateMinInMillis != 0) {
@@ -668,7 +669,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                     if (curDateAddedSecs > maxDateAddedSecs) {
                         maxDateAddedSecs = curDateAddedSecs;
                     }
-                    isUpdate = (curDateAddedSecs <= filterLastUpdateMinInMillis / 1000);
+                    isUpdate = (curDateAddedSecs <= filterLastUpdateMinInMillis / FotoSql.LAST_MODIFIED_FACTOR);
 
                     long curDateUpdatedSecs = getDateInSecs(c, colLAST_MODIFIED);
                     if (curDateUpdatedSecs > maxDateUpdatedSecs) {
@@ -676,16 +677,23 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                     }
 
                     if (isUpdate) {
-                        updateCount++;
                         lastSql = sqlUpdate;
                         isUpdate = bindAndExecUpdate(c, sqlUpdate, curDateAddedSecs, curDateUpdatedSecs) > 0;
                         // 0 affected update rows: must insert
+
+                        if (isUpdate) {
+                            updateCount++;
+                        }
                     }
 
                     if (!isUpdate) {
-                        insertCout++;
                         lastSql = sqlInsert;
-                        bindAndExecInsert(c, sqlInsert, curDateAddedSecs, curDateUpdatedSecs);
+                        try {
+                            bindAndExecInsert(c, sqlInsert, curDateAddedSecs, curDateUpdatedSecs);//!!!
+                            insertCout++;
+                        } catch (SQLiteConstraintException ignore) {
+                            // already in local database, ignore
+                        }
                     }
 
                     lastSql = null;
@@ -708,7 +716,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                             ", updated:" + updateCount +
                             ", toal:" + progress +
                             " / " + itemCount +
-                            ") in " + ((endTime.getTime() - startTime.getTime()) / 1000) +
+                            ") in " + ((endTime.getTime() - startTime.getTime()) / FotoSql.LAST_MODIFIED_FACTOR) +
                             " Secs";
                     Log.i(LOG_TAG, message);
                 }
@@ -718,7 +726,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                         ", updated:" + updateCount +
                         ", toal:" + progress +
                         " / " + itemCount +
-                        ") in " + ((endTime.getTime() - startTime.getTime()) / 1000) +
+                        ") in " + ((endTime.getTime() - startTime.getTime()) / FotoSql.LAST_MODIFIED_FACTOR) +
                         " Secs";
                 Log.e(LOG_TAG, "Cannot insert/update: " + lastSql + " from " + c + " in " + message, ex);
             } finally {
@@ -745,12 +753,12 @@ public class MediaDBRepository implements IMediaRepositoryApi {
         }
 
         protected static long getDateInSecs(Cursor c, int colPosition) {
-            long curDateAdded = (c.isNull(colPosition)) ? 0 : c.getLong(colPosition);
-            if (curDateAdded > nextMonthTimeInSecs) {
+            long dateInSecs = (c.isNull(colPosition)) ? 0 : c.getLong(colPosition);
+            if (dateInSecs > nextMonthTimeInSecs) {
                 // colDATE_ADDED: some apps/libs use milliscs instead of secs. Fix this.
-                curDateAdded = curDateAdded / 1000;
+                dateInSecs = dateInSecs / FotoSql.LAST_MODIFIED_FACTOR;
             }
-            return curDateAdded;
+            return dateInSecs;
         }
 
         private static void save(SQLiteDatabase db, Cursor c, ContentValues contentValues, long lastUpdate) {

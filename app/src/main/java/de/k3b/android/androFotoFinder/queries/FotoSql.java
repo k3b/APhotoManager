@@ -148,7 +148,7 @@ public class FotoSql extends FotoSqlBase {
     public static final int MEDIA_TYPE_IMAGE = MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;   // 1
 
     // used to translate between LAST_MODIFIED in database (secs since 1970) and internal format (java date milli secs simce 1970)
-    private static final int LAST_MODIFIED_FACTOR = 1000;
+    public static final int LAST_MODIFIED_FACTOR = 1000;
 
     public static final int MEDIA_TYPE_IMAGE_PRIVATE = 1000 + MEDIA_TYPE_IMAGE;                 // 1001 APhoto manager specific
     public static final int MEDIA_TYPE_IMAGE_HIDDEN = 1100 + MEDIA_TYPE_IMAGE;                 // 1101 APhoto manager specific

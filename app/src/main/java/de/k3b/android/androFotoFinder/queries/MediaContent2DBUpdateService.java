@@ -44,6 +44,7 @@ public class MediaContent2DBUpdateService {
 
         }
     };
+
     public static MediaContent2DBUpdateService instance = null;
     private final Context context;
     private final SQLiteDatabase writableDatabase;
@@ -57,24 +58,25 @@ public class MediaContent2DBUpdateService {
         DatabaseHelper.version2Upgrade_RecreateMediDbCopy(writableDatabase);
     }
 
-    public void rebuild(Context context, IProgessListener progessListener) {
+    public int rebuild(Context context, IProgessListener progessListener) {
         long start = new Date().getTime();
         clearMediaCopy();
-        MediaDBRepository.Impl.updateMediaCopy(context, writableDatabase, null, null, progessListener);
-        start = (new Date().getTime() - start) / 1000;
-        final String text = "load db " + start + " secs";
+        int changeCount = MediaDBRepository.Impl.updateMediaCopy(context, writableDatabase, null, null, progessListener);
+        long timeInSecs = (new Date().getTime() - start) / 1000;
+        final String text = "load db " + timeInSecs + " secs";
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
         if (progessListener != null) progessListener.onProgress(0, 0, text);
-
+        return changeCount;
     }
 
-    public void update(Context context, IProgessListener progessListener) {
+    public int update(Context context, IProgessListener progessListener) {
         long start = new Date().getTime();
-        MediaDBRepository.Impl.updateMediaCopy(context, writableDatabase, progessListener);
-        start = (new Date().getTime() - start) / 1000;
-        final String text = "update db " + start + " secs";
+        int changeCount = MediaDBRepository.Impl.updateMediaCopy(context, writableDatabase, progessListener);
+        long timeInSecs = (new Date().getTime() - start) / 1000;
+        final String text = "update db " + timeInSecs + " secs";
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
         if (progessListener != null) progessListener.onProgress(0, 0, text);
+        return changeCount;
     }
 
 

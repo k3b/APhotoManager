@@ -43,6 +43,7 @@ import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.BaseQueryActivity;
+import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.collections.SelectedItemIds;
@@ -206,10 +207,10 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
             case R.id.cmd_db_reload:
-                AndroFotoFinderApp.getMediaContent2DbUpdateService().rebuild(this, null);
-                return true;
+                return onDbReloadQuestion(item.getTitle().toString());
             case R.id.cmd_db_update:
-                AndroFotoFinderApp.getMediaContent2DbUpdateService().update(this, null);
+                if (0 != AndroFotoFinderApp.getMediaContent2DbUpdateService().update(this, null))
+                    notifyPhotoChanged();
                 return true;
             case R.id.cmd_more:
                 new Handler().postDelayed(new Runnable() {
@@ -223,6 +224,34 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
                 return onOptionsItemSelected(item, this.mSelectedItemIds);
         }
 
+    }
+
+    private boolean onDbReloadQuestion(String title) {
+        Dialogs dlg = new Dialogs() {
+            @Override
+            protected void onDialogResult(String result, Object[] parameters) {
+                setAutoClose(null, null, null);
+                if (result != null) {
+                    onDbReloadAnswer();
+                }
+            }
+        };
+
+        this.setAutoClose(null, dlg.yesNoQuestion(FotoGalleryActivity.this, title, title), null);
+
+        return true;
+    }
+
+    private void onDbReloadAnswer() {
+        if (0 != AndroFotoFinderApp.getMediaContent2DbUpdateService().rebuild(this, null)) {
+            notifyPhotoChanged();
+        }
+    }
+
+    public void notifyPhotoChanged() {
+        if (mGalleryGui instanceof GalleryCursorFragment) {
+            ((GalleryCursorFragment) mGalleryGui).notifyPhotoChanged();
+        }
     }
 
     /**
