@@ -88,90 +88,96 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
     protected Integer doInBackground(IFile[]... pathNames) {
         // do not call super.doInBackground here because logic is different
         int resultCount = 0;
+        FileDirectoryMediaCollector fileDirectoryMediaCollector = new FileDirectoryMediaCollector();
         for (IFile[] pathArray : pathNames) {
             if (pathArray != null) {
                 for (IFile pathName : pathArray) {
-                    resultCount += scanRoot(pathName);
+                    resultCount += fileDirectoryMediaCollector.scanRootDir(pathName);
                 }
             }
         }
         return resultCount;
     }
 
-    private int scanRoot(IFile rootPath) {
-        int resultCount = 0;
-        if ((rootPath != null) && (rootPath.length() > 0)) {
-            if (this.rescanNeverScannedByAPM) {
-                List<String> pathsToUpdate = TagSql.getPhotosNeverScanned(rootPath.getAbsolutePath());
-                for (String pathToUpdate : pathsToUpdate) {
-                    resultCount += scanDirOrFile(FileFacade.convert("scanRoot incremental paths never scanned ", pathToUpdate));
+    /**
+     * find media files by traversing File-(Sub-)Directories
+     */
+    private class FileDirectoryMediaCollector {
+        private int scanRootDir(IFile rootPath) {
+            int resultCount = 0;
+            if ((rootPath != null) && (rootPath.length() > 0)) {
+                if (rescanNeverScannedByAPM) {
+                    List<String> pathsToUpdate = TagSql.getPhotosNeverScanned(rootPath.getAbsolutePath());
+                    for (String pathToUpdate : pathsToUpdate) {
+                        resultCount += scanDirOrFile(FileFacade.convert("scanRoot incremental paths never scanned ", pathToUpdate));
+                    }
+                }
+
+                resultCount += scanDirOrFile(rootPath);
+            }
+            return resultCount;
+        }
+
+        private int scanDirOrFile(IFile file) {
+            int resultCount = 0;
+            final String fullFilePath = file.getAbsolutePath();
+            if (fullFilePath != null) {
+                if (!isCancelled()) {
+                    if (file.isDirectory()) {
+                        resultCount += scanDir(file, fullFilePath);
+                    } else if (PhotoPropertiesUtil.isImage(file.getName(), PhotoPropertiesUtil.IMG_TYPE_ALL)) {
+                        resultCount += runScanner(fullFilePath, file);
+                    }
+                } else if (mPaused != null) {
+                    mPaused.add(file);
+                }
+            }
+            return resultCount;
+        }
+
+        private int scanDir(IFile file, String fullFilePath) {
+            int resultCount = 0;
+            if (scanForDeleted) {
+                List<String> deletedPaths = null;
+                List<String> existing = FotoSql.getPathsOfFolderWithoutSubfolders(file.getAbsolutePath());
+                for (String candidatePath : existing) {
+                    IFile camdidateFile = FileFacade.convert(
+                            "RecursivePhotoPropertiesMediaFilesScannerAsyncTask.scanDir find deleted", candidatePath);
+                    // delete in db for existing but not found as file
+                    if (!camdidateFile.exists()) {
+                        if (deletedPaths == null) deletedPaths = new ArrayList<>();
+                        deletedPaths.add(candidatePath);
+                    }
+                }
+                if (deletedPaths != null) {
+                    FotoSql.deleteMedia("del photos that did not exist any more ",
+                            deletedPaths, true);
+                    resultCount += deletedPaths.size();
                 }
             }
 
-            resultCount += scanDirOrFile(rootPath);
-        }
-        return resultCount;
-    }
+            if (fullScan) {
+                IFile[] childFileNames = file.listFiles();
 
-    private int scanDirOrFile(IFile file) {
-        int resultCount = 0;
-        final String fullFilePath = file.getAbsolutePath();
-        if (fullFilePath != null) {
-            if (!isCancelled()) {
-                if (file.isDirectory()) {
-                    resultCount += scanDir(file, fullFilePath);
-                } else if (PhotoPropertiesUtil.isImage(file.getName(), PhotoPropertiesUtil.IMG_TYPE_ALL)) {
-                    resultCount += runScanner(fullFilePath, file);
-                }
-            } else if (mPaused != null) {
-                mPaused.add(file);
-            }
-        }
-        return resultCount;
-    }
-
-    private int scanDir(IFile file, String fullFilePath) {
-        int resultCount = 0;
-        if (this.scanForDeleted) {
-            List<String> deletedPaths = null;
-            List<String> existing = FotoSql.getPathsOfFolderWithoutSubfolders(file.getAbsolutePath());
-            for (String candidatePath : existing) {
-                IFile camdidateFile = FileFacade.convert(
-                        "RecursivePhotoPropertiesMediaFilesScannerAsyncTask.scanDir find deleted", candidatePath);
-                // delete in db for existing but not found as file
-                if (!camdidateFile.exists()) {
-                    if (deletedPaths == null) deletedPaths = new ArrayList<>();
-                    deletedPaths.add(candidatePath);
+                if (childFileNames != null) {
+                    resultCount += runScanner(fullFilePath, childFileNames);
                 }
             }
-            if (deletedPaths != null) {
-                FotoSql.deleteMedia("del photos that did not exist any more ",
-                        deletedPaths, true);
-                resultCount += deletedPaths.size();
-            }
-        }
 
-        if (this.fullScan) {
-            IFile[] childFileNames = file.listFiles();
+            if (fullScan || scanForDeleted) {
+                IFile[] subDirs = file.listFiles();
 
-            if (childFileNames != null) {
-                resultCount += runScanner(fullFilePath, childFileNames);
-            }
-        }
-
-        if (this.fullScan || this.scanForDeleted) {
-            IFile[] subDirs = file.listFiles();
-
-            if (subDirs != null) {
-                // #33
-                for (IFile subDir : subDirs) {
-                    if ((subDir != null) && (subDir.isDirectory()) && (!subDir.getName().startsWith("."))) {
-                        resultCount += scanDirOrFile(subDir);
+                if (subDirs != null) {
+                    // #33
+                    for (IFile subDir : subDirs) {
+                        if ((subDir != null) && (subDir.isDirectory()) && (!subDir.getName().startsWith("."))) {
+                            resultCount += scanDirOrFile(subDir);
+                        }
                     }
                 }
             }
+            return resultCount;
         }
-        return resultCount;
     }
 
     /** @return true if scanner was resumable and started resume operation. */

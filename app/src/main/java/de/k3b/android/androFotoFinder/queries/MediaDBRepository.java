@@ -74,7 +74,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
     public static final String LOG_TAG = FotoSql.LOG_TAG + "DB";
 
     // #155
-    public static final boolean debugEnabledSqlRefresh = true;
+    public static final boolean DEBUG_ENABLED_SQL_REFRESH = true;
 
     private static final String MODUL_NAME = MediaDBRepository.class.getSimpleName();
     private static String currentUpdateReason = null;
@@ -87,13 +87,13 @@ public class MediaDBRepository implements IMediaRepositoryApi {
     }
 
     @Override
-    public Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext,
+    public Cursor createCursorForQuery(StringBuilder outDebugMessage, String dbgContext,
                                        QueryParameter parameters, VISIBILITY visibility,
                                        CancellationSignal cancellationSignal) {
         if (visibility != null) {
             FotoSql.setWhereVisibility(parameters, visibility);
         }
-        return createCursorForQuery(out_debugMessage, dbgContext,
+        return createCursorForQuery(outDebugMessage, dbgContext,
                 parameters.toWhere(), parameters.toAndroidParameters(),
                 parameters.toGroupBy(), parameters.toHaving(),
                 parameters.toOrderBy(),
@@ -102,11 +102,11 @@ public class MediaDBRepository implements IMediaRepositoryApi {
     }
 
     @Override
-    public Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext, String from,
+    public Cursor createCursorForQuery(StringBuilder outDebugMessage, String dbgContext, String from,
                                        String sqlWhereStatement, String[] sqlWhereParameters,
                                        String sqlSortOrder, CancellationSignal cancellationSignal,
                                        String... sqlSelectColums) {
-        return createCursorForQuery(out_debugMessage, dbgContext,
+        return createCursorForQuery(outDebugMessage, dbgContext,
                 sqlWhereStatement, sqlWhereParameters,
                 null, null,
                 sqlSortOrder, cancellationSignal, sqlSelectColums);
@@ -115,7 +115,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
     /**
      * every cursor query should go through this. adds logging if enabled
      */
-    private Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext,
+    private Cursor createCursorForQuery(StringBuilder outDebugMessage, String dbgContext,
                                         String sqlWhereStatement, String[] selectionArgs, String groupBy,
                                         String having, String sqlSortOrder,
                                         CancellationSignal cancellationSignal, final String... sqlSelectColums) {
@@ -125,24 +125,24 @@ public class MediaDBRepository implements IMediaRepositoryApi {
         try {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                query = db.query(false, Impl.table, sqlSelectColums, sqlWhereStatement, selectionArgs,
+                query = db.query(false, Impl.DATABASE_TABLE_NAME, sqlSelectColums, sqlWhereStatement, selectionArgs,
                         groupBy, having, sqlSortOrder, null, cancellationSignal);
             } else {
-                query = db.query(false, Impl.table, sqlSelectColums, sqlWhereStatement, selectionArgs,
+                query = db.query(false, Impl.DATABASE_TABLE_NAME, sqlSelectColums, sqlWhereStatement, selectionArgs,
                         groupBy, having, sqlSortOrder, null);
             }
 
         } catch (Exception ex) {
             excpetion = ex;
         } finally {
-            if ((excpetion != null) || Global.debugEnabledSql || (out_debugMessage != null)) {
+            if ((excpetion != null) || Global.debugEnabledSql || (outDebugMessage != null)) {
                 final int count = (query == null) ? 0 : query.getCount();
-                StringBuilder message = StringUtils.appendMessage(out_debugMessage, excpetion,
+                StringBuilder message = StringUtils.appendMessage(outDebugMessage, excpetion,
                         dbgContext, MODUL_NAME +
                                 ".createCursorForQuery:\n",
-                        QueryParameter.toString(sqlSelectColums, null, Impl.table, sqlWhereStatement,
+                        QueryParameter.toString(sqlSelectColums, null, Impl.DATABASE_TABLE_NAME, sqlWhereStatement,
                                 selectionArgs, sqlSortOrder, count));
-                if (out_debugMessage == null) {
+                if (outDebugMessage == null) {
                     Log.i(LOG_TAG, message.toString(), excpetion);
                 } // else logging is done by caller
             }
@@ -187,7 +187,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
         int result = -1;
         Exception excpetion = null;
         try {
-            result = db.update(Impl.table, values, sqlWhere, selectionArgs);
+            result = db.update(Impl.DATABASE_TABLE_NAME, values, sqlWhere, selectionArgs);
             if (result != 0) {
                 currentUpdateId++;
                 currentUpdateReason = dbgContext;
@@ -211,7 +211,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
         Cursor c = null;
         try {
             c = this.createCursorForQuery(null, "getDbContent",
-                    Impl.table, FotoSql.FILTER_COL_PK, new String[]{"" + id}, null, null, "*");
+                    Impl.DATABASE_TABLE_NAME, FotoSql.FILTER_COL_PK, new String[]{"" + id}, null, null, "*");
             if (c.moveToNext()) {
                 ContentValues values = new ContentValues();
                 DatabaseUtils.cursorRowToContentValues(c, values);
@@ -238,7 +238,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
         Exception excpetion = null;
         try {
             // on my android-4.4 insert with media_type=1001 (private) does insert with media_type=1 (image)
-            result = db.insertWithOnConflict(Impl.table, null, values, SQLiteDatabase.CONFLICT_REPLACE );
+            result = db.insertWithOnConflict(Impl.DATABASE_TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
             if (result == -1) {
                 return null;
             }
@@ -284,7 +284,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
 
                 lastUsedWhereClause = FotoSql.SQL_COL_PATH + " is null";
                 lastSelectionArgs = null;
-                delCount = db.delete(Impl.table, lastUsedWhereClause, lastSelectionArgs);
+                delCount = db.delete(Impl.DATABASE_TABLE_NAME, lastUsedWhereClause, lastSelectionArgs);
                 if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
                     Log.i(LOG_TAG, dbgContext + "-b: " +
                             MODUL_NAME +
@@ -293,7 +293,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                                     lastUsedWhereClause, lastSelectionArgs, null, delCount));
                 }
             } else {
-                delCount = db.delete(Impl.table, lastUsedWhereClause, lastSelectionArgs);
+                delCount = db.delete(Impl.DATABASE_TABLE_NAME, lastUsedWhereClause, lastSelectionArgs);
                 if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
                     Log.i(LOG_TAG, dbgContext + ": " +
                             MODUL_NAME +
@@ -330,7 +330,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
     @Override
     public boolean mustRequery(long updateId) {
         final boolean modified = currentUpdateId != updateId;
-        if (modified && MediaDBRepository.debugEnabledSqlRefresh) {
+        if (modified && MediaDBRepository.DEBUG_ENABLED_SQL_REFRESH) {
             Log.i(MediaDBRepository.LOG_TAG, "mustRequery: true because of " + currentUpdateReason);
         }
         return modified;
@@ -397,11 +397,12 @@ public class MediaDBRepository implements IMediaRepositoryApi {
 
 
     public static class Impl {
+        public static final String DATABASE_TABLE_NAME = "files";
         /**
          * SQL to create copy of contentprovider MediaStore.Images.
          * copied from android-4.4 android database. Removed columns not used
          */
-        public static final String[] DDL = new String[]{
+        protected static final String[] DDL = new String[]{
                 "DROP TABLE IF EXISTS \"files\"",
                 "CREATE TABLE \"files\" (\n" +
                         "\t_id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
@@ -431,8 +432,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                 "CREATE INDEX sort_index ON files(datetaken ASC, _id ASC)",
                 "CREATE INDEX title_idx ON files(title)",
         };
-
-        public static final String table = "files";
+        private static final int COL_INT_MIN = 0;
         // same colum order as in DDL
         private static final String[] USED_MEDIA_COLUMNS = new String[]{
                 // INTEGER 0 .. 10
@@ -460,17 +460,22 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                 SQL_COL_LAT,
                 SQL_COL_LON,
         };
+        private static final int COL_INT_MAX = 10;
+        private static final int COL_TXT_MIN = 11;
+        private static final int COL_TXT_MAX = 16;
+        private static final int COL_DBL_MIN = 17;
+        private static final int COL_DBL_MAX = 18;
+        // COL_ID must be col#0 to macke update where id=? work
+        private static final int COL_ID = COL_INT_MIN; // = 0
+        private static final int COL_DATE_ADDED = 1;
+        private static final int COL_LAST_MODIFIED = 2;
+        // do not copy 6==SQL_COL_EXT_XMP_LAST_MODIFIED_DATE
+        // on android-10 and above wich is used as rescan marker
+        private static final int COL_INT_COPY_IGNORE = (Global.useAo10MediaImageDbReplacement) ? 6 : -1;
 
-        private static final int intMin = 0;
-        private static final int intMax = 10;
-        private static final int txtMin = 11;
-        private static final int txtMax = 16;
-        private static final int dblMin = 17;
-        private static final int dblMax = 18;
+        private Impl() {
+        }
 
-        private static final int colID = 0;
-        private static final int colDATE_ADDED = 1;
-        private static final int colLAST_MODIFIED = 2;
         private static final String FILTER_EXPR_AFFECTED_FILES
                 = "(" + FotoSql.FILTER_EXPR_PRIVATE_PUBLIC
                 + " OR " + SQL_COL_PATH + " like '%" + AlbumFile.SUFFIX_VALBUM + "' "
@@ -484,23 +489,23 @@ public class MediaDBRepository implements IMediaRepositoryApi {
         private static long nextMonthTimeInSecs;
 
         private static boolean isLomg(int index) {
-            return index >= intMin && index <= intMax;
+            return index >= COL_INT_MIN && index <= COL_INT_MAX;
         }
 
         // private Object get(Cursor cursor, columIndex)
 
         private static boolean isString(int index) {
-            return index >= txtMin && index <= txtMax;
+            return index >= COL_TXT_MIN && index <= COL_TXT_MAX;
         }
 
         private static boolean isDouble(int index) {
-            return index >= dblMin && index <= dblMax;
+            return index >= COL_DBL_MIN && index <= COL_DBL_MAX;
         }
 
         private static String getSqlInsertWithParams() {
             StringBuilder sql = new StringBuilder();
 
-            sql.append("INSERT INTO ").append(table).append("(").append(USED_MEDIA_COLUMNS[0]);
+            sql.append("INSERT INTO ").append(DATABASE_TABLE_NAME).append("(").append(USED_MEDIA_COLUMNS[0]);
             for (int i = 1; i < USED_MEDIA_COLUMNS.length; i++) {
                 sql.append(", ").append(USED_MEDIA_COLUMNS[i]);
             }
@@ -515,7 +520,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
         private static String getSqlUpdateWithParams() {
             StringBuilder sql = new StringBuilder();
 
-            sql.append("UPDATE ").append(table).append(" SET ");
+            sql.append("UPDATE ").append(DATABASE_TABLE_NAME).append(" SET ");
             for (int i = 1; i < USED_MEDIA_COLUMNS.length; i++) {
                 if (i > 1) sql.append(", ");
                 sql.append(USED_MEDIA_COLUMNS[i]).append("=?");
@@ -528,28 +533,28 @@ public class MediaDBRepository implements IMediaRepositoryApi {
             sql.clearBindings();
 
             // sql where
-            sql.bindLong(dblMax + 1, c.getLong(intMin));
+            sql.bindLong(COL_DBL_MAX + 1, c.getLong(COL_ID));
 
-            for (int i = intMin + 1; i <= intMax; i++) {
-                if (!c.isNull(i)) {
+            for (int i = COL_INT_MIN + 1; i <= COL_INT_MAX; i++) {
+                if (COL_INT_COPY_IGNORE != i && !c.isNull(i)) {
                     sql.bindLong(i, c.getLong(i));
                 }
             }
-            for (int i = txtMin; i <= txtMax; i++) {
+            for (int i = COL_TXT_MIN; i <= COL_TXT_MAX; i++) {
                 if (!c.isNull(i)) {
                     sql.bindString(i, c.getString(i));
                 }
             }
-            for (int i = dblMin; i <= dblMax; i++) {
+            for (int i = COL_DBL_MIN; i <= COL_DBL_MAX; i++) {
                 if (!c.isNull(i)) {
                     sql.bindDouble(i, c.getDouble(i));
                 }
             }
             if (dateAdded != 0) {
-                sql.bindLong(colDATE_ADDED, dateAdded);
+                sql.bindLong(COL_DATE_ADDED, dateAdded);
             }
             if (dateUpdated != 0) {
-                sql.bindLong(colLAST_MODIFIED, dateUpdated);
+                sql.bindLong(COL_LAST_MODIFIED, dateUpdated);
             }
             return sql.executeUpdateDelete();
         }
@@ -557,26 +562,26 @@ public class MediaDBRepository implements IMediaRepositoryApi {
         private static void bindAndExecInsert(Cursor c, SQLiteStatement sql, long dateAdded, long dateUpdated) {
             sql.clearBindings();
 
-            for (int i = intMin; i <= intMax; i++) {
-                if (!c.isNull(i)) {
+            for (int i = COL_INT_MIN; i <= COL_INT_MAX; i++) {
+                if (COL_INT_COPY_IGNORE != i && !c.isNull(i)) {
                     sql.bindLong(i + 1, c.getLong(i));
                 }
             }
-            for (int i = txtMin; i <= txtMax; i++) {
+            for (int i = COL_TXT_MIN; i <= COL_TXT_MAX; i++) {
                 if (!c.isNull(i)) {
                     sql.bindString(i + 1, c.getString(i));
                 }
             }
-            for (int i = dblMin; i <= dblMax; i++) {
+            for (int i = COL_DBL_MIN; i <= COL_DBL_MAX; i++) {
                 if (!c.isNull(i)) {
                     sql.bindDouble(i + 1, c.getDouble(i));
                 }
             }
             if (dateAdded != 0) {
-                sql.bindLong(colDATE_ADDED + 1, dateAdded);
+                sql.bindLong(COL_DATE_ADDED + 1, dateAdded);
             }
             if (dateUpdated != 0) {
-                sql.bindLong(colLAST_MODIFIED + 1, dateUpdated);
+                sql.bindLong(COL_LAST_MODIFIED + 1, dateUpdated);
             }
             sql.executeInsert();
         }
@@ -602,10 +607,9 @@ public class MediaDBRepository implements IMediaRepositoryApi {
 
         public static void clearMedaiCopy(SQLiteDatabase db) {
             try {
-                db.execSQL("DROP TABLE " + table);
+                db.execSQL("DROP TABLE " + DATABASE_TABLE_NAME);
             } catch (Exception ex) {
                 // Log.e(LOG_TAG, "FotoSql.execGetFotoPaths() Cannot get path from: " + FotoSql.SQL_COL_PATH + " like '" + pathFilter +"'", ex);
-            } finally {
             }
         }
 
@@ -665,13 +669,13 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                 long maxDateUpdatedSecs = 0;
                 while (c.moveToNext()) {
 
-                    long curDateAddedSecs = getDateInSecs(c, colDATE_ADDED);
+                    long curDateAddedSecs = getDateInSecs(c, COL_DATE_ADDED);
                     if (curDateAddedSecs > maxDateAddedSecs) {
                         maxDateAddedSecs = curDateAddedSecs;
                     }
                     isUpdate = (curDateAddedSecs <= filterLastUpdateMinInMillis / FotoSql.LAST_MODIFIED_FACTOR);
 
-                    long curDateUpdatedSecs = getDateInSecs(c, colLAST_MODIFIED);
+                    long curDateUpdatedSecs = getDateInSecs(c, COL_LAST_MODIFIED);
                     if (curDateUpdatedSecs > maxDateUpdatedSecs) {
                         maxDateUpdatedSecs = curDateUpdatedSecs;
                     }
@@ -698,11 +702,10 @@ public class MediaDBRepository implements IMediaRepositoryApi {
 
                     lastSql = null;
 
-                    if ((progessListener != null) && (progress % 100) == 0) {
-                        if (!progessListener.onProgress(progress, itemCount, context.getString(R.string.scanner_update_result_format, progress))) {
-                            // canceled in gui thread
-                            return -progress;
-                        }
+                    if ((progessListener != null) && (progress % 100) == 0 &&
+                            !progessListener.onProgress(progress, itemCount, context.getString(R.string.scanner_update_result_format, progress))) {
+                        // canceled in gui thread
+                        return -progress;
                     }
                     progress++;
                 } // while over all old items
@@ -759,18 +762,6 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                 dateInSecs = dateInSecs / FotoSql.LAST_MODIFIED_FACTOR;
             }
             return dateInSecs;
-        }
-
-        private static void save(SQLiteDatabase db, Cursor c, ContentValues contentValues, long lastUpdate) {
-            boolean isNew = (c.getLong(colDATE_ADDED) > lastUpdate);
-
-            if (isNew) {
-                db.insert(table, null, contentValues);
-            } else {
-                String[] params = new String[]{"" + c.getLong(colID)};
-                contentValues.remove(SQL_COL_PK);
-                db.update(table, contentValues, FotoSql.FILTER_COL_PK, params);
-            }
         }
     }
 }
