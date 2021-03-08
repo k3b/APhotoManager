@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -34,16 +34,19 @@ import java.util.List;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
+import de.k3b.io.IProgessListener;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesUtil;
 
 /**
  * Special PhotoPropertiesMediaFilesScanner that can only handle inserNew/updateExisting for directories or jp(e)g files.
- *
+ * <p>
  * Can handle pause/resume scanning after a directory was scanned before
  * continuing scanning other dirs.
- *
+ * <p>
+ * Timer based update-Status-Dialog
+ * <p>
  * Created by k3b on 22.10.2015.
  */
 public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPropertiesMediaFilesScannerAsyncTask {
@@ -59,24 +62,24 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
     private final boolean scanForDeleted;
 
     // statistics displayed in the status dialog
-    private String mCurrentFolder = "";
-    private int mCount = 0;
-
-    private AlertDialog mStatusDialog = null;
-    private Handler mTimerHandler = null;
-    private Runnable mTimerRunner = null;
-
+    protected String mCurrentFolder = "";
+    protected int mFileCount = 0;
     /**
      * if not null scanner is either
      * - in resume mode (can be started without parameters to resume interrupted scan)
      * - or in pausing mode collecting all canceled scans here to be processed in resumeIfNecessary()
      */
-    private List<IFile> mPaused = null;
+    protected List<IFile> mPaused = null;
+
+    private AlertDialog mStatusDialog = null;
+    private Handler mTimerHandler = null;
+    private Runnable mTimerRunner = null;
+    private int mDirCount = 0;
 
     public RecursivePhotoPropertiesMediaFilesScannerAsyncTask(
             PhotoPropertiesMediaFilesScanner scanner, Context context, String why,
-            boolean fullScan, boolean rescanNeverScannedByAPM, boolean scanForDeleted) {
-        super(scanner, context, why);
+            boolean fullScan, boolean rescanNeverScannedByAPM, boolean scanForDeleted, IProgessListener progessListener) {
+        super(scanner, context, why, progessListener);
 
         this.fullScan = fullScan;
         this.rescanNeverScannedByAPM = rescanNeverScannedByAPM;
@@ -182,8 +185,7 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
 
     /** @return true if scanner was resumable and started resume operation. */
     public boolean resumeIfNeccessary() {
-        if ((getStatus() == AsyncTask.Status.PENDING) && (mPaused != null))
-        {
+        if ((getStatus() == AsyncTask.Status.PENDING) && (mPaused != null)) {
             execute(mPaused.toArray(new IFile[mPaused.size()]));
             mPaused = null;
             return true;
@@ -191,17 +193,14 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
         return false;
     }
 
-    /** call the original background scanner and update the statistics */
-    private Integer runScanner(String parentPath, IFile... fileNames) {
-        this.mCurrentFolder = parentPath;
-        final Integer resultCount = super.doInBackground(null, fileNames);
-        if (resultCount != null) {
-            this.mCount += resultCount.intValue();
-        }
-        return resultCount;
+    private static void createScannerTask(String why, PhotoPropertiesMediaFilesScanner scanner, boolean fullScan, boolean rescanNeverScannedByAPM, boolean scanForDeleted, List<IFile> mPaused, IProgessListener progessListener) {
+        RecursivePhotoPropertiesMediaFilesScannerAsyncTask newScanner = ScannerTaskFactory.createScannerTask(why, scanner, fullScan, rescanNeverScannedByAPM, scanForDeleted, progessListener);
+        newScanner.mPaused = mPaused;
+        RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner = newScanner;
     }
 
-    @Override protected void onPostExecute(Integer modifyCount) {
+    @Override
+    protected void onPostExecute(Integer modifyCount) {
         super.onPostExecute(modifyCount);
         if (isCancelled()) {
             handleScannerCancel();
@@ -212,6 +211,20 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
             }
         }
 
+    }
+
+    /**
+     * call the original background scanner and update the statistics
+     */
+    protected Integer runScanner(String parentPath, IFile... fileNames) {
+        this.mCurrentFolder = parentPath;
+        this.mDirCount++;
+        onProgress(mFileCount, mDirCount, parentPath);
+        final Integer resultCount = super.doInBackground(null, fileNames);
+        if (resultCount != null) {
+            this.mFileCount += resultCount.intValue();
+        }
+        return resultCount;
     }
 
     private void handleScannerCancel() {
@@ -225,12 +238,10 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
         }
 
         if (mustCreateResumeScanner) {
-            RecursivePhotoPropertiesMediaFilesScannerAsyncTask newScanner
-                    = new RecursivePhotoPropertiesMediaFilesScannerAsyncTask(
-                    mScanner, mScanner.mContext, "resumed " + mWhy,
-                    fullScan, rescanNeverScannedByAPM, scanForDeleted);
-            newScanner.mPaused = this.mPaused;
-            RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner = newScanner;
+
+            RecursivePhotoPropertiesMediaFilesScannerAsyncTask newScanner;
+
+            createScannerTask("resume " + mWhy, mScanner, fullScan, rescanNeverScannedByAPM, scanForDeleted, mPaused, progessListener);
         }
     }
 
@@ -286,7 +297,7 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
                 if (mStatusDialog != null) {
                     RecursivePhotoPropertiesMediaFilesScannerAsyncTask scanner = RecursivePhotoPropertiesMediaFilesScannerAsyncTask.this;
                     folder.setText(scanner.mCurrentFolder);
-                    count.setText(parent.getString(R.string.image_loading_at_position_format, scanner.mCount));
+                    count.setText(parent.getString(R.string.image_loading_at_position_format, scanner.mFileCount));
                     if (scanner.mTimerRunner != null) {
                         mTimerHandler.postDelayed(scanner.mTimerRunner, 500); // e.g. 500 milliseconds
                     }

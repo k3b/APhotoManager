@@ -292,6 +292,8 @@ public class FotoSql extends FotoSqlBase {
 
     private static IMediaRepositoryApi mediaDBApi;
 
+    private static IMediaRepositoryApi mediaLocalDatabase;
+
     public static IMediaRepositoryApi getMediaDBApi() {
         if ((firstRun) && (FotoSql.mediaDBApi != null)) {
             firstRun = false;
@@ -300,8 +302,13 @@ public class FotoSql extends FotoSqlBase {
         return FotoSql.mediaDBApi;
     }
 
-    public static void setMediaDBApi(IMediaRepositoryApi mediaDBApi) {
+    public static IMediaRepositoryApi getMediaLocalDatabase() {
+        return mediaLocalDatabase;
+    }
+
+    public static void setMediaDBApi(IMediaRepositoryApi mediaDBApi, IMediaRepositoryApi mediaLocalDatabase) {
         FotoSql.mediaDBApi = mediaDBApi;
+        FotoSql.mediaLocalDatabase = mediaLocalDatabase;
     }
 
     public static final double getGroupFactor(final double _zoomLevel) {
@@ -1094,6 +1101,17 @@ public class FotoSql extends FotoSqlBase {
                                   boolean preventDeleteImageFile) {
         if ((pathsToBeRemoved != null) && (pathsToBeRemoved.size() > 0)) {
             String whereDelete = SQL_COL_PATH + " in ('" + ListUtils.toString("','", pathsToBeRemoved) + "')";
+            return mediaDBApi.deleteMedia(dbgContext, whereDelete, null, preventDeleteImageFile);
+        }
+        return 0;
+    }
+
+    public static int deleteMedia(IMediaRepositoryApi mediaDBApi,
+                                  String dbgContext,
+                                  List<Long> idsToBeRemoved,
+                                  boolean preventDeleteImageFile) {
+        if ((idsToBeRemoved != null) && (idsToBeRemoved.size() > 0)) {
+            String whereDelete = SQL_COL_PK + " in (" + ListUtils.toString(",", idsToBeRemoved) + ")";
             return mediaDBApi.deleteMedia(dbgContext, whereDelete, null, preventDeleteImageFile);
         }
         return 0;

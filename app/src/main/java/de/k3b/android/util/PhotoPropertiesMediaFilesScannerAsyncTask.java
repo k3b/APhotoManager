@@ -26,28 +26,35 @@ import android.widget.Toast;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.io.IProgessListener;
 import de.k3b.io.filefacade.IFile;
 
 /**
+ * Run mScanner as Background AsyncTask
  * Created by k3b on 04.10.2016.
  */
 
-public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<IFile[],Object,Integer> {
+public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<IFile[], Object, Integer> implements IProgessListener {
     private static final String CONTEXT = "PhotoPropertiesMediaFilesScannerAsyncTask.";
 
     protected final PhotoPropertiesMediaFilesScanner mScanner;
     protected final Context mContext;
     protected final String mWhy;
+    protected final IProgessListener progessListener;
 
-    public PhotoPropertiesMediaFilesScannerAsyncTask(PhotoPropertiesMediaFilesScanner scanner, Context context, String why) {
+    public PhotoPropertiesMediaFilesScannerAsyncTask(
+            PhotoPropertiesMediaFilesScanner scanner, Context context, String why,
+            IProgessListener progessListener) {
         mWhy = why;
         mContext = context.getApplicationContext();
         mScanner = scanner;
+        this.progessListener = progessListener;
     }
 
     @Override
     protected Integer doInBackground(IFile[]... pathNames) {
-        if (pathNames.length != 2) throw new IllegalArgumentException(CONTEXT + ".execute(oldFileNames, newFileNames)");
+        if (pathNames.length != 2)
+            throw new IllegalArgumentException(CONTEXT + ".execute(oldFileNames, newFileNames)");
         return mScanner.updateMediaDatabaseAndroid42(mContext, pathNames[0], pathNames[1]);
     }
 
@@ -73,9 +80,18 @@ public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<IFile[]
         notifyIfThereAreChanges(modifyCount, mContext, mWhy);
     }
 
-    /** return true if this is executed in the gui thread */
+    /**
+     * return true if this is executed in the gui thread
+     */
     private static boolean isGuiThread() {
         return (Looper.myLooper() == Looper.getMainLooper());
     }
 
+    @Override
+    public boolean onProgress(int itemcount, int size, String message) {
+        if (progessListener != null) {
+            return progessListener.onProgress(itemcount, size, message);
+        }
+        return true;
+    }
 }

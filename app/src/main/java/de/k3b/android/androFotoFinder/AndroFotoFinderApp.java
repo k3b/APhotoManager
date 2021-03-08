@@ -74,7 +74,7 @@ import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
  * Created by k3b on 14.07.2015.
  */
 public class AndroFotoFinderApp extends Application {
-    private static String fileNamePrefix = "androFotofinder.logcat-";
+    private static final String fileNamePrefix = "androFotofinder.logcat-";
 
     public static MediaContent2DBUpdateService getMediaContent2DbUpdateService() {
         return MediaContent2DBUpdateService.instance;
@@ -123,7 +123,7 @@ public class AndroFotoFinderApp extends Application {
             // switching from mediaImageDbReplacement to Contentprovider
             MediaContent2DBUpdateService.instance.clearMediaCopy();
         }
-        FotoSql.setMediaDBApi(mediaContentproviderRepository);
+        FotoSql.setMediaDBApi(mediaContentproviderRepository, null);
         MediaContent2DBUpdateService.instance = null;
     }
 
@@ -141,7 +141,7 @@ public class AndroFotoFinderApp extends Application {
 
             // read from copy database, write to both: copy-database and content-provider
             final MergedMediaRepository mediaDBApi = new MergedMediaRepository(mediaDBRepository, mediaContentproviderRepository);
-            FotoSql.setMediaDBApi(mediaDBApi);
+            FotoSql.setMediaDBApi(mediaDBApi, mediaDBRepository);
 
             MediaContent2DBUpdateService.instance = new MediaContent2DBUpdateService(context, writableDatabase);
 
@@ -151,13 +151,14 @@ public class AndroFotoFinderApp extends Application {
             }
 
             PhotoChangeNotifyer.registerContentObserver(context, GlobalMediaContentObserver.getInstance(context));
+
             return mediaDBApi;
         } catch (RuntimeException ignore) {
             Log.w(Global.LOG_CONTEXT,
                     "Cannot open Database (missing permissions) "
                             + DatabaseHelper.getDatabasePath(context) + " "
                             + ignore.getMessage(), ignore);
-            FotoSql.setMediaDBApi(new MediaDBRepositoryLoadOnDemand(context));
+            FotoSql.setMediaDBApi(new MediaDBRepositoryLoadOnDemand(context), null);
         }
         return null;
     }

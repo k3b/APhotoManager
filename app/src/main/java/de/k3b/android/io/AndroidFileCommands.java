@@ -56,6 +56,7 @@ import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.RecursivePhotoPropertiesMediaFilesScannerAsyncTask;
+import de.k3b.android.util.ScannerTaskFactory;
 import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
@@ -399,11 +400,13 @@ public class AndroidFileCommands extends AndroidFileCommandsDbImpl {
 
             final String message = activity.getString(R.string.scanner_menu_title);
 
-            final RecursivePhotoPropertiesMediaFilesScannerAsyncTask scanner = (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner != null)
-                    ? RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner :
-                    new RecursivePhotoPropertiesMediaFilesScannerAsyncTask(
-                            mScanner, activity, message,
-                            fullScan, rescanNeverScannedByAPM, scanForDeleted);
+            IProgessListener progessListener = activity instanceof IProgessListener ? ((IProgessListener) activity) : null;
+            final RecursivePhotoPropertiesMediaFilesScannerAsyncTask scanner =
+                    (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner != null)
+                            ? RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner :
+                            ScannerTaskFactory.createScannerTask(message, mScanner,
+                                    fullScan, rescanNeverScannedByAPM, scanForDeleted, progessListener);
+
             synchronized (this) {
                 if (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null) {
                     RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner = scanner;

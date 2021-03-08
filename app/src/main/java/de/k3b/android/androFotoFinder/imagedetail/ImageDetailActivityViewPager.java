@@ -80,6 +80,7 @@ import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
+import de.k3b.io.IProgessListener;
 import de.k3b.io.StringUtils;
 import de.k3b.io.XmpFile;
 import de.k3b.io.collections.SelectedFiles;
@@ -201,8 +202,9 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             Log.d(Global.LOG_CONTEXT, message.toString());
         }
 
+        IProgessListener progessListener = context instanceof IProgessListener ? ((IProgessListener) context) : null;
         PhotoPropertiesMediaFilesScannerAsyncTask scanner = new PhotoPropertiesMediaFilesScannerAsyncTask(
-                PhotoPropertiesMediaFilesScanner.getInstance(context), context, why);
+                PhotoPropertiesMediaFilesScanner.getInstance(context), context, why, progessListener);
         scanner.execute(null, missing.toArray(new IFile[missing.size()]));
         return missing.size();
     }

@@ -120,6 +120,8 @@ public abstract class PhotoPropertiesMediaFilesScanner {
 
     private final Map<String, Boolean> noMediaCache = new HashMap<>();
 
+    private boolean ignoreNoMediaCheck = false;
+
     public PhotoPropertiesMediaFilesScanner(Context context) {
         mContext = context.getApplicationContext();
     }
@@ -259,7 +261,7 @@ public abstract class PhotoPropertiesMediaFilesScanner {
             for (int i = 0; i < fullPathNames.length; i++) {
                 IFile fullPathName = fullPathNames[i];
                 if (fullPathName != null) {
-                    if (!PhotoPropertiesUtil.isImage(fullPathName, PhotoPropertiesUtil.IMG_TYPE_ALL) || isNoMedia(fullPathName, 5, this.noMediaCache)) {
+                    if (!PhotoPropertiesUtil.isImage(fullPathName, PhotoPropertiesUtil.IMG_TYPE_ALL) || excludeIsNoMedia(fullPathName)) {
                         fullPathNames[i] = null;
                     } else {
                         itemsLeft++;
@@ -269,6 +271,17 @@ public abstract class PhotoPropertiesMediaFilesScanner {
         }
 
         return itemsLeft;
+    }
+
+    public boolean setIgnoreNoMediaCheck(boolean ignoreNoMediaCheck) {
+        boolean oldValue = this.ignoreNoMediaCheck;
+        this.ignoreNoMediaCheck = ignoreNoMediaCheck;
+        return oldValue;
+    }
+
+    protected boolean excludeIsNoMedia(IFile fullPathName) {
+        if (ignoreNoMediaCheck) return false;
+        return isNoMedia(fullPathName, 5, this.noMediaCache);
     }
 
     private int insertIntoMediaDatabase(IFile[] newPathNames) {
@@ -286,8 +299,10 @@ public abstract class PhotoPropertiesMediaFilesScanner {
                     Long id = inMediaDb.get(fileName.getAbsolutePath());
                     if (id != null) {
                         // already exists
-                        modifyCount += updateAndroid42("PhotoPropertiesMediaFilesScanner.insertIntoMediaDatabase already existing "
-                                , id, fileName);
+                        modifyCount += updateAndroid42(
+                                getMediaDBApi(),
+                                "PhotoPropertiesMediaFilesScanner.insertIntoMediaDatabase already existing ",
+                                id, fileName);
                     } else {
                         modifyCount += insertAndroid42(
                                 "PhotoPropertiesMediaFilesScanner.insertIntoMediaDatabase new item ",
@@ -522,11 +537,11 @@ public abstract class PhotoPropertiesMediaFilesScanner {
         }
     }
 
-    private int updateAndroid42(String dbgContext, long id, IFile file) {
+    protected int updateAndroid42(IMediaRepositoryApi mediaDBApi, String dbgContext, long id, IFile file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = createDefaultContentValues();
             getExifFromFile(values, file);
-            return getMediaDBApi().execUpdate(dbgContext, id, values);
+            return mediaDBApi.execUpdate(dbgContext, id, values);
         }
         return 0;
     }

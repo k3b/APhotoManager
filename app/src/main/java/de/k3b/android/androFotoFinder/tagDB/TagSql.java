@@ -267,15 +267,29 @@ public class TagSql extends FotoSql {
         }
     }
 
+    public static QueryParameter createQueryIdPathDateForMediaScan(Date dateLastAddedOrNull) {
+        QueryParameter query = new QueryParameter()
+                .addColumn(TagSql.SQL_COL_PK, TagSql.SQL_COL_PATH, SQL_COL_DATE_ADDED)
+                .addFrom(TagSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+                .addWhere("( " + SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + " is null or " + SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + " = 0)" +
+                        " or (" + SQL_COL_LAT + " is null or " + SQL_COL_LAT + " = 0) " +
+                        " or (" + SQL_COL_EXT_TAGS + " is null or " + SQL_COL_EXT_TAGS + " = '')")
+                .addOrderBy(SQL_COL_DATE_ADDED + " asc");
+        if (dateLastAddedOrNull != null) {
+            addWhereDateAddedMinMax(query, dateLastAddedOrNull.getTime(), 0);
+        }
+        return query;
+    }
+
     public static int fixPrivate() {
         // update ... set media_type=1001 where media_type=1 and tags like '%;PRIVATE;%'
         ContentValues values = new ContentValues();
         values.put(SQL_COL_EXT_MEDIA_TYPE, MEDIA_TYPE_IMAGE_PRIVATE);
         StringBuilder where = new StringBuilder();
         where
-            .append(TagSql.FILTER_EXPR_PUBLIC)
-            .append(" AND (")
-            .append(TagSql.FILTER_EXPR_TAGS_INCLUDED);
+                .append(TagSql.FILTER_EXPR_PUBLIC)
+                .append(" AND (")
+                .append(TagSql.FILTER_EXPR_TAGS_INCLUDED);
         if (LibGlobal.renamePrivateJpg) {
             where.append(" OR ").append(TagSql.FILTER_EXPR_PATH_LIKE.replace("?","'%" +
                             PhotoPropertiesUtil.IMG_TYPE_PRIVATE + "'"));
