@@ -3,6 +3,7 @@ Changes from 0.8.3 to ???
 * #169: Add sd-card-saf-write-permission support (experimental)
 * #155: Android-10 support (experimental)
 * #173: incremental media scanner
+* #173: Ao10-performance-Optimized-Mediacanner
 * #180: Fixed: Show image with uri that cannot be translated to file (i.e. WhatsApp show photo in gallery)
 * #93: Bugfix crash in Autoprocessing with date-based-rename when photo has no dateCreated
 * fixed CSV IPhotoProperties import

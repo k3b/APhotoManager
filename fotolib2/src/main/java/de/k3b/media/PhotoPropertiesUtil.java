@@ -54,12 +54,15 @@ public class PhotoPropertiesUtil {
      * with this extension. */
     public static final String EXT_JPG_PRIVATE = ".jpg-p";
 
-    /** types of images currently supported */
-    public static final int IMG_TYPE_ALL        = 0xffff;
-    public static final int IMG_TYPE_JPG        = 0x0001; // jp(e)g
+    /**
+     * types of images currently supported
+     */
+    public static final int IMG_TYPE_ALL = 0x7fff;
+    public static final int IMG_TYPE_JPG = 0x0001; // jp(e)g
     public static final int IMG_TYPE_COMPRESSED_NON_JPG = 0x0010; // png, gif, ...
     public static final int IMG_TYPE_UNCOMPRESSED_NON_JPG = 0x0020; // BMP, TIFF, ...
-    public static final int IMG_TYPE_PRIVATE    = 0x1000; // jpg-p
+    public static final int IMG_TYPE_PRIVATE = 0x1000; // jpg-p
+    public static final int IMG_TYPE_XMP = 0x8000; // xmp
 
     public static final int IMG_TYPE_COMPRESSED = IMG_TYPE_JPG | IMG_TYPE_COMPRESSED_NON_JPG | IMG_TYPE_PRIVATE;
 
@@ -313,6 +316,11 @@ public class PhotoPropertiesUtil {
 
         if ((IMG_TYPE_UNCOMPRESSED_NON_JPG == (imageTypeFlags & IMG_TYPE_UNCOMPRESSED_NON_JPG)) &&
                 (lcPath.endsWith(".tiff") || lcPath.endsWith(".bmp"))) {
+            return true;
+        }
+
+        if ((IMG_TYPE_XMP == (imageTypeFlags & IMG_TYPE_XMP)) &&
+                (lcPath.endsWith(".xmp"))) {
             return true;
         }
 
