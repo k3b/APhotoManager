@@ -247,4 +247,5 @@ Você pode desfazer a ocultação chamando o leitor mediascanner do menu da gale
     <string name="dark_theme_title">Escuro</string>
     <!-- #155: android10 -->
     <string name="load_db_menu_title">(Re)Carregar Banco de Dados de Mídia</string>
+    <string name="database_menu_title">Dados de Mídia ...</string>
 </resources>

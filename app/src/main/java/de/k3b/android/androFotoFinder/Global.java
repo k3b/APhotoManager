@@ -184,7 +184,6 @@ public class Global {
                 R.id.cmd_selection_add_all,
                 R.id.cmd_selection_remove_all,
                 R.id.cmd_about,
-                R.id.cmd_scan,
                 R.id.cmd_more,
                 R.id.cmd_show_geo,
                 R.id.cmd_gallery,

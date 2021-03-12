@@ -245,4 +245,5 @@ Ezkutaketa desegin dezakezu multimedia eskanerra galeriaren menutik deituz."</st
   <string name="dark_theme_title">Iluna</string>
   <!-- #155: android10 -->
   <string name="load_db_menu_title">(Bir)kargatu multimedia datu-basea</string>
+  <string name="database_menu_title">Multimedia datu-basea ...</string>
 </resources>

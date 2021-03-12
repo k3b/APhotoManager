@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -407,15 +407,19 @@ public class AndroidFileCommands extends AndroidFileCommandsDbImpl {
                             ScannerTaskFactory.createScannerTask(message, mScanner,
                                     fullScan, rescanNeverScannedByAPM, scanForDeleted, progessListener);
 
-            synchronized (this) {
-                if (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null) {
-                    RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner = scanner;
-                    scanner.execute(new IFile[]{scanRootDir});
-                } // else scanner is already running
-            }
-
-            showMediaScannerStatus(RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner, activity);
+            runScanner(activity, scanRootDir, scanner);
         }
+    }
+
+    public void runScanner(Activity activity, IFile scanRootDir, RecursivePhotoPropertiesMediaFilesScannerAsyncTask scanner) {
+        synchronized (this) {
+            if (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null) {
+                RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner = scanner;
+                scanner.execute(new IFile[]{scanRootDir});
+            } // else scanner is already running
+        }
+
+        showMediaScannerStatus(RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner, activity);
     }
 
     public boolean cmdMediaScannerWithQuestion(Activity activity) {

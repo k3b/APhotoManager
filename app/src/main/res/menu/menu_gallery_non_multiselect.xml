@@ -93,8 +93,6 @@ Note menu_gallery_non_multiselect-seachbar and menu_gallery_non_multiselect are 
         android:orderInCategory="1000"
         android:showAsAction="ifRoom" />
 
-    <item android:id="@+id/cmd_scan" android:title="@string/scanner_menu_title" android:orderInCategory="110"
-        android:showAsAction="never" android:visible="true"/>
 
     <item android:id="@+id/cmd_app_pin"
         android:title="@string/menu_title_app_pinnend"

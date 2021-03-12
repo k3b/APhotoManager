@@ -243,5 +243,4 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="light_theme_title">Valo</string>
     <string name="dark_theme_title">Tumma</string>
     <!-- #155: android10 -->
-    <string name="load_db_menu_title">(Re)Load Media Database</string>
 </resources>

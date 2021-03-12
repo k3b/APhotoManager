@@ -31,21 +31,29 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import java.util.Date;
+
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
+import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
 import de.k3b.android.androFotoFinder.queries.Queryable;
+import de.k3b.android.io.AndroidFileCommands;
+import de.k3b.android.util.Ao10DbUpdateOnlyPhotoPropertiesMediaFilesScannerAsyncTask;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.IDirectory;
+import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedItemIds;
 
 /**
@@ -167,15 +175,8 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
             inflater.inflate(R.menu.menu_gallery_non_selected_only, menu);
             inflater.inflate(R.menu.menu_gallery_non_multiselect, menu);
 
-            if (Global.useAo10MediaImageDbReplacement) {
-                inflater.inflate(R.menu.menu_ao10, menu);
-            }
+            inflater.inflate(Global.useAo10MediaImageDbReplacement ? R.menu.menu_gallery_ao10 : R.menu.menu_gallery_ao9, menu);
 
-            /*
-            getActionBar().setListNavigationCallbacks();
-            MenuItem sorter = menu.getItem(R.id.cmd_sort);
-            sorter.getSubMenu().
-            */
             Global.fixMenu(this, menu);
         }
 
@@ -206,10 +207,10 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
-            case R.id.cmd_db_reload:
+            case R.id.cmd_db_recreate:
                 return onDbReloadQuestion(item.getTitle().toString());
             case R.id.cmd_db_update:
-                if (0 != AndroFotoFinderApp.getMediaContent2DbUpdateService().update(this, null))
+                if (0 != onDbUpdateCommand(item))
                     notifyPhotoChanged();
                 return true;
             case R.id.cmd_more:
@@ -224,6 +225,29 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
                 return onOptionsItemSelected(item, this.mSelectedItemIds);
         }
 
+    }
+
+    private int onDbUpdateCommand(MenuItem item) {
+        Activity activity = this;
+        int count = AndroFotoFinderApp.getMediaContent2DbUpdateService().update(this, null);
+
+        final String message = item.getTitle().toString();
+
+        IProgessListener progessListener = activity instanceof IProgessListener ? ((IProgessListener) activity) : null;
+
+        IMediaRepositoryApi mediaDBApi = FotoSql.getMediaLocalDatabase();
+        Date dateLastAdded = Ao10DbUpdateOnlyPhotoPropertiesMediaFilesScannerAsyncTask.loadDateLastAdded(activity);
+        PhotoPropertiesMediaFilesScanner scanner = PhotoPropertiesMediaFilesScanner.getInstance(activity);
+        Ao10DbUpdateOnlyPhotoPropertiesMediaFilesScannerAsyncTask newScanner = new Ao10DbUpdateOnlyPhotoPropertiesMediaFilesScannerAsyncTask(
+                mediaDBApi, scanner, scanner.mContext, message,
+                dateLastAdded, progessListener);
+
+        AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this, true)
+                .setContext(this);
+
+        cmd.runScanner(activity, null, newScanner);
+
+        return count;
     }
 
     private boolean onDbReloadQuestion(String title) {

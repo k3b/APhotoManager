@@ -32,7 +32,7 @@ public class ScannerTaskFactory {
             boolean fullScan, boolean rescanNeverScannedByAPM, boolean scanForDeleted,
             IProgessListener progessListener) {
         RecursivePhotoPropertiesMediaFilesScannerAsyncTask newScanner;
-        if (rescanNeverScannedByAPM && Global.useAo10MediaImageDbReplacement && FotoSql.getMediaLocalDatabase() != null) {
+        if (false && rescanNeverScannedByAPM && Global.useAo10MediaImageDbReplacement && FotoSql.getMediaLocalDatabase() != null) {
             IMediaRepositoryApi mediaDBApi = FotoSql.getMediaLocalDatabase();
             Date dateLastAdded = Ao10DbUpdateOnlyPhotoPropertiesMediaFilesScannerAsyncTask.loadDateLastAdded(scanner.mContext);
             newScanner = new Ao10DbUpdateOnlyPhotoPropertiesMediaFilesScannerAsyncTask(

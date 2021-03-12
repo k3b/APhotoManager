@@ -240,4 +240,5 @@ onzichtbaar voor de mediadatabase, de galerij apps en de mediascanner. De bestan
     <string name="dark_theme_title">Donker</string>
     <!-- #155: android10 -->
     <string name="load_db_menu_title">(Her)Laad Mediadatabase</string>
+    <string name="database_menu_title">Mediadatabase ...</string>
 </resources>
