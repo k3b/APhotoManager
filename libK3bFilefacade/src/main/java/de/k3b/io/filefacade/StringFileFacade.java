@@ -234,8 +234,8 @@ public class StringFileFacade implements IFile {
     }
 
     @Override
-    public int setCacheStrategy(int strategyID) {
-        return 0;
+    public IFile cacheStrategy(int strategyID) {
+        return this;
     }
 
     @Override

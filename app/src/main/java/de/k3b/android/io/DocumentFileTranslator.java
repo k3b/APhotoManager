@@ -66,7 +66,7 @@ public class DocumentFileTranslator {
      * Mapping from known File to DocumentFile-Directory translation
      */
     private final Map<File, DocumentFile> dirCache = new HashMap<>();
-    protected final DocumentFileCache documentFileCache = new DocumentFileCache();
+    protected DocumentFileCache documentFileCache = new DocumentFileCache();
 
 
     private static final File internalRootCandidate = new File("/storage/emulated/0");
@@ -100,6 +100,8 @@ public class DocumentFileTranslator {
         for (Map.Entry<String, String> enty : root.dir2uri.entrySet()) {
             add(new File(enty.getKey()), DocumentFile.fromTreeUri(context, Uri.parse(enty.getValue())));
         }
+        documentFileCache = new DocumentFileCache();
+
         return this;
     }
 

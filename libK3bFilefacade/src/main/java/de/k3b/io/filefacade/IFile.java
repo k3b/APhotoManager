@@ -102,11 +102,7 @@ public interface IFile {
     long length();
 
     //------- file cache support
-
-    /**
-     * 0: forInput; 1: forOutput; 3: disable cache.
-     */
-    int setCacheStrategy(int strategyID);
+    IFile cacheStrategy(int strategyID);
 
     void invalidateParentDirCache();
 }

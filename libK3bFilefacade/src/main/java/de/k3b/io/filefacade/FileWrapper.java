@@ -183,8 +183,9 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public int setCacheStrategy(int strategyID) {
-        return child.setCacheStrategy(strategyID);
+    public IFile cacheStrategy(int strategyID) {
+        child.cacheStrategy(strategyID);
+        return this;
     }
 
     @Override

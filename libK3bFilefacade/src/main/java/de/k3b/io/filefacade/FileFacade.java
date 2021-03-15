@@ -342,14 +342,10 @@ public class FileFacade implements IFile {
     }
 
 
-    /**
-     * true: forInput; false: forOutput; null: disable cache
-     */
     @Override
-    public int setCacheStrategy(int strategyID) {
-        int old = this.strategyID;
+    public IFile cacheStrategy(int strategyID) {
         this.strategyID = strategyID;
-        return old;
+        return this;
     }
 
     @Override

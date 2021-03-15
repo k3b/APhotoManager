@@ -1416,10 +1416,10 @@ public class ExifInterface {
         if (overwriteOriginal) {
             final String name = inFile.getName();
             final String tempName = name + TMP_FILE_SUFFIX;
-            // inFile.setCacheStrategy(3); //!!!
-            inFile = renameSouraceFileBeforeReplaceOrThrow(inFile, tempName);
-
-            currentOutFile = outFile.getParentFile().create(name);
+            inFile = renameSouraceFileBeforeReplaceOrThrow(inFile.cacheStrategy(IFile.STRATEGY_NONE), tempName).cacheStrategy(IFile.STRATEGY_NONE);
+            currentOutFile = outFile.getParentFile().create(name).cacheStrategy(IFile.STRATEGY_NONE);
+        } else {
+            currentOutFile.cacheStrategy(IFile.STRATEGY_OUTPUT);
         }
 
         saveJpegAttributes(
