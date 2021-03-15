@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 by k3b.
+ * Copyright (c) 2020-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.k3b.io.filefacade.FileFacade;
-import de.k3b.media.PhotoPropertiesUtil;
 
 /**
  * Handles Translation from File to android specific DocumentFileUtils
@@ -67,12 +66,8 @@ public class DocumentFileTranslator {
      * Mapping from known File to DocumentFile-Directory translation
      */
     private final Map<File, DocumentFile> dirCache = new HashMap<>();
+    protected final DocumentFileCache documentFileCache = new DocumentFileCache();
 
-    /**
-     * Mapping from local file name inside lastParentFile to photo-related-DocumentFiles
-     */
-    private final File lastParentFile = null;
-    private final HashMap<String, DocumentFile> lastChildDocFiles = new HashMap<>();
 
     private static final File internalRootCandidate = new File("/storage/emulated/0");
     // for debugging
@@ -181,21 +176,21 @@ public class DocumentFileTranslator {
         return this;
     }
 
-    private DocumentFile getDocumentFileOrDirImpl(File fileOrDir, boolean isDir) {
+    private DocumentFile getDocumentFileOrDirImpl(File fileOrDir, boolean isDir, int strategyID) {
         DocumentFile result = null;
         if (fileOrDir != null) {
             result = getFromCache(fileOrDir);
             if (result == null) {
-                DocumentFile parent = getDocumentFileOrDirImpl(fileOrDir.getParentFile(), true);
+                DocumentFile parent = getDocumentFileOrDirImpl(fileOrDir.getParentFile(), true, strategyID);
                 if (parent != null) {
-                    result = findFile(parent, fileOrDir, isDir);
+                    result = findFile(parent, fileOrDir, isDir, strategyID);
                 }
             }
         }
         return result;
     }
 
-    private DocumentFile findFile(DocumentFile parentDoc, File fileOrDir, boolean isDir) {
+    private DocumentFile findFile(DocumentFile parentDoc, File fileOrDir, boolean isDir, int strategyID) {
         String displayName = fileOrDir.getName();
         File parentFile = fileOrDir.getParentFile();
         if (isDir) {
@@ -214,23 +209,7 @@ public class DocumentFileTranslator {
             }
             return foundDoc;
         } else {
-            if (!parentFile.equals(lastParentFile)) {
-                lastChildDocFiles.clear();
-                for (DocumentFile childDoc : parentDoc.listFiles()) {
-                    if (childDoc.isFile()) {
-                        String childDocName = childDoc.getName().toLowerCase();
-                        if (PhotoPropertiesUtil.isImage(childDocName, PhotoPropertiesUtil.IMG_TYPE_ALL | PhotoPropertiesUtil.IMG_TYPE_XMP)) {
-                            lastChildDocFiles.put(childDocName, childDoc);
-                        }
-                    }
-                }
-
-            }
-
-            if (PhotoPropertiesUtil.isImage(displayName, PhotoPropertiesUtil.IMG_TYPE_ALL | PhotoPropertiesUtil.IMG_TYPE_XMP)) {
-                return lastChildDocFiles.get(displayName.toLowerCase());
-            }
-            return parentDoc.findFile(fileOrDir.getName());
+            return documentFileCache.findFile(parentDoc, parentFile, displayName, strategyID);
         }
     }
 
@@ -239,14 +218,14 @@ public class DocumentFileTranslator {
      *
      * @return the found or created directory
      */
-    public DocumentFile getOrCreateDirectory(File directory) {
+    public DocumentFile getOrCreateDirectory(File directory, int strategyID) {
         DocumentFile result = null;
         if (directory != null) {
             result = getFromCache(directory);
             if (result == null) {
-                DocumentFile parent = getOrCreateDirectory(directory.getParentFile());
+                DocumentFile parent = getOrCreateDirectory(directory.getParentFile(), strategyID);
                 if ((parent != null) && parent.isDirectory()) {
-                    result = findFile(parent, directory, true);
+                    result = findFile(parent, directory, true, strategyID);
 
                     if (result == null) {
                         result = parent.createDirectory(directory.getName());
@@ -262,17 +241,18 @@ public class DocumentFileTranslator {
      * gets existing DocumentFile that correspondws to fileOrDir
      * or null if not exists or no write permissions
      *
-     * @param fileOrDir where DocumentFile is searched for
-     * @param isDir     if null: return null if isDir is matchning
+     * @param fileOrDir  where DocumentFile is searched for
+     * @param isDir      if null: return null if isDir is matchning
+     * @param strategyID
      * @return DocumentFile or null
      */
-    public DocumentFile getDocumentFileOrDirOrNull(File fileOrDir, Boolean isDir) {
+    public DocumentFile getDocumentFileOrDirOrNull(File fileOrDir, Boolean isDir, int strategyID) {
         DocumentFile result = null;
         String path = fileOrDir != null ? fileOrDir.getAbsolutePath() : "";
         final String context = FileFacade.debugLogFacade ? (mDebugPrefix + "getDocumentFile('"
                 + path + "') ") : null;
         try {
-            result = getDocumentFileOrDirImpl(fileOrDir, isDir == Boolean.TRUE);
+            result = getDocumentFileOrDirImpl(fileOrDir, isDir == Boolean.TRUE, strategyID);
             if ((context != null) && (result == null)) {
                 Log.i(TAG, context + "not found");
             }

@@ -29,10 +29,15 @@ import java.io.OutputStream;
  * Goal: to become an android independant replacement for java.io.File
  * that can be implemented by android independant de.k3b.io.File
  * and android specific de.k3b.android.io....
- *
+ * <p>
  * This interface has the similar method names/sinatures as de.k3b.io.File
  */
 public interface IFile {
+    int STRATEGY_INPUT = 0;
+    int STRATEGY_OUTPUT = 1;
+    int STRATEGY_NONE = 2;
+    int STRATEGY_MAX = STRATEGY_NONE;
+
     void set(IFile src);
 
     @Deprecated
@@ -95,4 +100,13 @@ public interface IFile {
     File getFile();
 
     long length();
+
+    //------- file cache support
+
+    /**
+     * 0: forInput; 1: forOutput; 3: disable cache.
+     */
+    int setCacheStrategy(int strategyID);
+
+    void invalidateParentDirCache();
 }

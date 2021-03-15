@@ -183,6 +183,16 @@ public class FileWrapper implements IFile {
     }
 
     @Override
+    public int setCacheStrategy(int strategyID) {
+        return child.setCacheStrategy(strategyID);
+    }
+
+    @Override
+    public void invalidateParentDirCache() {
+        child.invalidateParentDirCache();
+    }
+
+    @Override
     public boolean equals(Object o) {
         return child.equals(o);
     }

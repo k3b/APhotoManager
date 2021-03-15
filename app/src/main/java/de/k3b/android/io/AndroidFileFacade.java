@@ -107,8 +107,8 @@ public class AndroidFileFacade extends FileFacade {
         super.set(src);
     }
 
-    public static DocumentFile getDocumentFileOrDirOrNull(@NonNull File file) {
-        return documentFileTranslator.getDocumentFileOrDirOrNull(file, null);
+    private DocumentFile getDocumentFileOrDirOrNull(@NonNull File file) {
+        return documentFileTranslator.getDocumentFileOrDirOrNull(file, null, this.strategyID);
     }
 
     @Override
@@ -255,7 +255,8 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public boolean mkdirs() {
-        this.androidFile = documentFileTranslator.getOrCreateDirectory(getFile());
+        this.androidFile = documentFileTranslator.getOrCreateDirectory(getFile(), strategyID);
+        invalidateParentDirCache();
         return null != this.androidFile;
     }
 
@@ -303,7 +304,7 @@ public class AndroidFileFacade extends FileFacade {
         DocumentFile androidFile = getAndroidFile(false);
         String context = "openOutputStream overwrite existing ";
         if (androidFile == null) {
-            final DocumentFile documentFileParent = documentFileTranslator.getOrCreateDirectory(getFile().getParentFile());
+            final DocumentFile documentFileParent = documentFileTranslator.getOrCreateDirectory(getFile().getParentFile(), strategyID);
             androidFile = this.androidFile = documentFileParent.createFile(null, getFile().getName());
             context = "openOutputStream create new ";
         }
@@ -334,6 +335,14 @@ public class AndroidFileFacade extends FileFacade {
         }
         return resultInputStream;
     }
+
+    //------- file cache support for android
+    @Override
+    public void invalidateParentDirCache() {
+        if (documentFileTranslator != null)
+            documentFileTranslator.documentFileCache.invalidateParentDirCache(strategyID);
+    }
+
 
     private IFile[] get(DocumentFile[] docs) {
         AndroidFileFacade[] f = new AndroidFileFacade[docs.length];

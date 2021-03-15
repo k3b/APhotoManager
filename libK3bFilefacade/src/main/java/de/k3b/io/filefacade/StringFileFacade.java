@@ -232,4 +232,14 @@ public class StringFileFacade implements IFile {
     public long length() {
         return 0;
     }
+
+    @Override
+    public int setCacheStrategy(int strategyID) {
+        return 0;
+    }
+
+    @Override
+    public void invalidateParentDirCache() {
+
+    }
 }

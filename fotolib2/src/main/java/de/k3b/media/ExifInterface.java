@@ -1416,6 +1416,7 @@ public class ExifInterface {
         if (overwriteOriginal) {
             final String name = inFile.getName();
             final String tempName = name + TMP_FILE_SUFFIX;
+            // inFile.setCacheStrategy(3); //!!!
             inFile = renameSouraceFileBeforeReplaceOrThrow(inFile, tempName);
 
             currentOutFile = outFile.getParentFile().create(name);

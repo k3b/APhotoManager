@@ -57,6 +57,8 @@ public class FileFacade implements IFile {
 
     private File file;
 
+    protected int strategyID = 0;
+
     private static final List<String> allowedFileSuffixesLowercase = new ArrayList<>();
 
     static {
@@ -337,5 +339,20 @@ public class FileFacade implements IFile {
 
     protected void setFile(File file) {
         this.file = file;
+    }
+
+
+    /**
+     * true: forInput; false: forOutput; null: disable cache
+     */
+    @Override
+    public int setCacheStrategy(int strategyID) {
+        int old = this.strategyID;
+        this.strategyID = strategyID;
+        return old;
+    }
+
+    @Override
+    public void invalidateParentDirCache() {
     }
 }
