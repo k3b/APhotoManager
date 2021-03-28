@@ -216,6 +216,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                           IFile destDirFolder, IProgessListener progessListener) {
         int result = 0;
         if (canProcessFile(move ? OP_MOVE : OP_COPY)) {
+            if (destDirFolder != null) destDirFolder.cacheStrategy(IFile.STRATEGY_OUTPUT);
             if (osCreateDirIfNeccessary(destDirFolder)) {
                 IFile[] destFiles = createDestFiles(renameProcessor, destDirFolder, selectedFiles.getDatesPhotoTaken(), selectedFiles.getIFiles());
 
@@ -297,6 +298,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
             } else {
                 destFile = destDirFolder.create(srcFile.getName());
             }
+            destFile.cacheStrategy(IFile.STRATEGY_OUTPUT);
             result[pos++] = destFile;
         }
 
@@ -418,6 +420,9 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                                 // destFile might have renamed it-s extension for private images
                                 destFile = FileFacade.convert(mDebugPrefix + "moveOrCopyFiles dest", modifiedOutPath);
                                 sameFile = (sourceFile != null) && sourceFile.equals(destFile);
+                                if (!sameFile && destFile != null) {
+                                    destFile.cacheStrategy(IFile.STRATEGY_OUTPUT);
+                                }
                             }
 
                             addProcessedFiles(move, destFile, sourceFile);
@@ -532,7 +537,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     }
 
     protected boolean osRenameTo(IFile dest, IFile source) {
-        return source.renameTo(dest);
+        return source.renameTo(dest.getName());
     }
 
     /**

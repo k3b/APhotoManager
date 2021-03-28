@@ -38,11 +38,6 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public boolean renameTo(IFile newName) {
-        return child.renameTo(newName);
-    }
-
-    @Override
     public boolean renameTo(String newName) {
         return child.renameTo(newName);
     }

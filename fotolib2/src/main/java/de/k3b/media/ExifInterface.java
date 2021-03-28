@@ -2877,10 +2877,6 @@ public class ExifInterface {
         return outFile.openOutputStream();
     }
 
-    protected boolean renameTo(IFile originalInFile, IFile renamedInFile) {
-        return originalInFile.renameTo(renamedInFile.getName());
-    }
-
     protected String getAbsolutePath(IFile inFile) {
         return inFile.getAbsolutePath();
     }

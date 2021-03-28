@@ -85,11 +85,6 @@ public class StringFileFacade implements IFile {
     }
 
     @Override
-    public boolean renameTo(IFile newName) {
-        return false;
-    }
-
-    @Override
     public boolean renameTo(String newName) {
         return false;
     }

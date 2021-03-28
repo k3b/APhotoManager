@@ -85,13 +85,14 @@ public class AndroidFileFacade extends FileFacade {
         }
     }
 
-    private AndroidFileFacade(@Nullable DocumentFile parentFile, @NonNull File parentFile1) {
+    private AndroidFileFacade(@Nullable DocumentFile parentFile, @NonNull File parentFile1, int strategyID) {
         super(parentFile1);
         androidFile = parentFile;
+        this.strategyID = strategyID;
     }
 
     public AndroidFileFacade(@NonNull File file) {
-        this(null, file);
+        this(null, file, IFile.STRATEGY_INPUT);
     }
 
     @Override
@@ -111,22 +112,6 @@ public class AndroidFileFacade extends FileFacade {
         return documentFileTranslator.getDocumentFileOrDirOrNull(file, null, this.strategyID);
     }
 
-    @Override
-    public boolean renameTo(@NonNull IFile newName) {
-        if (exists() && !newName.exists()) {
-            if (getParentFile().equals(newName.getParentFile())) {
-                // same directory
-                return renameTo(newName.getName());
-            }
-
-            if (copyImpl((AndroidFileFacade) newName, true)) {
-                return true;
-            }
-        }
-        Log.e(LOG_TAG, "renameTo " + this + " -> " + newName + " failed");
-        return false;
-    }
-
     private boolean copyImpl(@NonNull AndroidFileFacade targetFullPath, boolean deleteSourceWhenSuccess) {
         final String dbgContext = "AndroidFileFacade.copyImpl " + this + " -> " + targetFullPath;
         try {
@@ -144,6 +129,7 @@ public class AndroidFileFacade extends FileFacade {
     @Override
     public boolean renameTo(@NonNull String newName) {
         if (exists() && getAndroidFile(false).renameTo(newName)) {
+            invalidateParentDirCache();
             return true;
         }
 
@@ -156,6 +142,7 @@ public class AndroidFileFacade extends FileFacade {
         boolean result = exists() && getAndroidFile(false).delete();
 
         if (result) {
+            invalidateParentDirCache();
             // File (and reference to it) does not exist any more
             androidFileMayExist = false;
             androidFile = null;
@@ -212,7 +199,7 @@ public class AndroidFileFacade extends FileFacade {
     public IFile getParentFile() {
         final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
-            return new AndroidFileFacade(androidFile.getParentFile(), getFile().getParentFile());
+            return new AndroidFileFacade(androidFile.getParentFile(), getFile().getParentFile(), strategyID);
         } else {
             return super.getParentFile();
         }
@@ -264,7 +251,7 @@ public class AndroidFileFacade extends FileFacade {
     public IFile[] listFiles() {
         final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
-            return get(androidFile.listFiles());
+            return get(androidFile.listFiles(), strategyID);
         }
         return new IFile[0];
     }
@@ -278,7 +265,7 @@ public class AndroidFileFacade extends FileFacade {
                 if (file != null &&
                         (file.isDirectory() || accept(file.getName().toLowerCase()))) {
                     found.add(new AndroidFileFacade(
-                            file, new File(parent, file.getName())));
+                            file, new File(parent, file.getName()), strategyID));
                 }
             }
         }
@@ -302,11 +289,12 @@ public class AndroidFileFacade extends FileFacade {
     @Override
     public OutputStream openOutputStream() throws FileNotFoundException {
         DocumentFile androidFile = getAndroidFile(false);
-        String context = "openOutputStream overwrite existing ";
+        String context = strategyID + "openOutputStream overwrite existing ";
         if (androidFile == null) {
             final DocumentFile documentFileParent = documentFileTranslator.getOrCreateDirectory(getFile().getParentFile(), strategyID);
             androidFile = this.androidFile = documentFileParent.createFile(null, getFile().getName());
-            context = "openOutputStream create new ";
+            context = strategyID + "openOutputStream create new ";
+            invalidateParentDirCache();
         }
         if (FileFacade.debugLogFacade) {
             Log.i(LOG_TAG, context + this);
@@ -316,22 +304,23 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public InputStream openInputStream() throws FileNotFoundException {
+        String context = strategyID + "openInputStream ";
         if ((readUri != null)) {
             if (debugLogFacade) {
-                Log.i(LOG_TAG, "openInputStream " + this + " for uri " + readUri);
+                Log.i(LOG_TAG, context + this + " for uri " + readUri);
             }
             return documentFileTranslator.openInputStream(readUri);
         }
         final DocumentFile androidFile = getAndroidFile(true);
         final InputStream resultInputStream = documentFileTranslator.openInputStream(androidFile);
         if (resultInputStream == null) {
-            final String msg = "openInputStream " + this + " for uri "
+            final String msg = context + this + " for uri "
                     + ((androidFile != null) ? androidFile.getUri() : "null") + " returns null";
             Log.w(LOG_TAG, msg);
             getAndroidFile(true); // allow debugger to step in
             throw new FileNotFoundException(msg);
         } else if (debugLogFacade) {
-            Log.i(LOG_TAG, "openInputStream " + this + " for uri " + androidFile.getUri());
+            Log.i(LOG_TAG, context + this + " for uri " + androidFile.getUri());
         }
         return resultInputStream;
     }
@@ -344,12 +333,12 @@ public class AndroidFileFacade extends FileFacade {
     }
 
 
-    private IFile[] get(DocumentFile[] docs) {
+    private IFile[] get(DocumentFile[] docs, int strategyID) {
         AndroidFileFacade[] f = new AndroidFileFacade[docs.length];
         final File parent = getFile();
         for (int i = 0; i < docs.length; i++) {
             final DocumentFile doc = docs[i];
-            f[i] = new AndroidFileFacade(doc, new File(parent, doc.getName()));
+            f[i] = new AndroidFileFacade(doc, new File(parent, doc.getName()), strategyID);
         }
 
         return f;

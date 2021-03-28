@@ -135,22 +135,11 @@ public class FileFacade implements IFile {
         FileFacade.fileFacade = fileFacade;
     }
 
-    @Deprecated
-    @Override
-    public boolean renameTo(IFile newName) {
-        return renameImpl(newName.getFile());
-    }
-
     @Override
     public boolean renameTo(String newName) {
         File newFile = new File(this.file.getParentFile(), newName);
-        final boolean result = renameImpl(newFile);
+        final boolean result = this.file.renameTo(newFile);
         return result;
-    }
-
-    private boolean renameImpl(File newFile) {
-        final boolean success = this.file.renameTo(newFile);
-        return success;
     }
 
     @Override
@@ -326,7 +315,7 @@ public class FileFacade implements IFile {
 
     @Override
     public String toString() {
-        return String.format("%s: %s", this.getClass().getSimpleName(), file.getAbsoluteFile());
+        return String.format("%s: %i-%s", this.getClass().getSimpleName(), strategyID, file.getAbsoluteFile());
     }
 
     @Override

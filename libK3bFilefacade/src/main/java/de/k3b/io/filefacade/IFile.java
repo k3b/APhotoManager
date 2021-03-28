@@ -40,9 +40,6 @@ public interface IFile {
 
     void set(IFile src);
 
-    @Deprecated
-    boolean renameTo(IFile newName);
-
     boolean renameTo(String newName);
 
     boolean delete();
@@ -104,5 +101,6 @@ public interface IFile {
     //------- file cache support
     IFile cacheStrategy(int strategyID);
 
+    // may be called after delete, renameTo, openOutputStream, mkdirs
     void invalidateParentDirCache();
 }

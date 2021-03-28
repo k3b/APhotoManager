@@ -255,7 +255,9 @@ public class AndroidFileCommands extends AndroidFileCommandsDbImpl {
     public void onMoveOrCopyDirectoryPick(boolean move, SelectedFiles selectedFiles, IDirectory destFolder) {
         if (destFolder != null) {
             String copyToPath = destFolder.getAbsolute();
-            IFile destDirFolder = FileFacade.convert("AndroidFileCommands.onMoveOrCopyDirectoryPick", copyToPath);
+            IFile destDirFolder = FileFacade
+                    .convert("AndroidFileCommands.onMoveOrCopyDirectoryPick", copyToPath)
+                    .cacheStrategy(IFile.STRATEGY_OUTPUT);
 
             setLastCopyToPath(copyToPath);
 
