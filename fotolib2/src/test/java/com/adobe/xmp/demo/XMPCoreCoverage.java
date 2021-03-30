@@ -9,36 +9,37 @@
 
 package com.adobe.xmp.demo;
 
+import com.adobe.internal.xmp.XMPConst;
+import com.adobe.internal.xmp.XMPDateTime;
+import com.adobe.internal.xmp.XMPDateTimeFactory;
+import com.adobe.internal.xmp.XMPException;
+import com.adobe.internal.xmp.XMPIterator;
+import com.adobe.internal.xmp.XMPMeta;
+import com.adobe.internal.xmp.XMPMetaFactory;
+import com.adobe.internal.xmp.XMPPathFactory;
+import com.adobe.internal.xmp.XMPSchemaRegistry;
+import com.adobe.internal.xmp.options.IteratorOptions;
+import com.adobe.internal.xmp.options.ParseOptions;
+import com.adobe.internal.xmp.options.PropertyOptions;
+import com.adobe.internal.xmp.options.SerializeOptions;
+import com.adobe.internal.xmp.properties.XMPAliasInfo;
+import com.adobe.internal.xmp.properties.XMPProperty;
+import com.adobe.internal.xmp.properties.XMPPropertyInfo;
+
+import org.junit.Test;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
-
-import com.adobe.xmp.XMPConst;
-import com.adobe.xmp.XMPDateTime;
-import com.adobe.xmp.XMPDateTimeFactory;
-import com.adobe.xmp.XMPException;
-import com.adobe.xmp.XMPIterator;
-import com.adobe.xmp.XMPMeta;
-import com.adobe.xmp.XMPMetaFactory;
-import com.adobe.xmp.XMPPathFactory;
-import com.adobe.xmp.XMPSchemaRegistry;
-import com.adobe.xmp.options.IteratorOptions;
-import com.adobe.xmp.options.ParseOptions;
-import com.adobe.xmp.options.PropertyOptions;
-import com.adobe.xmp.options.SerializeOptions;
-import com.adobe.xmp.properties.XMPAliasInfo;
-import com.adobe.xmp.properties.XMPProperty;
-import com.adobe.xmp.properties.XMPPropertyInfo;
-
-import org.junit.Test;
 
 
 /**
@@ -50,10 +51,14 @@ import org.junit.Test;
  */
 public class XMPCoreCoverage implements XMPCoreCoverageConst
 {
-	/** the log stream for all outputs */
+	/**
+	 * the log stream for all outputs
+	 */
 	private static PrintStream log;
-	/** shortcut for the schema registry */
-	private static XMPSchemaRegistry registry = XMPMetaFactory.getSchemaRegistry();
+	/**
+	 * shortcut for the schema registry
+	 */
+	private static final XMPSchemaRegistry registry = XMPMetaFactory.getSchemaRegistry();
 
 	@Test
 	public void runTest() {
@@ -768,25 +773,22 @@ public class XMPCoreCoverage implements XMPCoreCoverageConst
 		writeMinorLabel ("Small padding serialize");
 		println(XMPMetaFactory.serializeToString(meta, new SerializeOptions().setPadding(10)));
 
-		writeMinorLabel ("Serialize with exact packet size");
+		writeMinorLabel("Serialize with exact packet size");
 		int s = XMPMetaFactory.serializeToBuffer(meta, new SerializeOptions()
 				.setReadOnlyPacket(true)).length;
-		println ("Minimum packet size is " + s + " bytes\n");
+		println("Minimum packet size is " + s + " bytes\n");
 
 		// with the flag "exact packet size" the padding becomes the overall length of the packet
 		byte[] buffer = XMPMetaFactory.serializeToBuffer(meta, new SerializeOptions()
 				.setExactPacketLength(true).setPadding(s));
-		println(new String(buffer, "UTF-8"));
+		println(new String(buffer, StandardCharsets.UTF_8));
 
-		try
-		{
+		try {
 			XMPMetaFactory.parseFromString(XMPMetaFactory.serializeToString(meta,
 					new SerializeOptions().setExactPacketLength(true).setPadding(s - 1)));
-		}
-		catch (XMPException e)
-		{
+		} catch (XMPException e) {
 			println("\nExact packet size smaller than minimal packet length - " +
-				"threw XMPException #" + e.getErrorCode() + " :   " + e.getMessage());
+					"threw XMPException #" + e.getErrorCode() + " :   " + e.getMessage());
 		}
 	}	
 	

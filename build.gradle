@@ -8,7 +8,7 @@ buildscript {
     }
     dependencies {
 		// see https://jcenter.bintray.com/com/android/tools/build/gradle/
-        classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath 'com.android.tools.build:gradle:4.1.3'
 
 		// markdown & unl-diagrams in javadoc
 		// https://github.com/Abnaxos/pegdown-doclet

@@ -367,7 +367,8 @@
             android:layout_below="@+id/edit_latitude"
             android:layout_toRightOf="@+id/edit_latitude"
             android:layout_toEndOf="@+id/edit_latitude" />
-        <EditText android:id="@+id/edit_longitude"
+        <EditText
+            android:id="@+id/edit_longitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal|numberSigned"
@@ -376,8 +377,7 @@
             android:layout_alignBaseline="@+id/lbl_longitude"
             android:layout_toLeftOf="@+id/cmd_lon_history"
             android:layout_toRightOf="@id/lbl_longitude"
-            android:layout_alignLeft="@+id/edit_tags_exclude"
-            android:layout_alignStart="@+id/edit_tags_exclude"
-            />
+            android:layout_alignStart="@+id/edit_tags_include"
+            android:layout_alignLeft="@+id/edit_tags_include" />
     </RelativeLayout>
 </ScrollView>

@@ -19,16 +19,16 @@
 
 package de.k3b.media;
 
-import com.adobe.xmp.XMPException;
-import com.adobe.xmp.XMPIterator;
-import com.adobe.xmp.XMPMeta;
-import com.adobe.xmp.XMPMetaFactory;
-import com.adobe.xmp.XMPSchemaRegistry;
-import com.adobe.xmp.XMPUtils;
-import com.adobe.xmp.options.PropertyOptions;
-import com.adobe.xmp.options.SerializeOptions;
-import com.adobe.xmp.properties.XMPProperty;
-import com.adobe.xmp.properties.XMPPropertyInfo;
+import com.adobe.internal.xmp.XMPException;
+import com.adobe.internal.xmp.XMPIterator;
+import com.adobe.internal.xmp.XMPMeta;
+import com.adobe.internal.xmp.XMPMetaFactory;
+import com.adobe.internal.xmp.XMPSchemaRegistry;
+import com.adobe.internal.xmp.XMPUtils;
+import com.adobe.internal.xmp.options.PropertyOptions;
+import com.adobe.internal.xmp.options.SerializeOptions;
+import com.adobe.internal.xmp.properties.XMPProperty;
+import com.adobe.internal.xmp.properties.XMPPropertyInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +60,7 @@ public class XmpSegment {
 
 
     private XMPMeta xmpMeta = null;
-    private static XMPSchemaRegistry registry = XMPMetaFactory.getSchemaRegistry();
+    private static final XMPSchemaRegistry registry = XMPMetaFactory.getSchemaRegistry();
 
     /** when xmp sidecar file was last modified (in secs 1970) or 0 */
     private long filelastModified = 0;

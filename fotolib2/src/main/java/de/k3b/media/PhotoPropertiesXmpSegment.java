@@ -19,9 +19,9 @@
 
 package de.k3b.media;
 
-import com.adobe.xmp.XMPMeta;
-import com.adobe.xmp.XMPUtils;
-import com.adobe.xmp.impl.XMPDateTimeImpl;
+import com.adobe.internal.xmp.XMPMeta;
+import com.adobe.internal.xmp.XMPUtils;
+import com.adobe.internal.xmp.impl.XMPDateTimeImpl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

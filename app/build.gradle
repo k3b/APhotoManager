@@ -121,7 +121,7 @@ task('increaseVersionCode').doLast({
 
 dependencies {
 
-    testImplementation 'junit:junit:4.11'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.slf4j:slf4j-api:1.7.7@jar'
     testImplementation 'org.slf4j:slf4j-simple:1.7.7'
 
@@ -138,10 +138,10 @@ dependencies {
     // from https://github.com/chrisbanes/PhotoView
     // implementation 'com.github.chrisbanes.photoview:library:1.2.3'
     // implementation project(':fotoview.library')  // local copy of PhotoView
-    implementation 'com.github.k3b:PhotoView:v1.2.6.k3b-7-SNAPSHOT' // via jitpack.io last bugfix on 2018-10-17
-
+    // implementation 'com.github.k3b:PhotoView:v1.2.6.k3b-7-SNAPSHOT' { transitive = false } // via jitpack.io last bugfix on 2018-10-17
+    implementation project(':photoview')
     // for view-pager
-    implementation 'com.android.support:support-v4:27.0.0'
+    implementation 'com.android.support:support-v4:28.0.0'
     // implementation 'com.android.support:support-v4:28.0.0' not supported by travix yet
     // implementation 'com.android.support:support-v4:23.1.1'
     // implementation 'com.android.support:support-v4:21.0.2'
@@ -149,10 +149,11 @@ dependencies {
     // exif support
     // https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted licence: http://www.apache.org/licenses/LICENSE-2.0
     // 2.10.1 includes more recent xmpcore that generates java-8 bytecode not supported by android yet
-    implementation ('com.drewnoakes:metadata-extractor:2.10.1') { transitive = false } // 2.8.1
+    implementation ('com.drewnoakes:metadata-extractor:2.15.0') { transitive = false } // 2.8.1
 	
 	// implementation 'com.adobe.xmp:xmpcore:6.1.10' // update for drewnoakes:metadata-extractor requires java-8 compiler does not run on my android-4.4.
-	implementation 'com.adobe.xmp:xmpcore:5.1.2' // current version for drewnoakes:metadata-extractor
+	implementation 'com.adobe.xmp:xmpcore:6.1.11'
+    // current version for drewnoakes:metadata-extractor
 
     // implementation 'com.github.k3b:slideDateTimePicker:v1.0.5' // via jitpack.io
 
@@ -161,14 +162,14 @@ dependencies {
     // this is osmdroid
     // https://github.com/osmdroid/osmdroid/  6.0.3 from 11/2018
     // https://github.com/osmdroid/osmdroid/  6.1.0 from 03/2019
-    implementation 'org.osmdroid:osmdroid-android:6.1.6'
-    implementation ('org.osmdroid:osmdroid-mapsforge:6.1.6')
+    implementation 'org.osmdroid:osmdroid-android:6.1.10'
+    implementation ('org.osmdroid:osmdroid-mapsforge:6.1.10')
 
 
     //Mapsforge rendering and database support, which is LGPL
-    implementation 'org.mapsforge:mapsforge-map-android:0.13.0'
-    implementation 'org.mapsforge:mapsforge-map:0.13.0'
-    implementation 'org.mapsforge:mapsforge-themes:0.13.0'
+    implementation 'org.mapsforge:mapsforge-map-android:0.15.0'
+    implementation 'org.mapsforge:mapsforge-map:0.15.0'
+    implementation 'org.mapsforge:mapsforge-themes:0.15.0'
 
     implementation 'org.slf4j:slf4j-api:1.7.7@jar'
     implementation 'eu.lp0.slf4j:slf4j-android:1.7.7-1@jar'
@@ -180,7 +181,8 @@ dependencies {
     implementation('com.github.k3b.ToGoZip:libK3bZip:L2.1.23')  { transitive = false }
     implementation('com.github.k3b.ToGoZip:libK3bAndroidZip:L2.1.23')  { transitive = false }
 
-    testImplementation('org.powermock:powermock-api-mockito:1.5.2')
-    testImplementation('org.powermock:powermock-module-junit4:1.5.2')
+    testImplementation('org.powermock:powermock-api-mockito:1.6.6')
+    testImplementation('org.powermock:powermock-module-junit4:2.0.9')
 
 }
+

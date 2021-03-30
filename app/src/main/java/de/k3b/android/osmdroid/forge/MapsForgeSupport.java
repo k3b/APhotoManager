@@ -62,7 +62,7 @@ public class MapsForgeSupport {
             //null is ok here, uses the default rendering theme if it's not set
             XmlRenderTheme theme = null;
             try {
-                theme = new AssetsRenderTheme(activity.getApplicationContext(), "renderthemes/", "rendertheme-v4.xml");
+                theme = new AssetsRenderTheme(activity.getApplicationContext().getAssets(), "renderthemes/", "rendertheme-v4.xml");
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

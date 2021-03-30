@@ -57,7 +57,8 @@
         android:layout_toLeftOf="@+id/cmd_select_lat_lon"
         android:layout_toStartOf="@+id/cmd_select_lat_lon"
         />
-    <EditText android:id="@+id/edit_latitude_from"
+    <EditText
+        android:id="@+id/edit_latitude_from"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="numberDecimal|numberSigned"
@@ -67,8 +68,8 @@
         android:layout_alignBaseline="@+id/lbl_latitude"
         android:layout_toLeftOf="@+id/cmd_lat_from_history"
         android:layout_toRightOf="@+id/lbl_latitude"
-        android:layout_alignLeft="@+id/edit_date_to"
-        android:layout_alignStart="@+id/edit_date_to" />
+        android:layout_alignStart="@+id/edit_latitude_to"
+        android:layout_alignLeft="@+id/edit_latitude_to" />
 
 <!-- -->
     <TextView android:id="@+id/lbl_longitude"

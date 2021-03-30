@@ -19,7 +19,7 @@
 
 package de.k3b.media;
 
-import com.adobe.xmp.options.PropertyOptions;
+import com.adobe.internal.xmp.options.PropertyOptions;
 
 /**
  * Supported predefined Xmp-Fileds for {@MediaXmpSegment}.

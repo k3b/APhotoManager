@@ -19,9 +19,9 @@
 
 package de.k3b.media;
 
-import com.adobe.xmp.XMPException;
-import com.adobe.xmp.XMPMetaFactory;
-import com.adobe.xmp.XMPSchemaRegistry;
+import com.adobe.internal.xmp.XMPException;
+import com.adobe.internal.xmp.XMPMetaFactory;
+import com.adobe.internal.xmp.XMPSchemaRegistry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
