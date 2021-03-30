@@ -1,0 +1,21 @@
+apply plugin: 'com.android.library'
+
+android {
+    // appXXX are defined in gradle.properties
+    compileSdkVersion = Integer.valueOf(appCompileSdkVersion)
+
+    defaultConfig {
+        minSdkVersion 4
+        targetSdkVersion 28
+		// use values from gradle.properties
+//        versionCode=Long.valueOf(VERSION_CODE)
+        // versionCode "1.2.9"
+        // versionName=VERSION_NAME
+    }
+}
+
+dependencies {
+    implementation 'com.android.support:support-v4:28.0.0'
+}
+
+// apply from: 'https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.0.0/gradle-android-javadocs.gradle'
