@@ -36,6 +36,10 @@ public class PhotoChangeNotifyer {
         PhotoChangeNotifyer.photoChangedListener = photoChangedListener;
     }
 
+    public static void onNotifyPhotoChanged() {
+        if (photoChangedListener != null) photoChangedListener.onNotifyPhotoChanged();
+    }
+
     public static void notifyPhotoChanged(Context context, PhotoChangedListener adapter) {
         if (adapter != null) adapter.onNotifyPhotoChanged();
 

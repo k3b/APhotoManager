@@ -57,7 +57,8 @@ public class DocumentFileCache {
             if (!parentFile.equals(currentFileCache.lastParentFile)) {
                 currentFileCache.lastParentFile = parentFile;
                 currentFileCache.lastChildDocFiles.clear();
-                for (DocumentFile childDoc : parentDoc.listFiles()) {
+                DocumentFile[] childDocuments = parentDoc.listFiles();
+                for (DocumentFile childDoc : childDocuments) {
                     if (childDoc.isFile()) {
                         String childDocName = childDoc.getName().toLowerCase();
                         if (PhotoPropertiesUtil.isImage(childDocName, PhotoPropertiesUtil.IMG_TYPE_ALL | PhotoPropertiesUtil.IMG_TYPE_XMP)) {

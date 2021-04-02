@@ -39,7 +39,9 @@ import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
+import com.nostra13.universalimageloader.core.assist.LoadedFrom;
+import com.nostra13.universalimageloader.core.display.BitmapDisplayer;
+import com.nostra13.universalimageloader.core.imageaware.ImageAware;
 
 import java.util.Date;
 
@@ -298,92 +300,24 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
         return result;
     }
 
-    @NonNull
-    protected View createViewWithContent(
-            int position, ViewGroup container, IFile imageFile, Uri imageUri, String debugContext, int size) {
-        final Context context = container.getContext();
-
-        final boolean useLayout = true;
-
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        PhotoViewEx photoView;
-        View root;
-        TextView contextTextView = null;
-
-        if (useLayout) {
-            root = inflater.inflate(R.layout.pager_item_image, container, false);
-
-            photoView = (PhotoViewEx) root.findViewById(R.id.image);
-            mImageButtonController.create((ImageButton) root.findViewById(R.id.cmd_any));
-            contextTextView = (TextView) root.findViewById(R.id.text);
-
-        } else {
-            photoView = new PhotoViewEx(context);
-            root = photoView;
-        }
-
-        if (contextTextView != null) {
-            String contextText = DBUtils.getString(getCursorAt(position), CONTEXT_COLUMN_FIELD, null);
-
-            if ((contextText != null) && (contextText.length() > 0)) {
-                contextTextView.setVisibility(View.VISIBLE);
-                contextTextView.setText(ImageContextController.sqlFormat(contextText));
-            } else {
-                contextTextView.setVisibility(View.INVISIBLE);
-            }
-        }
-
-        photoView.setMaximumScale(20);
-        photoView.setMediumScale(5);
-
-        String loadType;
-
-        if (imageFile != null) {
-            // if image is big use memoryefficient, fast, low-quality thumbnail (old code)
-            if (size > Global.imageDetailThumbnailIfBiggerThan) {
-                loadType = "image too big using thumb ";
-                setImageFromThumbnail(photoView, imageFile);
-            } else {
-                try {
-                    // #53 Optimisation: no need for thumbnail - saves cache memory but may throw OutOfMemoryError
-                    loadType = "image small enough ";
-                    Bitmap bitmap = HugeImageLoader.loadImage(imageFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION);
-                    // rotation is done by photoView
-                    photoView.setImageBitmap(bitmap);
-                    photoView.setImageReloadFile((IFile) null);
-                    photoView.setDebugPrefix(imageFile.getName());
-                } catch (OutOfMemoryError err) {
-                    loadType = "small image out of memory using thumb ";
-                    setImageFromThumbnail(photoView, imageFile);
-                }
-            }
-            final int rotationInDegrees = PhotoPropertiesBulkUpdateService.getRotationFromExifOrientation(imageFile, null);
-            if (Global.debugEnabledViewItem) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position + ", rotation=" +
-                        rotationInDegrees + ", "
-                        + loadType + ") => " + imageFile + " => " + photoView);
-            }
-            photoView.setRotationTo(rotationInDegrees);
-        } else if (imageUri != null) {
-            if (Global.debugEnabledViewItem) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + ") => " + imageUri + " => " + photoView);
-            }
-            photoView.setImageURI(imageUri);
-        } else if (Global.debugEnabledViewItem) {
-            Log.w(Global.LOG_CONTEXT, mDebugPrefix + debugContext + ") no ifile and no imageUri " + photoView);
-        }
-
-        container.addView(root, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        return root;
-    }
-
     private void setImageFromThumbnail(PhotoViewEx photoView, IFile imageFile) {
         /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image.
          * on first zoom it is reloaded with this uri */
         photoView.setImageReloadFile(imageFile);
 
-        ImageLoader.getInstance().displayImage(imageFile.getAsUriString(), photoView, mDisplayImageOptions);
+        String uri = imageFile.getAsUriString();
+        ImageLoader.getInstance().displayImage(uri, photoView, mDisplayImageOptions);
+    }
+
+    /**
+     * debug only to allow setting a breakpoint. Copy of original code
+     */
+    private static class SimpleBitmapDisplayer implements BitmapDisplayer {
+        @Override
+        public void display(Bitmap bitmap, ImageAware imageAware, LoadedFrom loadedFrom) {
+            imageAware.setImageBitmap(bitmap);
+        }
+
     }
 
     /**
@@ -447,7 +381,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
 
     private class ImageButtonControllerImpl {
         private MenuItem mMenuItem = null;
-        private View.OnClickListener mClickListener;
+        private final View.OnClickListener mClickListener;
         private final View.OnLongClickListener mLongClickListener;
 
         public ImageButtonControllerImpl() {

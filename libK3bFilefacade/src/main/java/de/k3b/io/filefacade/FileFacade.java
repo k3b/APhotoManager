@@ -315,7 +315,7 @@ public class FileFacade implements IFile {
 
     @Override
     public String toString() {
-        return String.format("%s: %i-%s", this.getClass().getSimpleName(), strategyID, file.getAbsoluteFile());
+        return String.format("%s: %d-%s", this.getClass().getSimpleName(), strategyID, file.getAbsoluteFile());
     }
 
     @Override

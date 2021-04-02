@@ -264,6 +264,7 @@ public class AndroidFileCommands extends AndroidFileCommandsDbImpl {
             //     public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder, IProgessListener progessListener) {
 
             moveOrCopyFilesTo(move, selectedFiles, destDirFolder, null);
+            PhotoChangeNotifyer.onNotifyPhotoChanged();
         }
     }
 
@@ -471,13 +472,13 @@ public class AndroidFileCommands extends AndroidFileCommandsDbImpl {
                                  Bundle savedInstanceState) {
             View result = super.onCreateView(inflater, container, savedInstanceState);
 
-            chkFullScan = (CheckBox) result.findViewById(R.id.chkFullScan);
+            chkFullScan = result.findViewById(R.id.chkFullScan);
             chkFullScan.setVisibility(View.VISIBLE);
 
-            chkRescanNeverScannedByAPM = (CheckBox) result.findViewById(R.id.chkRescanNeverScannedByAPM);
+            chkRescanNeverScannedByAPM = result.findViewById(R.id.chkRescanNeverScannedByAPM);
             chkRescanNeverScannedByAPM.setVisibility(View.VISIBLE);
 
-            chkScanForDeleted = (CheckBox) result.findViewById(R.id.chkScanForDeleted);
+            chkScanForDeleted = result.findViewById(R.id.chkScanForDeleted);
             chkScanForDeleted.setVisibility(View.VISIBLE);
 
             chkFullScan.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
