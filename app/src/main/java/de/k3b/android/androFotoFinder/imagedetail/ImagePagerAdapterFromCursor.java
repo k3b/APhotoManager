@@ -108,6 +108,86 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
         }
     }
 
+    @NonNull
+    protected View createViewWithContent(
+            int position, ViewGroup container, IFile imageFile, Uri imageUri, String debugContext, int size) {
+        final Context context = container.getContext();
+
+        final boolean useLayout = true;
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        PhotoViewEx photoView;
+        View root;
+        TextView contextTextView = null;
+
+        if (useLayout) {
+            root = inflater.inflate(R.layout.pager_item_image, container, false);
+
+            photoView = root.findViewById(R.id.image);
+            mImageButtonController.create((ImageButton) root.findViewById(R.id.cmd_any));
+            contextTextView = root.findViewById(R.id.text);
+
+        } else {
+            photoView = new PhotoViewEx(context);
+            root = photoView;
+        }
+
+        if (contextTextView != null) {
+            String contextText = DBUtils.getString(getCursorAt(position), CONTEXT_COLUMN_FIELD, null);
+
+            if ((contextText != null) && (contextText.length() > 0)) {
+                contextTextView.setVisibility(View.VISIBLE);
+                contextTextView.setText(ImageContextController.sqlFormat(contextText));
+            } else {
+                contextTextView.setVisibility(View.INVISIBLE);
+            }
+        }
+
+        photoView.setMaximumScale(20);
+        photoView.setMediumScale(5);
+
+        String loadType;
+
+        if (imageFile != null) {
+            // if image is big use memoryefficient, fast, low-quality thumbnail (old code)
+            if (size > Global.imageDetailThumbnailIfBiggerThan) {
+                loadType = "image too big using thumb ";
+                setImageFromThumbnail(photoView, imageFile);
+            } else {
+                try {
+                    // #53 Optimisation: no need for thumbnail - saves cache memory but may throw OutOfMemoryError
+                    loadType = "image small enough ";
+                    Bitmap bitmap = HugeImageLoader.loadImage(imageFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION);
+                    // rotation is done by photoView
+                    photoView.setImageBitmap(bitmap);
+                    photoView.setImageReloadFile((IFile) null);
+                    photoView.setDebugPrefix(imageFile.getName());
+                } catch (OutOfMemoryError err) {
+                    loadType = "small image out of memory using thumb ";
+                    setImageFromThumbnail(photoView, imageFile);
+                }
+            }
+            final int rotationInDegrees = PhotoPropertiesBulkUpdateService.getRotationFromExifOrientation(imageFile, null);
+            if (Global.debugEnabledViewItem) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position + ", rotation=" +
+                        rotationInDegrees + ", "
+                        + loadType + ") => " + imageFile + " => " + photoView);
+            }
+            photoView.setRotationTo(rotationInDegrees);
+        } else if (imageUri != null) {
+            if (Global.debugEnabledViewItem) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + ") => " + imageUri + " => " + photoView);
+            }
+            photoView.setImageURI(imageUri);
+        } else if (Global.debugEnabledViewItem) {
+            Log.w(Global.LOG_CONTEXT, mDebugPrefix + debugContext + ") no ifile and no imageUri " + photoView);
+        }
+
+        container.addView(root, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        return root;
+    }
+
     public void setMenu(Menu menu) {
         mMenu = menu;
     }
