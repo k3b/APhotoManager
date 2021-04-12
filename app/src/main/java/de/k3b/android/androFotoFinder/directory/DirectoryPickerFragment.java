@@ -462,7 +462,7 @@ public class DirectoryPickerFragment extends DialogFragment
 
     private boolean onCopy(IDirectory selection) {
         String path = (selection == null) ? null : selection.getAbsolute();
-        return ClipboardUtil.addDirToClipboard(this.getActivity(), path);
+        return ClipboardUtil.addDirToClipboard(this.getActivity(), path, true);
     }
 
     private boolean onEditApm(MenuItem menuItem, IDirectory selection) {

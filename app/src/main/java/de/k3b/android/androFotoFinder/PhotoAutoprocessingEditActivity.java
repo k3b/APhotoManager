@@ -712,7 +712,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
                 return true;
 
             case android.R.id.copy:
-                return ClipboardUtil.addDirToClipboard(this, mCurrentOutDir.getAbsolutePath());
+                return ClipboardUtil.addDirToClipboard(this, mCurrentOutDir.getAbsolutePath(), true);
             case android.R.id.paste:
                 return onPaste();
             default:

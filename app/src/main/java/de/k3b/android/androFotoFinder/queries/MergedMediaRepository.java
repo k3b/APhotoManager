@@ -204,4 +204,10 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
         localDatabase.deleteMedia(dbgContext, where, selectionArgs, preventDeleteImageFile);
         return result;
     }
+
+    @Override
+    public ContentValues getDbContent(Long idOrNull, String filePathOrNull) {
+        return this.contentProvider.getDbContent(idOrNull, filePathOrNull);
+    }
+
 }

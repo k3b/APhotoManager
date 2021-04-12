@@ -34,13 +34,15 @@ import de.k3b.io.filefacade.IFile;
  */
 
 public class ClipboardUtil {
-    public static boolean addDirToClipboard(Context context, CharSequence dir) {
+    public static boolean addDirToClipboard(Context context, CharSequence dir, boolean withToast) {
         if (!StringUtils.isNullOrEmpty(dir)) {
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard != null) {
                 ClipData clip = ClipData.newPlainText(context.getString(R.string.lbl_path), dir);
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(context, dir, Toast.LENGTH_LONG).show();
+                if (withToast) {
+                    Toast.makeText(context, dir, Toast.LENGTH_LONG).show();
+                }
                 return true;
             }
         }

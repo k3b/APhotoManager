@@ -60,6 +60,15 @@ public class AndroidFileFacade extends FileFacade {
      */
     private Uri readUri = null;
 
+    @Override
+    public String toString() {
+        String result = super.toString();
+        if (readUri != null) {
+            result += "(" + readUri + ")";
+        }
+        return result;
+    }
+
     /**
      * false means do not try to load androidFile again
      */

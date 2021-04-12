@@ -207,21 +207,35 @@ public class MediaDBRepository implements IMediaRepositoryApi {
     }
 
     @Override
-    public ContentValues getDbContent(long id) {
-        Cursor c = null;
-        try {
-            c = this.createCursorForQuery(null, "getDbContent",
-                    Impl.DATABASE_TABLE_NAME, FotoSql.FILTER_COL_PK, new String[]{"" + id}, null, null, "*");
-            if (c.moveToNext()) {
-                ContentValues values = new ContentValues();
-                DatabaseUtils.cursorRowToContentValues(c, values);
-                return values;
+    public ContentValues getDbContent(Long idOrNull, String filePathOrNull) {
+        if (idOrNull != null || filePathOrNull != null) {
+            Cursor c = null;
+            try {
+                String selection;
+                String[] selectionArgs;
+                if (filePathOrNull == null) {
+                    selection = FotoSql.FILTER_COL_PK;
+                    selectionArgs = new String[]{"" + idOrNull};
+                } else if (idOrNull == null) {
+                    selection = FotoSql.FILTER_EXPR_PATH_LIKE;
+                    selectionArgs = new String[]{filePathOrNull};
+                } else {
+                    selection = FotoSql.FILTER_COL_PK + " or " + FotoSql.FILTER_EXPR_PATH_LIKE;
+                    selectionArgs = new String[]{"" + idOrNull, filePathOrNull};
+                }
+                c = this.createCursorForQuery(null, "getDbContent",
+                        Impl.DATABASE_TABLE_NAME, selection, selectionArgs, null, null, "*");
+                if (c.moveToNext()) {
+                    ContentValues values = new ContentValues();
+                    DatabaseUtils.cursorRowToContentValues(c, values);
+                    return values;
+                }
+            } catch (Exception ex) {
+                Log.e(LOG_TAG, MODUL_NAME +
+                        ".getDbContent(id=" + idOrNull + ", path='" + filePathOrNull + "') failed", ex);
+            } finally {
+                if (c != null) c.close();
             }
-        } catch (Exception ex) {
-            Log.e(LOG_TAG, MODUL_NAME +
-                    ".getDbContent(id=" + id + ") failed", ex);
-        } finally {
-            if (c != null) c.close();
         }
         return null;
     }

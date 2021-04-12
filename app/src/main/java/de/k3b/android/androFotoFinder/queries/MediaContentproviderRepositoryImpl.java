@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -287,22 +287,36 @@ public class MediaContentproviderRepositoryImpl {
         return ops.size();
     }
 
-    public static ContentValues getDbContent(Context context, final long id) {
-        ContentResolver resolver = context.getContentResolver();
+    public static ContentValues getDbContent(Context context, final Long idOrNull, String filePathOrNull) {
+        if (idOrNull != null || filePathOrNull != null) {
+            ContentResolver resolver = context.getContentResolver();
 
-        Cursor c = null;
-        try {
-            c = resolver.query(FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, new String[]{"*"}, FotoSql.FILTER_COL_PK, new String[]{"" + id}, null);
-            if (c.moveToNext()) {
-                ContentValues values = new ContentValues();
-                DatabaseUtils.cursorRowToContentValues(c, values);
-                return values;
+            Cursor c = null;
+            try {
+                String selection;
+                String[] selectionArgs;
+                if (filePathOrNull == null) {
+                    selection = FotoSql.FILTER_COL_PK;
+                    selectionArgs = new String[]{"" + idOrNull};
+                } else if (idOrNull == null) {
+                    selection = FotoSql.FILTER_EXPR_PATH_LIKE;
+                    selectionArgs = new String[]{filePathOrNull};
+                } else {
+                    selection = FotoSql.FILTER_COL_PK + " or " + FotoSql.FILTER_EXPR_PATH_LIKE;
+                    selectionArgs = new String[]{"" + idOrNull, filePathOrNull};
+                }
+                c = resolver.query(FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, new String[]{"*"}, selection, selectionArgs, null);
+                if (c.moveToNext()) {
+                    ContentValues values = new ContentValues();
+                    DatabaseUtils.cursorRowToContentValues(c, values);
+                    return values;
+                }
+            } catch (Exception ex) {
+                Log.e(LOG_TAG, MODUL_NAME +
+                        ".getDbContent(id=" + idOrNull + ", path='" + filePathOrNull + "') failed", ex);
+            } finally {
+                if (c != null) c.close();
             }
-        } catch (Exception ex) {
-            Log.e(LOG_TAG, MODUL_NAME +
-                    ".getDbContent(id=" + id + ") failed", ex);
-        } finally {
-            if (c != null) c.close();
         }
         return null;
     }

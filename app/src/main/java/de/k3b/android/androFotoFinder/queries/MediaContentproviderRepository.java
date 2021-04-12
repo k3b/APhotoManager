@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 by k3b.
+ * Copyright (c) 2019-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -182,8 +182,8 @@ public class MediaContentproviderRepository implements IMediaRepositoryApi {
     }
 
     @Override
-    public ContentValues getDbContent(final long id) {
-        return MediaContentproviderRepositoryImpl.getDbContent(context, id);
+    public ContentValues getDbContent(final Long idOrNull, String filePathOrNull) {
+        return MediaContentproviderRepositoryImpl.getDbContent(context, idOrNull, filePathOrNull);
     }
 
     @Override

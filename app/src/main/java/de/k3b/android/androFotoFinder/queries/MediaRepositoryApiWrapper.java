@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 by k3b.
+ * Copyright (c) 2019-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -40,7 +40,7 @@ public class MediaRepositoryApiWrapper implements IMediaRepositoryApi {
     /**
      * count the non path write calls
      */
-    private int modifyCount = 0;
+    private final int modifyCount = 0;
 
     public MediaRepositoryApiWrapper(IMediaRepositoryApi child) {
         this(child, child, child);
@@ -111,8 +111,8 @@ public class MediaRepositoryApiWrapper implements IMediaRepositoryApi {
     }
 
     @Override
-    public ContentValues getDbContent(long id) {
-        return getReadChild().getDbContent(id);
+    public ContentValues getDbContent(Long idOrNull, String filePathOrNull) {
+        return this.getReadChild().getDbContent(idOrNull, filePathOrNull);
     }
 
     @Override

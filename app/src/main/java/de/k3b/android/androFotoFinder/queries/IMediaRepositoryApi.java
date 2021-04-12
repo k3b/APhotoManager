@@ -63,7 +63,13 @@ public interface IMediaRepositoryApi {
      */
     int deleteMedia(String dbgContext, String where, String[] selectionArgs, boolean preventDeleteImageFile);
 
-    ContentValues getDbContent(long id);
+    /**
+     * get all column values belonging to id or filepath for debugging purpose
+     *
+     * @param idOrNull
+     * @param filePathOrNull
+     */
+    ContentValues getDbContent(Long idOrNull, String filePathOrNull);
 
     long getCurrentUpdateId();
 
