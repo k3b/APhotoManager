@@ -25,6 +25,7 @@ import androidx.documentfile.provider.DocumentFile;
 import java.io.File;
 import java.util.HashMap;
 
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesUtil;
 
@@ -52,26 +53,28 @@ public class DocumentFileCache {
     }
 
     public DocumentFile findFile(DocumentFile parentDoc, File parentFile, String displayName, int strategyID) {
-        CurrentFileCache currentFileCache = getCacheStrategy(strategyID);
+        if (Global.android_DocumentFile_find_cache) {
+            CurrentFileCache currentFileCache = getCacheStrategy(strategyID);
 
-        if (currentFileCache != null) {
-            if (!parentFile.equals(currentFileCache.lastParentFile)) {
-                currentFileCache.lastParentFile = parentFile;
-                currentFileCache.lastChildDocFiles.clear();
-                DocumentFile[] childDocuments = parentDoc.listFiles();
-                for (DocumentFile childDoc : childDocuments) {
-                    if (childDoc.isFile()) {
-                        String childDocName = childDoc.getName().toLowerCase();
-                        if (PhotoPropertiesUtil.isImage(childDocName, PhotoPropertiesUtil.IMG_TYPE_ALL | PhotoPropertiesUtil.IMG_TYPE_XMP)) {
-                            currentFileCache.lastChildDocFiles.put(childDocName, childDoc);
+            if (currentFileCache != null) {
+                if (!parentFile.equals(currentFileCache.lastParentFile)) {
+                    currentFileCache.lastParentFile = parentFile;
+                    currentFileCache.lastChildDocFiles.clear();
+                    DocumentFile[] childDocuments = parentDoc.listFiles();
+                    for (DocumentFile childDoc : childDocuments) {
+                        if (childDoc.isFile()) {
+                            String childDocName = childDoc.getName().toLowerCase();
+                            if (PhotoPropertiesUtil.isImage(childDocName, PhotoPropertiesUtil.IMG_TYPE_ALL | PhotoPropertiesUtil.IMG_TYPE_XMP)) {
+                                currentFileCache.lastChildDocFiles.put(childDocName, childDoc);
+                            }
                         }
                     }
+
                 }
 
-            }
-
-            if (PhotoPropertiesUtil.isImage(displayName, PhotoPropertiesUtil.IMG_TYPE_ALL | PhotoPropertiesUtil.IMG_TYPE_XMP)) {
-                return currentFileCache.lastChildDocFiles.get(displayName.toLowerCase());
+                if (PhotoPropertiesUtil.isImage(displayName, PhotoPropertiesUtil.IMG_TYPE_ALL | PhotoPropertiesUtil.IMG_TYPE_XMP)) {
+                    return currentFileCache.lastChildDocFiles.get(displayName.toLowerCase());
+                }
             }
         }
         return parentDoc.findFile(displayName);

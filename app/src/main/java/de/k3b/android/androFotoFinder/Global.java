@@ -149,9 +149,16 @@ public class Global {
     // Build.VERSION_CODES.??ANDROID10?? = 29
     public static boolean useAo10MediaImageDbReplacement = isAndroid10OrAbove();
 
-    /** map with blue selection markers: how much to area to increase */
+    // #169 Android SAF DocumentFile performance improvements fast but disabled because it is still error-prone
+    public final static boolean android_DocumentFile_find_cache = true;
+
+    /**
+     * map with blue selection markers: how much to area to increase
+     */
     public static final double mapMultiselectionBoxIncreaseByProcent = 100.0;
-    /** map with blue selection markers: minimum size of zoom box in degrees */
+    /**
+     * map with blue selection markers: minimum size of zoom box in degrees
+     */
     public static final double mapMultiselectionBoxIncreaseMinSizeInDegrees = 0.01;
 
     private static boolean isAndroid10OrAbove() {
