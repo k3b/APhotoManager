@@ -162,6 +162,7 @@ public class PhotoView extends ImageView implements IPhotoView {
 
     @Override
     public ScaleType getScaleType() {
+        if (mAttacher == null) return ScaleType.CENTER;
         return mAttacher.getScaleType();
     }
 
