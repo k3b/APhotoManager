@@ -29,7 +29,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -41,6 +40,8 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.events.DelayedMapListener;
@@ -740,9 +741,11 @@ public class LocationMapFragment extends DialogFragment {
     /** how much mCurrentFotoMarkerLoader are tirggerd while task is loading */
     private int mFotoMarkerPendingLoads = 0;
 
-    /** The factory LocationMapFragment.FotoMarkerLoaderTask#createMarker() tries to recycle old
-     *     unused Fotomarkers before creating new */
-    private Stack<FotoMarker> mFotoMarkerRecycler = new Stack<FotoMarker>();
+    /**
+     * The factory LocationMapFragment.FotoMarkerLoaderTask#createMarker() tries to recycle old
+     * unused Fotomarkers before creating new
+     */
+    private final Stack<FotoMarker> mFotoMarkerRecycler = new Stack<FotoMarker>();
 
     /** To allow canceling of loading task. There are 0 or one tasks running at a time */
     private FotoMarkerLoaderTask mCurrentFotoMarkerLoader = null;

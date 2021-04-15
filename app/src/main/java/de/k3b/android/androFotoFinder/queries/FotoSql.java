@@ -25,9 +25,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;

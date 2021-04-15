@@ -25,8 +25,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -42,6 +40,9 @@ import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.text.DecimalFormat;

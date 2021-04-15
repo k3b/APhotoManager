@@ -32,7 +32,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +39,8 @@ import android.view.View;
 import android.view.Window;
 import android.widget.PopupMenu;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import org.osmdroid.api.IGeoPoint;
 

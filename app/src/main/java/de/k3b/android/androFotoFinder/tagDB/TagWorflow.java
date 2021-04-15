@@ -20,8 +20,9 @@ package de.k3b.android.androFotoFinder.tagDB;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.util.Date;

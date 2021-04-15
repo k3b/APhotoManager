@@ -28,7 +28,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
@@ -40,6 +39,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.io.Serializable;
@@ -110,7 +111,7 @@ public class BackupActivity extends BaseActivity implements Common {
             ? "--"
             : OsUtils.getDefaultPhotoRoot().getAbsolutePath();
 
-    private static String mDebugPrefix = "BackupActivity: ";
+    private static final String mDebugPrefix = "BackupActivity: ";
 
     private Gui gui = null;
 
@@ -598,7 +599,7 @@ public class BackupActivity extends BaseActivity implements Common {
         private final TextView exifFilterDetails;
         private final GalleryFilterFormatter formatter;
 
-        private HistoryEditText mHistory;
+        private final HistoryEditText mHistory;
 
         private Gui() {
             formatter = new GalleryFilterFormatter(false,

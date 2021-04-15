@@ -21,8 +21,9 @@ package de.k3b.android.androFotoFinder.backup;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.support.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -58,7 +59,7 @@ import de.k3b.zip.ZipStorage;
  * Gui independant service to load/save/execute the backup and it-s parameters
  */
 public class Backup2ZipService implements IProgessListener, ZipLog {
-    private static String mDebugPrefix = "Backup2ZipService: ";
+    private static final String mDebugPrefix = "Backup2ZipService: ";
     private final Context context;
     private final IZipConfig zipConfig;
     private final ZipStorage zipStorage;

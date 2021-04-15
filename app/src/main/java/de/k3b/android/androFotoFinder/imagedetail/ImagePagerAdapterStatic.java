@@ -21,10 +21,11 @@ package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.v4.view.PagerAdapter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.viewpager.widget.PagerAdapter;
 
 import java.io.InputStream;
 

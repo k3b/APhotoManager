@@ -16,19 +16,20 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
- 
+
 package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.content.Context;
-import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.viewpager.widget.ViewPager;
+
 /**
  * Found at http://stackoverflow.com/questions/7814017/is-it-possible-to-disable-scrolling-on-a-viewpager.
  * Convenient way to temporarily disable ViewPager navigation while interacting with ImageView.
- * 
+ * <p>
  * Julia Zudikova
  */
 

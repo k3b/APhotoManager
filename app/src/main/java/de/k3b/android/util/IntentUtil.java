@@ -27,11 +27,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
-import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 
@@ -118,7 +119,7 @@ public class IntentUtil implements Common {
         // "content://org.openintents.filemanager/%2Fstorage%2Femulated%2F0%2FDCIM%2F%F0%9F%93%B8test%2F180122mytest001.jpg"
         if (isFileUri(uri)) {
             final File file = getExistingFileOrNull(uri.getPath());
-            if (file != null) return file;
+            return file;
         }
         return null;
     }

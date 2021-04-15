@@ -23,8 +23,6 @@ import android.graphics.Matrix.ScaleToFit;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.annotation.Nullable;
-import android.support.v4.view.MotionEventCompat;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,6 +34,9 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.core.view.MotionEventCompat;
 
 import java.io.File;
 import java.lang.ref.WeakReference;

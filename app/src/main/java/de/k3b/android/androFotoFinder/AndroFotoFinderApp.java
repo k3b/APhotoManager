@@ -23,9 +23,10 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import org.osmdroid.api.IMapView;
 import org.osmdroid.config.Configuration;

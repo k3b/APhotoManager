@@ -35,10 +35,6 @@
 package de.k3b.android.widget;
 
 import android.content.Context;
-import android.support.annotation.ArrayRes;
-import android.support.annotation.IdRes;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,6 +43,11 @@ import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
+
+import androidx.annotation.ArrayRes;
+import androidx.annotation.IdRes;
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,7 +80,7 @@ public class ArrayAdapterEx<T> extends BaseAdapter implements Filterable {
      * The resource indicating what views to inflate to display the content of this
      * array adapter.
      */
-    private int mResource;
+    private final int mResource;
 
     /**
      * The resource indicating what views to inflate to display the content of this
@@ -100,7 +101,7 @@ public class ArrayAdapterEx<T> extends BaseAdapter implements Filterable {
      */
     private boolean mNotifyOnChange = true;
 
-    private Context mContext;
+    private final Context mContext;
 
     // A copy of the original mObjects array, initialized from and then used instead as soon as
     // the mFilter ArrayFilter is used. mObjects will then only contain the filtered values.

@@ -21,9 +21,10 @@ package de.k3b.android.androFotoFinder.ads;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 /**
  * Created by k3b on 07.09.2017.

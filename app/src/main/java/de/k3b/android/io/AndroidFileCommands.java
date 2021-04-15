@@ -30,7 +30,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -39,6 +38,8 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.util.Date;

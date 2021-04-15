@@ -27,9 +27,10 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.core.app.ActivityCompat;
 
 import java.io.File;
 
@@ -51,7 +52,7 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
     private static IOnDirectoryPermissionGrantedHandler currentPermissionGrantedHandler = null;
 
     private static final int REQUEST_ID_WRITE_EXTERNAL_STORAGE = 2000;
-    private static Uri fileRootUri = null;
+    private static final Uri fileRootUri = null;
     private static final String PERMISSION_WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     private static File currentRootFileRequest = null;
     private DocumentFileTranslator documentFileTranslator = null;

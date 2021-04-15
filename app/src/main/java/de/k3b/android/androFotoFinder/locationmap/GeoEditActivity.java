@@ -27,7 +27,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -35,6 +34,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.util.Arrays;
@@ -73,7 +74,7 @@ public class GeoEditActivity extends FilePermissionActivity implements Common {
     private HistoryEditText mHistory;
     private SelectedFiles mSelectedItems;
 
-    private GeoPointDto mCurrentPoint = new GeoPointDto();
+    private final GeoPointDto mCurrentPoint = new GeoPointDto();
     private Button cmdOk;
     private Button cmdCancel;
 

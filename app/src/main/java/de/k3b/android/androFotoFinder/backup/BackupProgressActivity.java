@@ -26,10 +26,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 import java.io.Serializable;
@@ -56,7 +57,7 @@ public class BackupProgressActivity extends ProgressActivity<IZipConfig> {
     public static final boolean USE_DOCUMENT_PROVIDER = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
 
     protected static final String EXTRA_STATE_ZIP_CONFIG = "zip_config";
-    private static String mDebugPrefix = "BuProgressActivity: ";
+    private static final String mDebugPrefix = "BuProgressActivity: ";
 
     // != null while async backup is running
     private static ProgressableAsyncTask<IZipConfig> asyncTask = null;

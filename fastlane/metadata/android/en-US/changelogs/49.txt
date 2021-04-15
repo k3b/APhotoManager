@@ -1,0 +1,5 @@
+Changes from 0.8.4 to ???
+
+* #155: Android-10 support (experimental)
+* #173: incremental media scanner
+* #173: Ao10-performance-Optimized-Mediacanner

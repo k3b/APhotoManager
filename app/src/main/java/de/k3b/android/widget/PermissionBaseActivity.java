@@ -22,7 +22,8 @@ package de.k3b.android.widget;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.support.v4.app.ActivityCompat;
+
+import androidx.core.app.ActivityCompat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -89,7 +90,6 @@ public abstract class PermissionBaseActivity extends ActivityWithAutoCloseDialog
 
     private static class CallbackHandler {
         private static Integer nextId = 1000;
-        ;
         private final Map<Integer, IPermissionResult> id2Callback = new HashMap<>();
         private final Map<IPermissionResult, Integer> callback2Id = new HashMap<>();
 

@@ -23,12 +23,13 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.preference.DialogPreference;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
+
+import androidx.annotation.NonNull;
 
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.R;
@@ -41,7 +42,7 @@ import de.k3b.android.androFotoFinder.R;
  * Copyright (C) 2014-2020 by k3b
  */
 public class AboutDialogPreference extends DialogPreference {
-    private Context context;
+    private final Context context;
 
     public AboutDialogPreference(Context context, AttributeSet attrs) {
         super(context, attrs);

@@ -20,10 +20,11 @@
 package de.k3b.android.osmdroid;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
 
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.api.IMapController;
@@ -39,7 +40,7 @@ import org.osmdroid.views.MapView;
  */
 public class OsmdroidUtil {
     // osmdroid supports 0..29.0 but this app only 0..22
-    private static int MAX_ZOOM_LEVEL = 22;
+    private static final int MAX_ZOOM_LEVEL = 22;
 
     public static final int NO_ZOOM = -1; // GeoPointDto.NO_ZOOM;
     public static final int RECALCULATE_ZOOM = NO_ZOOM; // GeoPointDto.NO_ZOOM;

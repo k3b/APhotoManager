@@ -25,8 +25,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.v4.view.PagerAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,6 +34,9 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.viewpager.widget.PagerAdapter;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
