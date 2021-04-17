@@ -412,13 +412,14 @@ public class MediaDBRepository implements IMediaRepositoryApi {
 
     public static class Impl {
         public static final String DATABASE_TABLE_NAME = "files";
+        public static final String DATABASE_TABLE_NAME_BACKUP = "backup";
         /**
          * SQL to create copy of contentprovider MediaStore.Images.
          * copied from android-4.4 android database. Removed columns not used
          */
         protected static final String[] DDL = new String[]{
-                "DROP TABLE IF EXISTS \"files\"",
-                "CREATE TABLE \"files\" (\n" +
+                "DROP TABLE IF EXISTS \"" + DATABASE_TABLE_NAME + "\"",
+                "CREATE TABLE \"" + DATABASE_TABLE_NAME + "\" (\n" +
                         "\t_id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                         "\t_size INTEGER,\n" +
                         "\tdate_added INTEGER,\n" +
@@ -441,11 +442,37 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                         "\tlatitude DOUBLE,\n" +
                         "\tlongitude DOUBLE\n" +
                         "\t )",
-                "CREATE INDEX media_type_index ON files(media_type)",
-                "CREATE INDEX path_index ON files(_data)",
-                "CREATE INDEX sort_index ON files(datetaken ASC, _id ASC)",
-                "CREATE INDEX title_idx ON files(title)",
+                "CREATE INDEX media_type_index ON " + DATABASE_TABLE_NAME + "(media_type)",
+                "CREATE INDEX path_index ON " + DATABASE_TABLE_NAME + "(_data)",
+                "CREATE INDEX sort_index ON " + DATABASE_TABLE_NAME + "(datetaken ASC, _id ASC)",
+                "CREATE INDEX title_idx ON " + DATABASE_TABLE_NAME + "(title)",
         };
+        protected static final String[] RESTORE_FROM_BACKUP = new String[]{
+                "UPDATE " + DATABASE_TABLE_NAME + "\n" +
+                        "SET latitude = (SELECT latitude FROM " + DATABASE_TABLE_NAME_BACKUP + "  WHERE _data = " + DATABASE_TABLE_NAME + "._data)\n" +
+                        ", latitude = (SELECT latitude FROM " + DATABASE_TABLE_NAME_BACKUP + "  WHERE _data = " + DATABASE_TABLE_NAME + "._data)\n" +
+                        ", longitude = (SELECT longitude FROM " + DATABASE_TABLE_NAME_BACKUP + "  WHERE _data = " + DATABASE_TABLE_NAME + "._data)\n" +
+                        ", tags = (SELECT tags FROM " + DATABASE_TABLE_NAME_BACKUP + "  WHERE _data = " + DATABASE_TABLE_NAME + "._data)\n" +
+                        ", duration = (SELECT duration FROM " + DATABASE_TABLE_NAME_BACKUP + "  WHERE _data = " + DATABASE_TABLE_NAME + "._data)\n" +
+                        ", title = (SELECT title FROM " + DATABASE_TABLE_NAME_BACKUP + "  WHERE _data = " + DATABASE_TABLE_NAME + "._data)\n" +
+                        ", description = (SELECT description FROM " + DATABASE_TABLE_NAME_BACKUP + "  WHERE _data = " + DATABASE_TABLE_NAME + "._data)\n" +
+                        ", bookmark = (SELECT bookmark FROM " + DATABASE_TABLE_NAME_BACKUP + "  WHERE _data = " + DATABASE_TABLE_NAME + "._data)",
+        };
+        private static final String HAS_DATA = "latitude is not null or tags is not null or bookmark is not null";
+        private static final String MY_COLUMNS = " _id, _data, latitude, longitude, tags, duration, bookmark, title, description ";
+        private static final String SELECT_FROM_FILES = " SELECT" + MY_COLUMNS + " from " + DATABASE_TABLE_NAME + "" + " where " + HAS_DATA;
+        protected static final String[] CREATE_BACKUP = new String[]{
+                "DROP TABLE IF EXISTS \"" + DATABASE_TABLE_NAME_BACKUP + "\"",
+                "CREATE TABLE \"" + DATABASE_TABLE_NAME_BACKUP + "\" AS" + SELECT_FROM_FILES,
+                "CREATE INDEX bu_path_index ON " + DATABASE_TABLE_NAME_BACKUP + "(_data)",
+        };
+        protected static final String[] UPDATE_BACKUP = new String[]{
+                "DELETE FROM " + DATABASE_TABLE_NAME_BACKUP + " where exists " +
+                        "(select _data from " + DATABASE_TABLE_NAME +
+                        " WHERE _data = " + DATABASE_TABLE_NAME_BACKUP + "._data" + " AND (" + HAS_DATA + "))",
+                "INSERT INTO " + DATABASE_TABLE_NAME_BACKUP + "(" + MY_COLUMNS + ")" + SELECT_FROM_FILES,
+        };
+
         private static final int COL_INT_MIN = 0;
         // same colum order as in DDL
         private static final String[] USED_MEDIA_COLUMNS = new String[]{

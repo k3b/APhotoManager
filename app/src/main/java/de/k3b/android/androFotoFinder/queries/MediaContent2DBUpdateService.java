@@ -55,18 +55,31 @@ public class MediaContent2DBUpdateService {
     }
 
     public void clearMediaCopy() {
-        DatabaseHelper.version2Upgrade_RecreateMediDbCopy(writableDatabase);
+        DatabaseHelper.version2Upgrade_ReCreateMediaDbTable(writableDatabase);
     }
 
     public int rebuild(Context context, IProgessListener progessListener) {
         long start = new Date().getTime();
+        if (progessListener != null)
+            progessListener.onProgress(0, 0, "Create Backup of tags, lat, lon, rating");
+        createBackup();
+        if (progessListener != null) progessListener.onProgress(0, 0, "Recreate Database");
         clearMediaCopy();
+        if (progessListener != null)
+            progessListener.onProgress(0, 0, "Copy from Android Media Database");
         int changeCount = MediaDBRepository.Impl.updateMediaCopy(context, writableDatabase, null, null, progessListener);
+        if (progessListener != null)
+            progessListener.onProgress(0, 0, "Restore tags, lat, lon, rating from Backup");
+        DatabaseHelper.restoreFromBackup(writableDatabase);
         long timeInSecs = (new Date().getTime() - start) / 1000;
         final String text = "load db " + timeInSecs + " secs";
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
         if (progessListener != null) progessListener.onProgress(0, 0, text);
         return changeCount;
+    }
+
+    public void createBackup() {
+        DatabaseHelper.createBackup(writableDatabase);
     }
 
     public int update(Context context, IProgessListener progessListener) {

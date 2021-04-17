@@ -20,14 +20,18 @@
 package de.k3b.android.androFotoFinder.queries;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.io.File;
 
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.android.util.DatabaseContext;
+
+import static de.k3b.android.androFotoFinder.queries.FotoSql.LOG_TAG;
 
 /**
  * Created by k3b on 22.02.2017.
@@ -68,8 +72,53 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public static void version2Upgrade_RecreateMediDbCopy(final SQLiteDatabase db) {
-        for (String sql : MediaDBRepository.Impl.DDL) {
+    public static void version2Upgrade_ReCreateMediaDbTable(final SQLiteDatabase db) {
+        execSql(db, "(Re)CreateMediaDbTable:", MediaDBRepository.Impl.DDL);
+    }
+
+    public static void createBackup(SQLiteDatabase db) {
+        if (tableExists(db, MediaDBRepository.Impl.DATABASE_TABLE_NAME)) {
+            // see https://www.techonthenet.com/sqlite/tables/create_table_as.php
+
+            if (!tableExists(db, MediaDBRepository.Impl.DATABASE_TABLE_NAME_BACKUP)) {
+                execSql(db, "create Backup:", MediaDBRepository.Impl.CREATE_BACKUP);
+            } else {
+                execSql(db, "update Backup:", MediaDBRepository.Impl.UPDATE_BACKUP);
+            }
+        }
+    }
+
+    public static void restoreFromBackup(SQLiteDatabase db) {
+        if (tableExists(db, MediaDBRepository.Impl.DATABASE_TABLE_NAME_BACKUP)) {
+            // see https://stackoverflow.com/questions/19270259/update-with-join-in-sqlite
+            execSql(db, "restoreFromBackup:", MediaDBRepository.Impl.RESTORE_FROM_BACKUP);
+        }
+    }
+
+    // from https://stackoverflow.com/questions/1601151/how-do-i-check-in-sqlite-whether-a-table-exists
+    private static boolean tableExists(SQLiteDatabase db, String tableName) {
+        if (tableName == null || db == null || !db.isOpen()) {
+            return false;
+        }
+        Cursor cursor = db.rawQuery(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type = ? AND name = ?",
+                new String[]{"table", tableName}
+        );
+        if (!cursor.moveToFirst()) {
+            cursor.close();
+            return false;
+        }
+        int count = cursor.getInt(0);
+        cursor.close();
+        return count > 0;
+    }
+
+    private static void execSql(SQLiteDatabase db, String dbgContext, String... ddlStatements) {
+
+        for (String sql : ddlStatements) {
+            if (Global.debugEnabledSql) {
+                Log.i(LOG_TAG, "DatabaseHelper-" + dbgContext + sql);
+            }
             db.execSQL(sql);
         }
     }
@@ -79,9 +128,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     @Override
     public void onCreate(final SQLiteDatabase db) {
-        db.execSQL(TransactionLogSql.CREATE_TABLE);
+        execSql(db, "First Create DB: ", TransactionLogSql.CREATE_TABLE);
 
-        this.version2Upgrade_RecreateMediDbCopy(db);
+        version2Upgrade_ReCreateMediaDbTable(db);
     }
 
     @Override
@@ -90,7 +139,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.w(this.getClass().toString(), "Upgrading database from version "
                 + oldVersion + " to " + newVersion + ". (Old data is kept.)");
         if (oldVersion < DatabaseHelper.DATABASE_VERSION_2_MEDIA_DB_COPY) {
-            this.version2Upgrade_RecreateMediDbCopy(db);
+            version2Upgrade_ReCreateMediaDbTable(db);
         }
     }
 }

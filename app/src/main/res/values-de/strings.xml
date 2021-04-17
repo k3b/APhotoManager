@@ -253,6 +253,7 @@ der SD-Karte oder des USB-Sticks aus.</p>
     <string name="load_db_menu_title">Mediendatenbank (neu) laden</string>
 
     <string name="update_db_menu_title">Mediendatenbank aktualisieren</string>
+    <string name="backup_db_menu_title">Backup lat,long,tags,... in Mediendatenbank</string>
 
     <!-- #173: incremental media scanner -->
     <string name="scanner_menu_title">Media-Scanner</string>

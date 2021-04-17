@@ -213,6 +213,11 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
                 if (0 != onDbUpdateCommand(item))
                     notifyPhotoChanged();
                 return true;
+
+            case R.id.cmd_db_backup:
+                onDbBackup();
+                return true;
+
             case R.id.cmd_more:
                 new Handler().postDelayed(new Runnable() {
                     public void run() {
@@ -225,6 +230,10 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
                 return onOptionsItemSelected(item, this.mSelectedItemIds);
         }
 
+    }
+
+    private void onDbBackup() {
+        AndroFotoFinderApp.getMediaContent2DbUpdateService().createBackup();
     }
 
     private int onDbUpdateCommand(MenuItem item) {

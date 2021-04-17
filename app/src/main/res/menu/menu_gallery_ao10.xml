@@ -50,6 +50,13 @@
                 android:title="@string/update_db_menu_title"
                 android:visible="true" />
 
+            <item
+                android:id="@+id/cmd_db_backup"
+                android:orderInCategory="9900"
+                android:showAsAction="never"
+                android:title="@string/backup_db_menu_title"
+                android:visible="true" />
+
         </menu>
     </item>
 </menu>

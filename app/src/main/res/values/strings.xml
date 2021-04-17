@@ -295,6 +295,7 @@ of SD-Card or USB-Stick.</p>
     <string name="database_menu_title">Mediadatabase ...</string>
     <string name="load_db_menu_title">(Re)Load Mediadatabase</string>
     <string name="update_db_menu_title">Update Mediadatabase</string>
+    <string name="backup_db_menu_title">Backup lat,long,tags,... in Mediadatabase</string>
 
     <!-- #173: incremental media scanner -->
     <string name="scanner_menu_title">Mediafile scanner</string>
