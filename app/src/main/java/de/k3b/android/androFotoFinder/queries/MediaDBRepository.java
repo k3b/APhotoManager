@@ -410,6 +410,16 @@ public class MediaDBRepository implements IMediaRepositoryApi {
     }
 
 
+    public static void saveSyncStats(Context context, long maxDateAddedSecs, long maxDateUpdatedSecs) {
+        SharedPreferences prefsInstance = PreferenceManager
+                .getDefaultSharedPreferences(context.getApplicationContext());
+
+        SharedPreferences.Editor prefs = prefsInstance.edit();
+        if (maxDateUpdatedSecs > 0) prefs.putLong("maxDateUpdatedSecs", maxDateUpdatedSecs + 1);
+        if (maxDateAddedSecs > 0) prefs.putLong("maxDateAddedSecs", maxDateAddedSecs + 1);
+        prefs.apply();
+    }
+
     public static class Impl {
         public static final String DATABASE_TABLE_NAME = "files";
         public static final String DATABASE_TABLE_NAME_BACKUP = "backup";
@@ -752,7 +762,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                 } // while over all old items
                 db.setTransactionSuccessful(); // This commits the transaction if there were no exceptions
 
-                saveStats(context, maxDateAddedSecs, maxDateUpdatedSecs);
+                saveSyncStats(context, maxDateAddedSecs, maxDateUpdatedSecs);
 
                 if (Global.debugEnabledSql) {
                     java.util.Date endTime = new java.util.Date();
@@ -786,16 +796,6 @@ public class MediaDBRepository implements IMediaRepositoryApi {
             return progress;
         }
 
-        private static void saveStats(Context context, long maxDateAddedSecs, long maxDateUpdatedSecs) {
-            SharedPreferences prefsInstance = PreferenceManager
-                    .getDefaultSharedPreferences(context.getApplicationContext());
-
-            SharedPreferences.Editor prefs = prefsInstance.edit();
-            if (maxDateUpdatedSecs > 0) prefs.putLong("maxDateUpdatedSecs", maxDateUpdatedSecs + 1);
-            if (maxDateAddedSecs > 0) prefs.putLong("maxDateAddedSecs", maxDateAddedSecs + 1);
-            prefs.apply();
-        }
-
         protected static long getDateInSecs(Cursor c, int colPosition) {
             long dateInSecs = (c.isNull(colPosition)) ? 0 : c.getLong(colPosition);
             if (dateInSecs > nextMonthTimeInSecs) {
@@ -805,4 +805,5 @@ public class MediaDBRepository implements IMediaRepositoryApi {
             return dateInSecs;
         }
     }
+
 }

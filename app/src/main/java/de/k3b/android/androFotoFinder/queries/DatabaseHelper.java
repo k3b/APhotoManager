@@ -50,8 +50,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance = null;
     private static DatabaseContext databaseContext = null;
 
+    private final Context context;
+
     public DatabaseHelper(final Context context, final String databaseName) {
         super(context, databaseName, null, DatabaseHelper.DATABASE_VERSION);
+        this.context = context.getApplicationContext();
     }
 
     public static SQLiteDatabase getWritableDatabase(Context context) {
@@ -72,7 +75,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public static void version2Upgrade_ReCreateMediaDbTable(final SQLiteDatabase db) {
+    public static void version2Upgrade_ReCreateMediaDbTable(Context context, final SQLiteDatabase db) {
+        MediaDBRepository.saveSyncStats(context, 1, 1);
         execSql(db, "(Re)CreateMediaDbTable:", MediaDBRepository.Impl.DDL);
     }
 
@@ -130,7 +134,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(final SQLiteDatabase db) {
         execSql(db, "First Create DB: ", TransactionLogSql.CREATE_TABLE);
 
-        version2Upgrade_ReCreateMediaDbTable(db);
+        version2Upgrade_ReCreateMediaDbTable(context, db);
     }
 
     @Override
@@ -139,7 +143,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.w(this.getClass().toString(), "Upgrading database from version "
                 + oldVersion + " to " + newVersion + ". (Old data is kept.)");
         if (oldVersion < DatabaseHelper.DATABASE_VERSION_2_MEDIA_DB_COPY) {
-            version2Upgrade_ReCreateMediaDbTable(db);
+            version2Upgrade_ReCreateMediaDbTable(context, db);
         }
     }
 }

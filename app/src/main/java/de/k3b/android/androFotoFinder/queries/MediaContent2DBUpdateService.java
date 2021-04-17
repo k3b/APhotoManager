@@ -55,7 +55,7 @@ public class MediaContent2DBUpdateService {
     }
 
     public void clearMediaCopy() {
-        DatabaseHelper.version2Upgrade_ReCreateMediaDbTable(writableDatabase);
+        DatabaseHelper.version2Upgrade_ReCreateMediaDbTable(context, writableDatabase);
     }
 
     public int rebuild(Context context, IProgessListener progessListener) {
