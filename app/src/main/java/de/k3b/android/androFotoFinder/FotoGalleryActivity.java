@@ -49,6 +49,7 @@ import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.AsyncTaskRunnerWithProgressDialog;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
@@ -260,7 +261,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
     }
 
     private boolean onDbReloadQuestion(String title) {
-        Dialogs dlg = new Dialogs() {
+        final Dialogs dlg = new Dialogs() {
             @Override
             protected void onDialogResult(String result, Object[] parameters) {
                 setAutoClose(null, null, null);
@@ -276,9 +277,19 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
     }
 
     private void onDbReloadAnswer() {
-        if (0 != AndroFotoFinderApp.getMediaContent2DbUpdateService().rebuild(this, null)) {
-            notifyPhotoChanged();
-        }
+        new AsyncTaskRunnerWithProgressDialog(this, R.string.load_db_menu_title) {
+            @Override
+            protected void onPostExecute(Integer itemCount) {
+                super.onPostExecute(itemCount);
+                if (itemCount != 0) {
+                    FotoGalleryActivity fotoGalleryActivity = (FotoGalleryActivity) getActivity();
+                    if (fotoGalleryActivity != null) {
+                        fotoGalleryActivity.notifyPhotoChanged();
+                    }
+                }
+            }
+
+        }.execute(AndroFotoFinderApp.getMediaContent2DbUpdateService().getRebbuildRunner());
     }
 
     public void notifyPhotoChanged() {

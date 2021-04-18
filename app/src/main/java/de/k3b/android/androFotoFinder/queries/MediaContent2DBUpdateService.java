@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import java.util.Date;
 
+import de.k3b.android.widget.ITaskRunner;
 import de.k3b.io.IProgessListener;
 
 /**
@@ -58,6 +59,16 @@ public class MediaContent2DBUpdateService {
         DatabaseHelper.version2Upgrade_ReCreateMediaDbTable(context, writableDatabase);
     }
 
+    public ITaskRunner getRebbuildRunner() {
+        return new ITaskRunner() {
+            @Override
+            public int run(Context context, IProgessListener progessListener) {
+                return rebuild(context, progessListener);
+            }
+        };
+
+    }
+
     public int rebuild(Context context, IProgessListener progessListener) {
         long start = new Date().getTime();
         if (progessListener != null)
@@ -73,7 +84,6 @@ public class MediaContent2DBUpdateService {
         DatabaseHelper.restoreFromBackup(writableDatabase);
         long timeInSecs = (new Date().getTime() - start) / 1000;
         final String text = "load db " + timeInSecs + " secs";
-        Toast.makeText(context, text, Toast.LENGTH_LONG).show();
         if (progessListener != null) progessListener.onProgress(0, 0, text);
         return changeCount;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 by k3b.
+ * Copyright (c) 2017-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -21,33 +21,47 @@ package de.k3b.android.widget;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.Closeable;
 import java.lang.ref.WeakReference;
 
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.io.IProgessListener;
+import de.k3b.zip.LibZipGlobal;
 
 /**
  * Async task that displays ProgressDialog while running.
- *
+ * <p>
  * Created by k3b on 09.07.2017.
  */
 
 abstract public class AsyncTaskWithProgressDialog<param> extends AsyncTask<param, String, Integer>
-                    implements Closeable{
+        implements Closeable, IProgessListener {
     private final int idResourceTitle;
     private WeakReference<Activity> activity;
 
     protected ProgressDialog dlg = null;
+
     public AsyncTaskWithProgressDialog(Activity activity, int idResourceTitle) {
         this.idResourceTitle = idResourceTitle;
         this.setActivity(activity);
     }
+
     protected void onProgressUpdate(String... values) {
         if (dlg != null) {
-            if (!dlg.isShowing()) dlg.show();
+            if (!dlg.isShowing()) {
+                dlg.show();
+                setDialog(getActivity(), dlg);
+            }
             dlg.setMessage(values[0]);
+        }
+    }
+
+    private void setDialog(Activity activity, ProgressDialog dlg) {
+        if (activity instanceof ActivityWithAutoCloseDialogs) {
+            ((ActivityWithAutoCloseDialogs) activity).setAutoClose(null, dlg, null);
         }
     }
 
@@ -72,12 +86,29 @@ abstract public class AsyncTaskWithProgressDialog<param> extends AsyncTask<param
     public void close() {
         destroy();
     }
+
     public void destroy() {
         setActivity(null);
     }
 
-    /** periodically called while work in progress.  */
-    protected void publishProgress(int itemCount, int total, Object message) {
+    /**
+     * de.k3b.io.IProgessListener:
+     * <p>
+     * called every time when command makes some little progress in non gui thread.
+     * return true to continue
+     */
+    @Override
+    public boolean onProgress(int itemCount, int total, String message) {
+        return publishProgress(itemCount, total, message);
+    }
+
+    public boolean publishProgress(int itemCount, int total, Object message) {
+        final boolean cancelled = this.isCancelled();
+        if (cancelled) {
+            if (LibZipGlobal.debugEnabled) {
+                Log.d(LibZipGlobal.LOG_TAG, this.getClass().getSimpleName() + " cancel pressed ");
+            }
+        }
         StringBuilder msg = new StringBuilder();
         if (itemCount > 0) {
             msg.append("(").append(itemCount);
@@ -90,23 +121,28 @@ abstract public class AsyncTaskWithProgressDialog<param> extends AsyncTask<param
             msg.append(message);
         }
         publishProgress(msg.toString());
+        return !cancelled;
     }
+
 
     protected Activity getActivity() {
         if (activity == null) return null;
         return activity.get();
     }
 
-    public void setActivity(Activity activity) {
+    public AsyncTaskWithProgressDialog setActivity(Activity activity) {
         boolean isActive = isNotFinishedYet();
 
-        if (isActive && (activity == getActivity())) {
+        Activity oldActivity = getActivity();
+        if (isActive && (activity == oldActivity)) {
             // no change
-            return;
+            return this;
         }
+
         this.activity = (isActive && (activity != null)) ? new WeakReference<>(activity) : null;
         if ((dlg != null) && dlg.isShowing()) {
             dlg.dismiss();
+            setDialog(activity, null);
         }
         dlg = null;
 
@@ -114,6 +150,7 @@ abstract public class AsyncTaskWithProgressDialog<param> extends AsyncTask<param
             dlg = new ProgressDialog(activity);
             dlg.setTitle(idResourceTitle);
         }
+        return this;
     }
 
     public boolean isNotFinishedYet() {

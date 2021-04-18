@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 by k3b.
+ * Copyright (c) 2020-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -46,7 +46,7 @@ import de.k3b.io.filefacade.FileFacade;
  * * write to external-storage and
  * * write to sdcard/usbstick,....
  */
-public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialogs {
+public abstract class FilePermissionActivity extends ActivityWithAsyncTaskDialog {
     private static final int REQUEST_ROOT_DIR = 2001;
     public static final String TAG = "k3b.FilePermAct";
     private static IOnDirectoryPermissionGrantedHandler currentPermissionGrantedHandler = null;

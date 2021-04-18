@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 by k3b.
+ * Copyright (c) 2020-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -44,7 +44,7 @@ import java.util.Map;
  * onActivityResult(REQUEST_SAVE_EDIT_PICTURE_AS, RESULT_OK, data) :
  * edit.onSaveEditPictureAsOutputUriPickerResult(outUri=data.getData())
  */
-public abstract class PermissionBaseActivity extends ActivityWithAutoCloseDialogs {
+public abstract class PermissionBaseActivity extends ActivityWithAsyncTaskDialog {
     private static final CallbackHandler permissionHandler = new CallbackHandler();
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 by k3b.
+ * Copyright (c) 2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -17,16 +17,16 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-package de.k3b.io;
+package de.k3b.android.widget;
+
+import android.content.Context;
+
+import de.k3b.io.IProgessListener;
 
 /**
- * Created by k3b on 05.11.2017.
+ * {@link ActivityWithAsyncTaskDialog} is an Activity that shows a Progress-Dialog while
+ * {@link AsyncTaskRunnerWithProgressDialog} runs a {@link ITaskRunner} in the Background
  */
-
-public interface IProgessListener {
-    /**
-     * called every time (inside background-task) when command makes some little progress. Can be mapped to async progress-bar.
-     * return true to continue
-     */
-    boolean onProgress(int itemcount, int size, String message);
+public interface ITaskRunner {
+    int run(Context context, IProgessListener iProgessListener);
 }
