@@ -78,13 +78,11 @@ import de.k3b.android.androFotoFinder.queries.CursorLoaderWithException;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
-import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.io.AndroidFileCommands;
-import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
@@ -599,33 +597,6 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         requery(why);
     }
 
-    /**
-     * image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder.
-     */
-    private void repairMissingDisplayNames() {
-        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "Searching media database for missing 'displayname'-s:\n", null) {
-            private int mPathColNo = -2;
-            private int mResultCount = 0;
-
-            @Override
-            protected void doInBackground(Long id, Cursor cursor) {
-                if (mPathColNo == -2) mPathColNo = cursor.getColumnIndex(FotoSql.SQL_COL_PATH);
-                mResultCount += PhotoPropertiesMediaFilesScanner.getInstance(getActivity()).updatePathRelatedFields(cursor, cursor.getString(mPathColNo), mColumnIndexPK, mPathColNo);
-            }
-
-            @Override
-            protected void onPostExecute(SelectedItemIds selectedItemIds) {
-                if (!isCancelled()) {
-                    onMissingDisplayNamesComplete(mStatus);
-                    onNotifyPhotoChanged();
-                }
-            }
-        };
-        QueryParameter query = FotoSql.queryGetMissingDisplayNames;
-        FotoSql.setWhereVisibility(query, VISIBILITY.PRIVATE_PUBLIC);
-        task.execute(query);
-    }
-
     private QueryParameter getCurrentQuery() {
         return getCurrentQuery(mGalleryContentQuery);
     }
@@ -990,45 +961,6 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         // setAutoClose(null, dlg, null);
     }
 
-    private void removeDuplicates() {
-        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "Searching for duplcates in media database:\n", null) {
-            @Override
-            protected void doInBackground(Long id, Cursor cursor) {
-                this.mSelectedItemIds.add(id);
-                if (mStatus != null) {
-                    mStatus
-                            .append("\nduplicate found ")
-                            .append(id)
-                            .append("#")
-                            .append(DBUtils.getString(cursor, FotoSql.SQL_COL_DISPLAY_TEXT, "???"))
-                    //.append("\n")
-                    ;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(SelectedItemIds selectedItemIds) {
-                if (!isCancelled()) {
-                    if ((selectedItemIds != null) && (selectedItemIds.size() > 0)) {
-                        onDuplicatesFound(selectedItemIds, mStatus);
-                    } else {
-                        onDuplicatesFound(null, mStatus);
-                    }
-                    onNotifyPhotoChanged();
-                } else {
-                    if (mStatus != null) {
-                        mStatus.append("\nTask canceled");
-                        Log.w(Global.LOG_CONTEXT, mDebugPrefix + mStatus);
-                    }
-
-                }
-            }
-        };
-        QueryParameter query = FotoSql.queryGetDuplicates;
-        FotoSql.setWhereVisibility(query, VISIBILITY.PRIVATE_PUBLIC);
-        task.execute(query);
-    }
-
     private boolean onEditExif(MenuItem menuItem, SelectedFiles fotos) {
         PhotoPropertiesEditActivity.showActivity(" menu " + menuItem.getTitle() + "[12]",
                 getActivity(), null, null, fotos, 0, true);
@@ -1344,51 +1276,47 @@ showActivity(String debugContext, Activity context,
         }
 
     }
-    private void removeAllFromSelection() {
-        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "removeAllFromSelection", this.mSelectedItemIds) {
-            @Override
-            protected void doInBackground(Long id, Cursor cursor) {
-                this.mSelectedItemIds.remove(id);
-            }
 
-            @Override
-            protected void onPostExecute(SelectedItemIds selectedItems) {
-                replaceSelectedItems(selectedItems, mStatus, mDebugPrefix);
-            }
-        };
+    private void removeAllFromSelection() {
         QueryParameter query = getCurrentQuery();
         FotoSql.setWhereVisibility(query, VISIBILITY.DEFAULT);
-        task.execute(query);
+
+        boolean multiSelectionActive = isMultiSelectionActive();
+        FotoSql.each("removeDuplicates", query, new FotoSql.Runner() {
+            @Override
+            public boolean run(Long id, Cursor cursor) {
+                mSelectedItemIds.remove(id);
+                return true;
+            }
+        });
+
+        replaceSelectedItems(null, mDebugPrefix, multiSelectionActive);
     }
 
     private void addAllToSelection() {
-        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "addAllToSelection", this.mSelectedItemIds) {
-            @Override
-            protected void doInBackground(Long id, Cursor cursor) {
-                this.mSelectedItemIds.add(id);
-            }
-
-            @Override
-            protected void onPostExecute(SelectedItemIds selectedItems) {
-                replaceSelectedItems(selectedItems, mStatus, mDebugPrefix);
-            }
-        };
         QueryParameter query = getCurrentQuery();
         FotoSql.setWhereVisibility(query, VISIBILITY.PRIVATE_PUBLIC);
-        task.execute(query);
+
+        boolean multiSelectionActive = isMultiSelectionActive();
+        FotoSql.each("addAllToSelection", query, new FotoSql.Runner() {
+            @Override
+            public boolean run(Long id, Cursor cursor) {
+                mSelectedItemIds.add(id);
+                return true;
+            }
+        });
+
+        replaceSelectedItems(null, mDebugPrefix, multiSelectionActive);
     }
 
-    private void replaceSelectedItems(SelectedItemIds selectedItemIds, StringBuffer debugMessage, String why) {
-        int oldSize = mSelectedItemIds.size();
-        this.mSelectedItemIds.clear();
-        this.mSelectedItemIds.addAll(selectedItemIds);
+    private void replaceSelectedItems(StringBuffer debugMessage, String why, boolean multiSelectionActive) {
         int newSize = mSelectedItemIds.size();
 
         if (debugMessage != null) {
-            debugMessage.append("\nSelections ").append(oldSize).append("=>").append(newSize);
+            debugMessage.append("\nSelections ").append("=>").append(newSize);
             Log.i(Global.LOG_CONTEXT, debugMessage.toString());
         }
-        if ((oldSize == 0) && (newSize > 0)) {
+        if ((!multiSelectionActive) && (newSize > 0)) {
             startMultiSelectionMode();
         }
         multiSelectionUpdateActionbar(why);
@@ -1406,6 +1334,51 @@ showActivity(String debugContext, Activity context,
             removeDuplicates();
         }
     }
+
+    /**
+     * image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder.
+     */
+    private void repairMissingDisplayNames() {
+        QueryParameter query = FotoSql.queryGetMissingDisplayNames;
+        FotoSql.setWhereVisibility(query, VISIBILITY.PRIVATE_PUBLIC);
+
+        FotoSql.each("repairMissingDisplayNames", query, new FotoSql.Runner() {
+            PhotoPropertiesMediaFilesScanner scanner = null;
+            private int colPk;
+            private int colPath;
+
+            @Override
+            public boolean run(Long id, Cursor cursor) {
+                if (scanner == null) {
+                    scanner = PhotoPropertiesMediaFilesScanner.getInstance(getActivity());
+                    colPath = cursor.getColumnIndex(FotoSql.SQL_COL_PATH);
+                    colPk = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
+                }
+
+                scanner.updatePathRelatedFields(cursor, cursor.getString(colPath), colPk, colPath);
+                return true;
+            }
+        });
+    }
+
+    private void removeDuplicates() {
+        QueryParameter query = FotoSql.queryGetDuplicates;
+        FotoSql.setWhereVisibility(query, VISIBILITY.PRIVATE_PUBLIC);
+
+        final SelectedItemIds selectedItemIds = new SelectedItemIds();
+        FotoSql.each("removeDuplicates", query, new FotoSql.Runner() {
+            @Override
+            public boolean run(Long id, Cursor cursor) {
+                selectedItemIds.add(id);
+                return true;
+            }
+        });
+
+        if (selectedItemIds.size() > 0) {
+            onDuplicatesFound(selectedItemIds, null);
+        }
+    }
+
 
     /**
      * is called when removeDuplicates() found duplicates
@@ -1441,15 +1414,6 @@ showActivity(String debugContext, Activity context,
                     requery("after delete duplicates"); // content has changed: must refreshLocal
                 }
             }
-        }
-    }
-
-    /**
-     * called after MissingDisplayNamesComplete finished
-     */
-    private void onMissingDisplayNamesComplete(StringBuffer debugMessage) {
-        if (debugMessage != null) {
-            Log.w(Global.LOG_CONTEXT, mDebugPrefix + debugMessage);
         }
     }
 
@@ -1640,5 +1604,4 @@ showActivity(String debugContext, Activity context,
         }
 
     }
-
 }

@@ -803,14 +803,46 @@ public class FotoSql extends FotoSqlBase {
                     dest.get(geo);
                 }
                 return true;
-            default:break;
+            default:
+                break;
         }
         Log.e(FotoSql.LOG_TAG, "FotoSql.setFilter(queryTypeId = " + queryTypeId + ") : unknown type");
 
         return false;
     }
 
-	/** converts content-Uri-with-id to full path */
+    public static int each(String debugPrefix, QueryParameter query, Runner runner) {
+        int itemCount = 0;
+        Cursor cursor = null;
+        try {
+            cursor = FotoSql.getMediaDBApi().createCursorForQuery(
+                    null, "SqlJobTask",
+                    query, null, null);
+            int columnIndexPK = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
+
+            while (cursor.moveToNext()) {
+                itemCount++;
+                Long id = cursor.getLong(columnIndexPK);
+                if (!runner.run(id, cursor)) break;
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, debugPrefix + query, ex);
+            throw new RuntimeException(debugPrefix + query + "\n" + ex.getMessage(), ex);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return itemCount;
+    }
+
+    public interface Runner {
+        boolean run(Long id, Cursor cursor);
+    }
+
+    /**
+     * converts content-Uri-with-id to full path
+     */
     public static String execGetFotoPath(Uri uriWithID) {
         Cursor c = null;
         try {
