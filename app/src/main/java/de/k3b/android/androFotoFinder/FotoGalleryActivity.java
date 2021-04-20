@@ -30,6 +30,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.Date;
 
@@ -211,12 +212,11 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
             case R.id.cmd_db_recreate:
                 return onDbReloadQuestion(item.getTitle().toString());
             case R.id.cmd_db_update:
-                if (0 != onDbUpdateCommand(item))
-                    notifyPhotoChanged();
+                onDbUpdate(item.getTitle().toString());
                 return true;
 
             case R.id.cmd_db_backup:
-                onDbBackup();
+                onDbBackup(item.getTitle());
                 return true;
 
             case R.id.cmd_more:
@@ -233,15 +233,21 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
 
     }
 
-    private void onDbBackup() {
+    private void onDbBackup(CharSequence title) {
         AndroFotoFinderApp.getMediaContent2DbUpdateService().createBackup();
+        Toast.makeText(this, title, Toast.LENGTH_LONG).show();
     }
 
-    private int onDbUpdateCommand(MenuItem item) {
+    private void onDbUpdate(String title) {
+        if (0 != onDbUpdateCommand(title)) {
+            Toast.makeText(this, title, Toast.LENGTH_LONG).show();
+            notifyPhotoChanged();
+        }
+    }
+
+    private int onDbUpdateCommand(String title) {
         Activity activity = this;
         int count = AndroFotoFinderApp.getMediaContent2DbUpdateService().update(this, null);
-
-        final String message = item.getTitle().toString();
 
         IProgessListener progessListener = activity instanceof IProgessListener ? ((IProgessListener) activity) : null;
 
@@ -249,7 +255,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
         Date dateLastAdded = Ao10DbUpdateOnlyPhotoPropertiesMediaFilesScannerAsyncTask.loadDateLastAdded(activity);
         PhotoPropertiesMediaFilesScanner scanner = PhotoPropertiesMediaFilesScanner.getInstance(activity);
         Ao10DbUpdateOnlyPhotoPropertiesMediaFilesScannerAsyncTask newScanner = new Ao10DbUpdateOnlyPhotoPropertiesMediaFilesScannerAsyncTask(
-                mediaDBApi, scanner, scanner.mContext, message,
+                mediaDBApi, scanner, scanner.mContext, title,
                 dateLastAdded, progessListener);
 
         AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this, true)

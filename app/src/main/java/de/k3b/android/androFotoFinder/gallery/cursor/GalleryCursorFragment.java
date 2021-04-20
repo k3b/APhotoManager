@@ -1282,7 +1282,7 @@ showActivity(String debugContext, Activity context,
         FotoSql.setWhereVisibility(query, VISIBILITY.DEFAULT);
 
         boolean multiSelectionActive = isMultiSelectionActive();
-        FotoSql.each("removeDuplicates", query, new FotoSql.Runner() {
+        FotoSql.each("removeAllFromSelection", query, new FotoSql.Runner() {
             @Override
             public boolean run(Long id, Cursor cursor) {
                 mSelectedItemIds.remove(id);
@@ -1330,19 +1330,19 @@ showActivity(String debugContext, Activity context,
             if (Global.debugEnabled) {
                 Log.d(Global.LOG_CONTEXT, "Analysing media database for potential problems");
             }
-            repairMissingDisplayNames();
-            removeDuplicates();
+            int count = repairMissingDisplayNames() + removeDuplicates();
+            Toast.makeText(this.getActivity(), getString(R.string.image_success_update_format, count), Toast.LENGTH_LONG).show();
         }
     }
 
     /**
      * image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder.
      */
-    private void repairMissingDisplayNames() {
+    private int repairMissingDisplayNames() {
         QueryParameter query = FotoSql.queryGetMissingDisplayNames;
         FotoSql.setWhereVisibility(query, VISIBILITY.PRIVATE_PUBLIC);
 
-        FotoSql.each("repairMissingDisplayNames", query, new FotoSql.Runner() {
+        int count = FotoSql.each("repairMissingDisplayNames", query, new FotoSql.Runner() {
             PhotoPropertiesMediaFilesScanner scanner = null;
             private int colPk;
             private int colPath;
@@ -1359,14 +1359,15 @@ showActivity(String debugContext, Activity context,
                 return true;
             }
         });
+        return count;
     }
 
-    private void removeDuplicates() {
+    private int removeDuplicates() {
         QueryParameter query = FotoSql.queryGetDuplicates;
         FotoSql.setWhereVisibility(query, VISIBILITY.PRIVATE_PUBLIC);
 
         final SelectedItemIds selectedItemIds = new SelectedItemIds();
-        FotoSql.each("removeDuplicates", query, new FotoSql.Runner() {
+        int count = FotoSql.each("removeDuplicates", query, new FotoSql.Runner() {
             @Override
             public boolean run(Long id, Cursor cursor) {
                 selectedItemIds.add(id);
@@ -1377,6 +1378,7 @@ showActivity(String debugContext, Activity context,
         if (selectedItemIds.size() > 0) {
             onDuplicatesFound(selectedItemIds, null);
         }
+        return count;
     }
 
 
