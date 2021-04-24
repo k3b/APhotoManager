@@ -1532,7 +1532,7 @@ showActivity(String debugContext, Activity context,
             // rember position where we have to scroll to after refreshLocal is finished.
             mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
 
-            mAdapter.swapCursor(null);
+            if (mAdapter != null) mAdapter.swapCursor(null);
             notifyPhotoChanged();
         }
 

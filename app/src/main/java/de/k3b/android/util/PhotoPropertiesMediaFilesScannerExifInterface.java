@@ -23,20 +23,26 @@ package de.k3b.android.util;
 import android.content.ContentValues;
 import android.content.Context;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.IPhotoProperties;
+import de.k3b.media.PhotoPropertiesImageReader;
 
 /**
  * PhotoPropertiesMediaFilesScanner based on android ExifInterface.
- *
+ * <p>
  * Created by k3b on 11.04.2017.
  */
 
 public class PhotoPropertiesMediaFilesScannerExifInterface extends PhotoPropertiesMediaFilesScanner {
+    private static final Logger logger = LoggerFactory.getLogger(PhotoPropertiesImageReader.LOG_TAG);
+
     public PhotoPropertiesMediaFilesScannerExifInterface(Context context) {
         super(context);
     }
@@ -49,6 +55,7 @@ public class PhotoPropertiesMediaFilesScannerExifInterface extends PhotoProperti
             if (!exif.isValidJpgExifFormat()) exif = null;
         } catch (IOException ex) {
             // exif is null
+            logger.info(" Error open file '" + jpgFile + "' as jpg :" + ex.getMessage());
         }
 
         if ((exif != null) && (destinationValues != null)) {

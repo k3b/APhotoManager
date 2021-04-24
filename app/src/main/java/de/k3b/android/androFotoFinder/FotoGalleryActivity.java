@@ -247,7 +247,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
 
     private int onDbUpdateCommand(String title) {
         Activity activity = this;
-        int count = AndroFotoFinderApp.getMediaContent2DbUpdateService().update(this, null);
+        int count = AndroFotoFinderApp.getMediaContent2DbUpdateService().update(title, this, null);
 
         IProgessListener progessListener = activity instanceof IProgessListener ? ((IProgessListener) activity) : null;
 
@@ -266,13 +266,13 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
         return count;
     }
 
-    private boolean onDbReloadQuestion(String title) {
+    private boolean onDbReloadQuestion(final String title) {
         final Dialogs dlg = new Dialogs() {
             @Override
             protected void onDialogResult(String result, Object[] parameters) {
                 setAutoClose(null, null, null);
                 if (result != null) {
-                    onDbReloadAnswer();
+                    onDbReloadAnswer(title);
                 }
             }
         };
@@ -282,7 +282,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
         return true;
     }
 
-    private void onDbReloadAnswer() {
+    private void onDbReloadAnswer(final String title) {
         new AsyncTaskRunnerWithProgressDialog(this, R.string.load_db_menu_title) {
             @Override
             protected void onPostExecute(Integer itemCount) {
@@ -295,7 +295,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
                 }
             }
 
-        }.execute(AndroFotoFinderApp.getMediaContent2DbUpdateService().getRebbuildRunner());
+        }.execute(AndroFotoFinderApp.getMediaContent2DbUpdateService().getRebbuildRunner(title));
     }
 
     public void notifyPhotoChanged() {

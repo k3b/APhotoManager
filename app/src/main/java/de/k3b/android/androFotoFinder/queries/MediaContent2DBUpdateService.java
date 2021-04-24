@@ -59,17 +59,17 @@ public class MediaContent2DBUpdateService {
         DatabaseHelper.version2Upgrade_ReCreateMediaDbTable(context, writableDatabase);
     }
 
-    public ITaskRunner getRebbuildRunner() {
+    public ITaskRunner getRebbuildRunner(final String title) {
         return new ITaskRunner() {
             @Override
             public int run(Context context, IProgessListener progessListener) {
-                return rebuild(context, progessListener);
+                return rebuild(title, context, progessListener);
             }
         };
 
     }
 
-    public int rebuild(Context context, IProgessListener progessListener) {
+    public int rebuild(String dbgContext, Context context, IProgessListener progessListener) {
         long start = new Date().getTime();
         if (progessListener != null)
             progessListener.onProgress(0, 0, "Create Backup of tags, lat, lon, rating");
@@ -78,7 +78,7 @@ public class MediaContent2DBUpdateService {
         clearMediaCopy();
         if (progessListener != null)
             progessListener.onProgress(0, 0, "Copy from Android Media Database");
-        int changeCount = MediaDBRepository.Impl.updateMediaCopy(context, writableDatabase, null, null, progessListener);
+        int changeCount = MediaDBRepository.Impl.updateMediaCopy(dbgContext, context, writableDatabase, null, null, progessListener);
         if (progessListener != null)
             progessListener.onProgress(0, 0, "Restore tags, lat, lon, rating from Backup");
         DatabaseHelper.restoreFromBackup(writableDatabase);
@@ -92,9 +92,9 @@ public class MediaContent2DBUpdateService {
         DatabaseHelper.createBackup(writableDatabase);
     }
 
-    public int update(Context context, IProgessListener progessListener) {
+    public int update(String dbgContext, Context context, IProgessListener progessListener) {
         long start = new Date().getTime();
-        int changeCount = MediaDBRepository.Impl.updateMediaCopy(context, writableDatabase, progessListener);
+        int changeCount = MediaDBRepository.Impl.updateMediaCopy(dbgContext, context, writableDatabase, progessListener);
         long timeInSecs = (new Date().getTime() - start) / 1000;
         final String text = "update db " + timeInSecs + " secs";
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();

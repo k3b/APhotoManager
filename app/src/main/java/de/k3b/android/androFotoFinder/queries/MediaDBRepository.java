@@ -665,34 +665,36 @@ public class MediaDBRepository implements IMediaRepositoryApi {
         }
 
         public static int updateMediaCopy(
-                Context context, SQLiteDatabase db,
+                String dbgContext, Context context, SQLiteDatabase db,
                 IProgessListener progessListener) {
             SharedPreferences prefsInstance = PreferenceManager
                     .getDefaultSharedPreferences(context.getApplicationContext());
             long maxDateAddedSecs = prefsInstance.getLong("maxDateAddedSecs", 0l);
-            return updateMediaCopy(context, db, null, new Date(maxDateAddedSecs * FotoSql.LAST_MODIFIED_FACTOR), progessListener);
+            return updateMediaCopy(dbgContext, context, db, null, new Date(maxDateAddedSecs * FotoSql.LAST_MODIFIED_FACTOR), progessListener);
         }
 
         public static int updateMediaCopy(
-                Context context, SQLiteDatabase db,
+                String dbgContext, Context context, SQLiteDatabase db,
                 Date filterLastUpdateMin, Date filterLastAddedMin, IProgessListener progessListener) {
             int progress = 0;
             java.util.Date startTime = new java.util.Date();
 
             QueryParameter query = new QueryParameter().getFrom(queryGetAllColumns);
 
-            Calendar nextMonth = Calendar.getInstance();
-            nextMonth.add(Calendar.MONTH, 1);
-            nextMonthTimeInSecs = nextMonth.getTimeInMillis() / FotoSql.LAST_MODIFIED_FACTOR;
-
             long filterLastUpdateMinInMillis = (filterLastUpdateMin != null) ? (filterLastUpdateMin.getTime()) : 0L;
             if (filterLastUpdateMinInMillis != 0) {
                 FotoSql.addWhereDateModifiedMinMax(query, filterLastUpdateMinInMillis, 0);
+                dbgContext += " LastUpdate >= " + filterLastUpdateMin;
             }
 
             long filterLastAddedMinInMillis = (filterLastAddedMin != null) ? (filterLastAddedMin.getTime()) : 0L;
             if (filterLastAddedMinInMillis != 0) {
+                Calendar nextMonth = Calendar.getInstance();
+                nextMonth.add(Calendar.MONTH, 1);
+                nextMonthTimeInSecs = nextMonth.getTimeInMillis() / FotoSql.LAST_MODIFIED_FACTOR;
+
                 FotoSql.addWhereDateAddedMinMax(query, filterLastAddedMinInMillis, nextMonth.getTimeInMillis());
+                dbgContext += " LastAdded >= " + filterLastAddedMin;
             }
 
             Cursor c = null;
@@ -710,7 +712,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
                 if (progessListener != null) progessListener.onProgress(progress, 0,
                         context.getString(R.string.load_db_menu_title));
 
-                c = MediaContentproviderRepositoryImpl.createCursorForQuery(null, "updateMedaiCopy-source", context,
+                c = MediaContentproviderRepositoryImpl.createCursorForQuery(null, dbgContext + "-updateMedaiCopy-source", context,
                         query, null, null);
                 itemCount = c.getCount();
 

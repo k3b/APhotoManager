@@ -73,16 +73,15 @@ public class Ao10DbUpdateOnlyPhotoPropertiesMediaFilesScannerAsyncTask extends R
     @Override
     protected Integer doInBackground(IFile[]... pathNames) {
         // do not call super.doInBackground here because logic is different
-        String dbgContext = "First APM-Re-Scan Photos";
+        String dbgContext = "APM-Re-Scan Photos without tags/gps/rating since " + dateLastAdded + "\n";
         int resultCount = 0;
         boolean oldValue = this.mScanner.setIgnoreNoMediaCheck(true);
-        StringBuilder outDebugLog = new StringBuilder();
         List<Long> notFound = new ArrayList<>();
         long dateAddedInSecs = 0;
         try {
             onProgress(0, 0, "#");
             QueryParameter query = TagSql.createQueryIdPathDateForMediaScan(dateLastAdded);
-            Cursor c = mediaDBApi.createCursorForQuery(outDebugLog, dbgContext, query, null, null);
+            Cursor c = mediaDBApi.createCursorForQuery(null, dbgContext, query, null, null);
             int size = c.getCount();
             if (c.moveToFirst()) {
                 do {

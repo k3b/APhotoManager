@@ -46,12 +46,16 @@ public class MediaContentproviderRepositoryImpl {
 
     public static Cursor createCursorForQuery(
             StringBuilder out_debugMessage, String dbgContext, final Context context,
-            QueryParameter parameters, VISIBILITY visibility, CancellationSignal cancellationSignal) {
-        FotoSql.setWhereVisibility(parameters, visibility);
-        return createCursorForQuery(out_debugMessage, dbgContext, context, parameters.toFrom(),
-                parameters.toAndroidWhere(),
-                parameters.toAndroidParameters(), parameters.toOrderBy(),
-                cancellationSignal, parameters.toColumns()
+            QueryParameter query, VISIBILITY visibility, CancellationSignal cancellationSignal) {
+        FotoSql.setWhereVisibility(query, visibility);
+        if (out_debugMessage == null && Global.debugEnabledSql) {
+            Log.i(LOG_TAG, dbgContext + ":" +
+                    MODUL_NAME + "\n" + query.toSqlString());
+        }
+        return createCursorForQuery(out_debugMessage, dbgContext, context, query.toFrom(),
+                query.toAndroidWhere(),
+                query.toAndroidParameters(), query.toOrderBy(),
+                cancellationSignal, query.toColumns()
         );
     }
 
@@ -65,20 +69,20 @@ public class MediaContentproviderRepositoryImpl {
             CancellationSignal cancellationSignal, final String... sqlSelectColums) {
         ContentResolver resolver = context.getContentResolver();
 
-        Cursor query = null;
+        Cursor cursor = null;
 
         Exception excpetion = null;
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                query = resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder, cancellationSignal);
+                cursor = resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder, cancellationSignal);
             } else {
-                query = resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder);
+                cursor = resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder);
             }
         } catch (Exception ex) {
             excpetion = ex;
         } finally {
             if ((excpetion != null) || Global.debugEnabledSql || (out_debugMessage != null)) {
-                final int count = (query == null) ? 0 : query.getCount();
+                final int count = (cursor == null) ? 0 : cursor.getCount();
                 StringBuilder message = StringUtils.appendMessage(out_debugMessage, excpetion,
                         dbgContext, MODUL_NAME +
                                 ".createCursorForQuery:\n",
@@ -90,7 +94,7 @@ public class MediaContentproviderRepositoryImpl {
             }
         }
 
-        return query;
+        return cursor;
     }
 
     public static int execUpdate(String dbgContext, Context context, String path, ContentValues values, VISIBILITY visibility) {

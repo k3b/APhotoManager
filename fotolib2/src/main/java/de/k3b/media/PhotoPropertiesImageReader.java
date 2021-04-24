@@ -130,7 +130,8 @@ public class PhotoPropertiesImageReader implements IPhotoProperties, IPhotoPrope
             if (inputStream == null) inputStream = jpegFile.openInputStream();
             metadata = JpegMetadataReader.readMetadata(inputStream);
         } catch (ImageProcessingException e) {
-            logger.error(dbg_context +" Error open file " + e.getMessage(), e);
+            // occurs if png or gif file
+            logger.info(dbg_context + " Error open file '" + jpegFile + "' as jpg :" + e.getMessage());
 
             metadata = null;
         } finally {

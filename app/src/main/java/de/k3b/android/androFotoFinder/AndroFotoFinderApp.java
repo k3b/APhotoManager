@@ -148,7 +148,8 @@ public class AndroFotoFinderApp extends Application {
 
             if (FotoSql.getCount(new QueryParameter().addWhere("1 = 1")) == 0) {
                 // database is empty; reload from Contentprovider
-                MediaContent2DBUpdateService.instance.rebuild(context, null);
+                MediaContent2DBUpdateService.instance.rebuild(
+                        "registerAo10MediaImageDbReplacement", context, null);
             }
 
             PhotoChangeNotifyer.registerContentObserver(context, GlobalMediaContentObserver.getInstance(context));
