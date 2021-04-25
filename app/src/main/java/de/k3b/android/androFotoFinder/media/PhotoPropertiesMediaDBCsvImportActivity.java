@@ -41,6 +41,7 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.io.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.csv2db.csv.CsvLoader;
+import de.k3b.io.AlbumFile;
 import de.k3b.io.FileUtils;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
@@ -182,7 +183,11 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
             String path = _path;
             if (path != null) {
                 if (!path.contains("%")) {
-                    if (PhotoPropertiesUtil.isImage(path, PhotoPropertiesUtil.IMG_TYPE_ALL)) {
+                    if (AlbumFile.isQueryFile(path)) {
+                        // do not set xmp-Flag for albums
+                        xmlLastFileModifyDate = TagSql.EXT_LAST_EXT_SCAN_UNKNOWN;
+                        dbValues.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, FotoSql.MEDIA_TYPE_ALBUM_FILE);
+                    } else if (PhotoPropertiesUtil.isImage(path, PhotoPropertiesUtil.IMG_TYPE_ALL)) {
                         // non xmp-file: do not update file modify date
                         xmlLastFileModifyDate = (Global.Media.enableXmpNone)
                                 ? TagSql.EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV
@@ -207,8 +212,13 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
                 TagSql.setFileModifyDate(dbValues, new Date());
 
                 dbValues.put(FotoSql.SQL_COL_PATH, path);
-                mUpdateCount += TagSql.insertOrUpdateMediaDatabaseFromCsv(
+                Long updateResult = TagSql.insertOrUpdateMediaDatabaseFromCsv(
                         dbgContext, path, xmlLastFileModifyDate, dbValues, null);
+                if (updateResult > 5) {
+                    // updateResult may be a new created id instead of number of changed items
+                    updateResult = 1L;
+                }
+                this.mUpdateCount += updateResult;
                 mItemCount++;
             }
         }
@@ -238,8 +248,8 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
              */
             private final IFile mCsvRootDir;
 
-            private ContentValues mDbValues = new ContentValues();
-            private PhotoPropertiesMediaDBContentValues mMediaValueAdapter = new PhotoPropertiesMediaDBContentValues();
+            private final ContentValues mDbValues = new ContentValues();
+            private final PhotoPropertiesMediaDBContentValues mMediaValueAdapter = new PhotoPropertiesMediaDBContentValues();
             private Tag mImportRoot = null;
 
             public MediaCsvLoader(IFile csvRootDir) {
