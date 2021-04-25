@@ -31,6 +31,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.LibGlobal;
+import de.k3b.io.AlbumFile;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GeoUtil;
 import de.k3b.io.ListUtils;
@@ -57,12 +58,13 @@ public class PhotoPropertiesUtil {
     /**
      * types of images currently supported
      */
-    public static final int IMG_TYPE_ALL = 0x7fff;
+    public static final int IMG_TYPE_ALL = 0x3fff;
     public static final int IMG_TYPE_JPG = 0x0001; // jp(e)g
     public static final int IMG_TYPE_COMPRESSED_NON_JPG = 0x0010; // png, gif, ...
     public static final int IMG_TYPE_UNCOMPRESSED_NON_JPG = 0x0020; // BMP, TIFF, ...
     public static final int IMG_TYPE_PRIVATE = 0x1000; // jpg-p
     public static final int IMG_TYPE_XMP = 0x8000; // xmp
+    public static final int IMG_TYPE_ALBUM = 0x4000; // album file or query file
 
     public static final int IMG_TYPE_COMPRESSED = IMG_TYPE_JPG | IMG_TYPE_COMPRESSED_NON_JPG | IMG_TYPE_PRIVATE;
 
@@ -321,6 +323,11 @@ public class PhotoPropertiesUtil {
 
         if ((IMG_TYPE_XMP == (imageTypeFlags & IMG_TYPE_XMP)) &&
                 (lcPath.endsWith(".xmp"))) {
+            return true;
+        }
+
+        if ((IMG_TYPE_ALBUM == (imageTypeFlags & IMG_TYPE_ALBUM)) &&
+                (lcPath.endsWith(AlbumFile.SUFFIX_QUERY) || lcPath.endsWith(AlbumFile.SUFFIX_VALBUM))) {
             return true;
         }
 

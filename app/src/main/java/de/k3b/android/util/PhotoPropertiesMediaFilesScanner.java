@@ -26,7 +26,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.BitmapFactory;
-import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -44,10 +43,12 @@ import java.util.Map;
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBContentValues;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
+import de.k3b.io.AlbumFile;
 import de.k3b.io.FileUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.filefacade.IFile;
@@ -72,7 +73,7 @@ import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_TABLE_EXTERNAL_CON
 import static de.k3b.android.androFotoFinder.tagDB.TagSql.addDateAdded;
 import static de.k3b.android.androFotoFinder.tagDB.TagSql.execDeleteByPath;
 import static de.k3b.android.androFotoFinder.tagDB.TagSql.execGetPathIdMap;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.fixPrivate;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.fixAllPrivate;
 import static de.k3b.android.androFotoFinder.tagDB.TagSql.getMediaDBApi;
 import static de.k3b.android.androFotoFinder.tagDB.TagSql.getWhereInFileNames;
 import static de.k3b.android.androFotoFinder.tagDB.TagSql.queryChangePath;
@@ -224,28 +225,36 @@ public abstract class PhotoPropertiesMediaFilesScanner {
         return newAbsolutePath;
     }
 
-    public int updateMediaDatabaseAndroid42(Context context, IFile[] oldPathNames, IFile... newPathNames) {
-        IMediaRepositoryApi api = getMediaDBApi();
-        try {
-            api.beginTransaction();
-            final boolean hasNew = excludeNomediaFiles(newPathNames) > 0;
-            final boolean hasOld = excludeNomediaFiles(oldPathNames) > 0;
-            int result = 0;
-
-            if (hasNew && hasOld) {
-                result = renameInMediaDatabase(context, oldPathNames, newPathNames);
-            } else if (hasOld) {
-                result = deleteInMediaDatabase(oldPathNames);
+    public int updateMediaDatabaseAndroid42(Context context, boolean withTransaction, IFile[] oldPathNames, IFile... newPathNames) {
+        if (withTransaction) {
+            try {
+                getMediaDBApi().beginTransaction();
+                int result = updateMediaDatabaseAndroid42Impl(context, oldPathNames, newPathNames);
+                fixAllPrivate();
+                getMediaDBApi().setTransactionSuccessful();
+                return result;
+            } finally {
+                getMediaDBApi().endTransaction();
             }
-            if (hasNew) {
-                result = insertIntoMediaDatabase(newPathNames);
-            }
-            fixPrivate();
-            api.setTransactionSuccessful();
-            return result;
-        } finally {
-            api.endTransaction();
+        } else {
+            return updateMediaDatabaseAndroid42Impl(context, oldPathNames, newPathNames);
         }
+    }
+
+    private int updateMediaDatabaseAndroid42Impl(Context context, IFile[] oldPathNames, IFile[] newPathNames) {
+        final boolean hasNew = excludeNomediaFiles(newPathNames) > 0;
+        final boolean hasOld = excludeNomediaFiles(oldPathNames) > 0;
+        int result = 0;
+
+        if (hasNew && hasOld) {
+            result = renameInMediaDatabase(context, oldPathNames, newPathNames);
+        } else if (hasOld) {
+            result = deleteInMediaDatabase(oldPathNames);
+        }
+        if (hasNew) {
+            result = insertIntoMediaDatabase(newPathNames);
+        }
+        return result;
     }
 
     /**
@@ -261,7 +270,8 @@ public abstract class PhotoPropertiesMediaFilesScanner {
             for (int i = 0; i < fullPathNames.length; i++) {
                 IFile fullPathName = fullPathNames[i];
                 if (fullPathName != null) {
-                    if (!PhotoPropertiesUtil.isImage(fullPathName, PhotoPropertiesUtil.IMG_TYPE_ALL) || excludeIsNoMedia(fullPathName)) {
+                    if (!PhotoPropertiesUtil.isImage(fullPathName, PhotoPropertiesUtil.IMG_TYPE_ALL | PhotoPropertiesUtil.IMG_TYPE_ALBUM)
+                            || excludeIsNoMedia(fullPathName)) {
                         fullPathNames[i] = null;
                     } else {
                         itemsLeft++;
@@ -294,13 +304,14 @@ public abstract class PhotoPropertiesMediaFilesScanner {
 
             Map<String, Long> inMediaDb = execGetPathIdMap(newPathNames);
 
+            IMediaRepositoryApi mediaDBApi = getMediaDBApi();
             for (IFile fileName : newPathNames) {
                 if (fileName != null) {
                     Long id = inMediaDb.get(fileName.getAbsolutePath());
                     if (id != null) {
                         // already exists
                         modifyCount += updateAndroid42(
-                                getMediaDBApi(),
+                                mediaDBApi,
                                 "PhotoPropertiesMediaFilesScanner.insertIntoMediaDatabase already existing ",
                                 id, fileName);
                     } else {
@@ -457,8 +468,7 @@ public abstract class PhotoPropertiesMediaFilesScanner {
             PhotoPropertiesXmpSegment xmpContent = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(jpgFile, "getExifFromFile");
             final long xmpFilelastModified = getXmpFilelastModified(xmpContent);
 
-            values.put(SQL_COL_LAST_MODIFIED, jpgFile.lastModified() / 1000);
-            values.put(DB_SIZE, jpgFile.length());
+            loadFileValues(values, jpgFile);
 
             if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) && mWidth > 0 && mHeight > 0) {
                 values.put(DB_WIDTH, mWidth);
@@ -504,6 +514,11 @@ public abstract class PhotoPropertiesMediaFilesScanner {
         return null;
     }
 
+    protected void loadFileValues(ContentValues values, IFile jpgFile) {
+        values.put(SQL_COL_LAST_MODIFIED, jpgFile.lastModified() / 1000);
+        values.put(DB_SIZE, jpgFile.length());
+    }
+
     public int updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath) {
         int columnIndexPk = cursor.getColumnIndex(SQL_COL_PK);
         int columnIndexPath = cursor.getColumnIndex(SQL_COL_PATH);
@@ -537,15 +552,6 @@ public abstract class PhotoPropertiesMediaFilesScanner {
         }
     }
 
-    protected int updateAndroid42(IMediaRepositoryApi mediaDBApi, String dbgContext, long id, IFile file) {
-        if ((file != null) && file.exists() && file.canRead()) {
-            ContentValues values = createDefaultContentValues();
-            getExifFromFile(values, file);
-            return mediaDBApi.execUpdate(dbgContext, id, values);
-        }
-        return 0;
-    }
-
     protected ContentValues createDefaultContentValues() {
         ContentValues contentValues = new ContentValues();
 
@@ -564,10 +570,27 @@ public abstract class PhotoPropertiesMediaFilesScanner {
             ContentValues values = createDefaultContentValues();
             addDateAdded(values);
 
-            IPhotoProperties exif = getExifFromFile(values, file);
-            return (null != getMediaDBApi().insertOrUpdateMediaDatabase(dbgContext, exif.getPath(), values, exif.getVisibility(), 1L)) ? 1 : 0;
+            String canonicalPath = file.getCanonicalPath();
+            if (AlbumFile.isQueryFile(canonicalPath)) {
+                loadFileValues(values, file);
+                setPathRelatedFieldsIfNeccessary(values, canonicalPath, "");
+                values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, FotoSql.MEDIA_TYPE_ALBUM_FILE);
+                return (null != getMediaDBApi().insertOrUpdateMediaDatabase(dbgContext, canonicalPath, values, null, 1L)) ? 1 : 0;
+            } else {
+                IPhotoProperties exif = getExifFromFile(values, file);
+                return (null != getMediaDBApi().insertOrUpdateMediaDatabase(dbgContext, canonicalPath, values, exif.getVisibility(), 1L)) ? 1 : 0;
+            }
         }
-		return 0;
+        return 0;
+    }
+
+    protected int updateAndroid42(IMediaRepositoryApi mediaDBApi, String dbgContext, long id, IFile file) {
+        if ((file != null) && !AlbumFile.isQueryFile(file.getName()) && file.exists() && file.canRead()) {
+            ContentValues values = createDefaultContentValues();
+            getExifFromFile(values, file);
+            return mediaDBApi.execUpdate(dbgContext, id, values);
+        }
+        return 0;
     }
 
     // generates a title based on file name
@@ -597,22 +620,6 @@ public abstract class PhotoPropertiesMediaFilesScanner {
             }
         }
         return filePath;
-    }
-
-    /** update media db via android-s native scanner.
-     * Requires android-4.4 and up to support single files
-     */
-    public static void updateMediaDBAndrod44(Context context, String[] pathNames) {
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, CONTEXT + "updateMediaDB_Androd44(" + pathNames.length + " files " + pathNames[0] + "...");
-        }
-
-        // this only works in android-4.4 and up but not below
-        MediaScannerConnection.scanFile(
-                // http://stackoverflow.com/questions/5739140/mediascannerconnection-produces-android-app-serviceconnectionleaked
-                context.getApplicationContext(),
-                pathNames, // mPathNames.toArray(new String[mPathNames.size()]),
-                null, null);
     }
 
     // http://stackoverflow.com/questions/12136681/detect-if-media-scanner-running-on-android

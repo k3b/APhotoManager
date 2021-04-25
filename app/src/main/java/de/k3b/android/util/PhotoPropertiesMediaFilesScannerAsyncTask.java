@@ -41,6 +41,7 @@ public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<IFile[]
     protected final Context mContext;
     protected final String mWhy;
     protected final IProgessListener progessListener;
+    protected boolean withTransaction = true;
 
     public PhotoPropertiesMediaFilesScannerAsyncTask(
             PhotoPropertiesMediaFilesScanner scanner, Context context, String why,
@@ -55,7 +56,7 @@ public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<IFile[]
     protected Integer doInBackground(IFile[]... pathNames) {
         if (pathNames.length != 2)
             throw new IllegalArgumentException(CONTEXT + ".execute(oldFileNames, newFileNames)");
-        return mScanner.updateMediaDatabaseAndroid42(mContext, pathNames[0], pathNames[1]);
+        return mScanner.updateMediaDatabaseAndroid42(mContext, withTransaction, pathNames[0], pathNames[1]);
     }
 
     private static void notifyIfThereAreChanges(Integer modifyCount, Context context, String why) {

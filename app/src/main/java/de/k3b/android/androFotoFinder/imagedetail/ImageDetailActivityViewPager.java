@@ -557,7 +557,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
             if (orgiginalFileToScan != null) {
                 PhotoPropertiesMediaFilesScanner.getInstance(this).updateMediaDatabaseAndroid42(
-                        this, null, orgiginalFileToScan);
+                        this, true, null, orgiginalFileToScan);
             }
         }
 

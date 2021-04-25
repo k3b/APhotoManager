@@ -39,6 +39,8 @@ import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesUtil;
 
+import static de.k3b.android.androFotoFinder.queries.FotoSql.getMediaDBApi;
+
 /**
  * Special PhotoPropertiesMediaFilesScanner that can only handle inserNew/updateExisting for directories or jp(e)g files.
  * <p>
@@ -91,13 +93,22 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
     protected Integer doInBackground(IFile[]... pathNames) {
         // do not call super.doInBackground here because logic is different
         int resultCount = 0;
-        FileDirectoryMediaCollector fileDirectoryMediaCollector = new FileDirectoryMediaCollector();
-        for (IFile[] pathArray : pathNames) {
-            if (pathArray != null) {
-                for (IFile pathName : pathArray) {
-                    resultCount += fileDirectoryMediaCollector.scanRootDir(pathName);
+        this.withTransaction = false;
+        try {
+            getMediaDBApi().beginTransaction();
+
+            FileDirectoryMediaCollector fileDirectoryMediaCollector = new FileDirectoryMediaCollector();
+            for (IFile[] pathArray : pathNames) {
+                if (pathArray != null) {
+                    for (IFile pathName : pathArray) {
+                        resultCount += fileDirectoryMediaCollector.scanRootDir(pathName);
+                    }
                 }
             }
+            TagSql.fixAllPrivate();
+            getMediaDBApi().setTransactionSuccessful();
+        } finally {
+            getMediaDBApi().endTransaction();
         }
         return resultCount;
     }
@@ -168,7 +179,7 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
             }
 
             if (fullScan || scanForDeleted) {
-                IFile[] subDirs = file.listFiles();
+                IFile[] subDirs = file.listDirs();
 
                 if (subDirs != null) {
                     // #33

@@ -7,5 +7,5 @@ Changes from 0.8.3 to 0.8.4
 * version bumbs android-9 (sdk-28), gradle-6.1.1, osmdroid-6.1.6 mapsforge:0.13.0
 * new translation eu (Basque)
 * translation updates de, pt-BR, da, fi
-
+* #191: Add album files to MediaScanner, ZipBackup, csv import/export
 * APhotoManager is not Android-10 (api-29) ready yet see #155 and #173

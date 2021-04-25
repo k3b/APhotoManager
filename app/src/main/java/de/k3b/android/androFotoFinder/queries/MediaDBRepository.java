@@ -39,6 +39,7 @@ import java.util.Calendar;
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
 import de.k3b.io.IProgessListener;
@@ -670,7 +671,9 @@ public class MediaDBRepository implements IMediaRepositoryApi {
             SharedPreferences prefsInstance = PreferenceManager
                     .getDefaultSharedPreferences(context.getApplicationContext());
             long maxDateAddedSecs = prefsInstance.getLong("maxDateAddedSecs", 0l);
-            return updateMediaCopy(dbgContext, context, db, null, new Date(maxDateAddedSecs * FotoSql.LAST_MODIFIED_FACTOR), progessListener);
+            int count = updateMediaCopy(dbgContext, context, db, null, new Date(maxDateAddedSecs * FotoSql.LAST_MODIFIED_FACTOR), progessListener);
+            TagSql.fixAllPrivate();
+            return count;
         }
 
         public static int updateMediaCopy(

@@ -281,7 +281,7 @@ public class TagSql extends FotoSql {
         return query;
     }
 
-    public static int fixPrivate() {
+    public static int fixAllPrivate() {
         // update ... set media_type=1001 where media_type=1 and tags like '%;PRIVATE;%'
         ContentValues values = new ContentValues();
         values.put(SQL_COL_EXT_MEDIA_TYPE, MEDIA_TYPE_IMAGE_PRIVATE);
@@ -291,8 +291,8 @@ public class TagSql extends FotoSql {
                 .append(" AND (")
                 .append(TagSql.FILTER_EXPR_TAGS_INCLUDED);
         if (LibGlobal.renamePrivateJpg) {
-            where.append(" OR ").append(TagSql.FILTER_EXPR_PATH_LIKE.replace("?","'%" +
-                            PhotoPropertiesUtil.IMG_TYPE_PRIVATE + "'"));
+            where.append(" OR ").append(TagSql.FILTER_EXPR_PATH_LIKE.replace("?", "'%" +
+                    PhotoPropertiesUtil.EXT_JPG_PRIVATE + "'"));
         }
         where.append(")");
         return getMediaDBApi().exexUpdateImpl("Fix visibility private",

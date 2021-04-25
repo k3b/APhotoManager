@@ -28,6 +28,7 @@ import android.util.Log;
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.android.util.DatabaseContext;
 
@@ -96,6 +97,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (tableExists(db, MediaDBRepository.Impl.DATABASE_TABLE_NAME_BACKUP)) {
             // see https://stackoverflow.com/questions/19270259/update-with-join-in-sqlite
             execSql(db, "restoreFromBackup:", MediaDBRepository.Impl.RESTORE_FROM_BACKUP);
+            TagSql.fixAllPrivate();
         }
     }
 
