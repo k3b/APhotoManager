@@ -46,6 +46,7 @@ import de.k3b.android.util.DBUtils;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.FileNameUtil;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
@@ -184,7 +185,12 @@ public class FotoSql extends FotoSqlBase {
     private static final String FILTER_EXPR_DATE_ADDED_MAX = SQL_COL_DATE_ADDED + " < ?";
     private static final String FILTER_EXPR_DATE_ADDED_MIN = SQL_COL_DATE_ADDED + " >= ?";
 
-    protected static final String FILTER_EXPR_PATH_LIKE = "(" + SQL_COL_PATH + " like ?)";
+    public static final String FILTER_EXPR_PATH_ALBUM =
+            "(" + SQL_COL_PATH + " like '%" + AlbumFile.SUFFIX_VALBUM + "' OR " +
+                    SQL_COL_PATH + " like '%" + AlbumFile.SUFFIX_QUERY + "')";
+    public static final String SQL_EXPR_EXACT_FOLDER = "substr(" + SQL_COL_PATH + ",1,length(" + SQL_COL_PATH + ") - length(" + SQL_COL__IMPL_DISPLAY_NAME + "))";
+    // FILTER_EXPR_PATH_see below
+    public static final String FILTER_EXPR_PATH_EXACT_FOLDER = SQL_EXPR_EXACT_FOLDER + " =  ?";
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
     public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + SQL_COL_DATE_TAKEN + " / " +
@@ -216,22 +222,19 @@ public class FotoSql extends FotoSqlBase {
             .addWhere(FILTER_EXPR_PRIVATE_PUBLIC)
             .addGroupBy(SQL_EXPR_DAY_MODIFIED)
             .addOrderBy(SQL_EXPR_DAY_MODIFIED);
-
-    public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_PATH + ",1,length(" + SQL_COL_PATH + ") - length(" + SQL_COL__IMPL_DISPLAY_NAME + "))";
     public static final QueryParameter queryGroupByDir = new QueryParameter()
             .setID(QUERY_TYPE_GROUP_ALBUM)
             .addColumn(
                     "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
-                    SQL_EXPR_FOLDER + " AS " + SQL_COL_DISPLAY_TEXT,
+                    SQL_EXPR_EXACT_FOLDER + " AS " + SQL_COL_DISPLAY_TEXT,
                     "count(*) AS " + SQL_COL_COUNT,
                     // (Substr(_data,1, length(_data) -  length(_display_Name)) = '/storage/sdcard0/DCIM/onw7b/2013/')
                     // "'(" + SQL_EXPR_FOLDER + " = ''' || " + SQL_EXPR_FOLDER + " || ''')'"
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
             .addWhere(FILTER_EXPR_PRIVATE_PUBLIC)
-            .addGroupBy(SQL_EXPR_FOLDER)
-            .addOrderBy(SQL_EXPR_FOLDER);
-
+            .addGroupBy(SQL_EXPR_EXACT_FOLDER)
+            .addOrderBy(SQL_EXPR_EXACT_FOLDER);
     public static final QueryParameter queryVAlbum = new QueryParameter()
             .setID(QUERY_TYPE_GROUP_ALBUM)
             .addColumn(
@@ -240,8 +243,10 @@ public class FotoSql extends FotoSqlBase {
                     "0 AS " + SQL_COL_COUNT,
                     "null AS " + SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
-            .addWhere(SQL_COL_PATH + " like '%" + AlbumFile.SUFFIX_VALBUM + "'")
+            .addWhere(FILTER_EXPR_PATH_ALBUM)
             .addOrderBy(SQL_COL_PATH);
+    private static final String FILTER_EXPR_PATH_LIKE_OLD = FotoSql.SQL_COL_PATH + " like ?";
+    protected static final String FILTER_EXPR_PATH_LIKE = "(" + FILTER_EXPR_PATH_LIKE_OLD + ")";
 
     /* image entries may become duplicated if media scanner finds new images that have not been inserted into media database yet
      * and aFotoSql tries to show the new image and triggers a filescan. */
@@ -484,7 +489,11 @@ public class FotoSql extends FotoSqlBase {
 
     public static String getFilePath(QueryParameter query, boolean removeFromSourceQuery) {
         if (query == null) return null;
-        return getParam(query, FILTER_EXPR_PATH_LIKE, removeFromSourceQuery);
+        String path = getParam(query, FILTER_EXPR_PATH_EXACT_FOLDER, removeFromSourceQuery);
+        if (path == null) path = getParam(query, FILTER_EXPR_PATH_LIKE_OLD, removeFromSourceQuery);
+        if (path == null) path = getParam(query, FILTER_EXPR_PATH_LIKE, removeFromSourceQuery);
+
+        return FileNameUtil.getWithoutWildcard(path);
     }
 
     /** append path expressions from src to dest. Return null if unchanged. */
@@ -584,7 +593,7 @@ public class FotoSql extends FotoSqlBase {
     public static QueryParameter addWhereFolderWithoutSubfolders(QueryParameter resultQuery, String absoluteFolderPath) {
         if ((resultQuery != null) && (absoluteFolderPath != null)) {
             if (!absoluteFolderPath.endsWith("/")) absoluteFolderPath += "/";
-            resultQuery.addWhere(SQL_EXPR_FOLDER + " =  ?", absoluteFolderPath);
+            resultQuery.addWhere(FILTER_EXPR_PATH_EXACT_FOLDER, absoluteFolderPath);
         }
         return resultQuery;
     }
@@ -596,7 +605,7 @@ public class FotoSql extends FotoSqlBase {
         if (!Double.isNaN(logituedMax)) query.addWhere(FILTER_EXPR_LON_MAX, DirectoryFormatter.formatLatLon(logituedMax));
     }
 
-    public static void addPathWhere(QueryParameter newQuery, String selectedAbsolutePath, int dirQueryID) {
+    public static QueryParameter addPathWhere(QueryParameter newQuery, String selectedAbsolutePath, int dirQueryID) {
         if ((selectedAbsolutePath != null) && (selectedAbsolutePath.length() > 0)) {
             switch (dirQueryID) {
                 case QUERY_TYPE_GROUP_DATE:
@@ -610,6 +619,7 @@ public class FotoSql extends FotoSqlBase {
                     addWhereDirectoryPath(newQuery, selectedAbsolutePath);
             }
         }
+        return newQuery;
     }
 
     /**
@@ -617,14 +627,15 @@ public class FotoSql extends FotoSqlBase {
      */
     private static void addWhereDirectoryPath(QueryParameter newQuery, String selectedAbsolutePath) {
         if (FotoViewerParameter.includeSubItems) {
+
             newQuery
-                    .addWhere(FotoSql.SQL_COL_PATH + " like ?", selectedAbsolutePath + "%")
+                    .addWhere(FotoSql.FILTER_EXPR_PATH_LIKE_OLD, selectedAbsolutePath + "%")
                             // .addWhere(FotoSql.SQL_COL_PATH + " like '" + selectedAbsolutePath + "%'")
                     .addOrderBy(FotoSql.SQL_COL_PATH);
         } else {
             // foldername exact match
             newQuery
-                    .addWhere(SQL_EXPR_FOLDER + " =  ?", selectedAbsolutePath)
+                    .addWhere(FILTER_EXPR_PATH_EXACT_FOLDER, selectedAbsolutePath)
                     .addOrderBy(FotoSql.SQL_COL_PATH);
         }
     }
@@ -872,7 +883,8 @@ public class FotoSql extends FotoSqlBase {
         try {
             QueryParameter query = new QueryParameter()
                     .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
-                    .addWhere(FotoSql.SQL_COL_PATH + " like ? and " + FILTER_EXPR_PRIVATE_PUBLIC, pathFilter)
+                    .addWhere(FILTER_EXPR_PATH_LIKE_OLD +
+                            " and " + FILTER_EXPR_PRIVATE_PUBLIC, pathFilter)
                     .addColumn(FotoSql.SQL_COL_PATH)
                     .addOrderBy(FotoSql.SQL_COL_PATH);
             c = mediaDBApi.createCursorForQuery(
@@ -1245,7 +1257,7 @@ public class FotoSql extends FotoSqlBase {
     public static String getMinFolder(QueryParameter query,
                                       boolean removeLastModifiedFromFilter) {
         QueryParameter queryModified = new QueryParameter(query);
-        queryModified.clearColumns().addColumn("min(" + SQL_EXPR_FOLDER + ")");
+        queryModified.clearColumns().addColumn("min(" + SQL_EXPR_EXACT_FOLDER + ")");
 
         if (removeLastModifiedFromFilter) {
             parseDateModifiedMin(queryModified, true);

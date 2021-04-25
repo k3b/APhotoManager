@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -40,9 +40,6 @@ import de.k3b.io.StringUtils;
  * Created by k3b on 04.06.2015.
  */
 public class QueryParameter {
-    public static final String SUFFIX_VALBUM = ".album";
-    public static final String SUFFIX_QUERY = ".query";
-
     /** added to every serialized item if != null. Example "Generated on 2015-10-19 with myApp Version 0815." */
     public static String sFileComment = null;
 

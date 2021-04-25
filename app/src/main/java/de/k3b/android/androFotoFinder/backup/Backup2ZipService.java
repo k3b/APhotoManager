@@ -93,6 +93,62 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     }
 
     /**
+     * @return get query without filte-DateModified-min/max and with added zipConfig.getDateModifiedFrom
+     */
+    @NonNull
+    public static QueryParameter getEffectiveQueryParameter(@NonNull IZipConfig zipConfig) {
+        QueryParameter filter = QueryParameter.parse(zipConfig.getFilter());
+        if (filter == null) {
+            filter = new QueryParameter();
+            FotoSql.setWhereVisibility(filter, VISIBILITY.DEFAULT);
+        }
+
+        // remove lastModified from filter
+        FotoSql.parseDateModifiedMax(filter, true);
+        FotoSql.parseDateModifiedMin(filter, true);
+        setCsvColums(filter);
+        final Date dateModifiedFrom = zipConfig.getDateModifiedFrom();
+        if (dateModifiedFrom != null) {
+            FotoSql.addWhereDateModifiedMinMax(filter, dateModifiedFrom.getTime(), 0);
+        }
+
+        return filter;
+    }
+
+    @Deprecated
+    public CompressItem addCompressItem(IFile item) {
+        return job.addToCompressQue("", item.getFile());
+    }
+
+    private static QueryParameter setCsvColums(QueryParameter filter) {
+        filter.clearColumns().addColumn(TagSql.SQL_COL_PK
+                , TagSql.SQL_COL_PATH
+                , TagSql.SQL_COL_DATE_TAKEN
+                , TagSql.SQL_COL_EXT_TITLE
+                , TagSql.SQL_COL_EXT_DESCRIPTION
+                , TagSql.SQL_COL_EXT_TAGS
+                , TagSql.SQL_COL_LAT
+                , TagSql.SQL_COL_LON
+                , TagSql.SQL_COL_EXT_RATING
+                , TagSql.SQL_COL_EXT_MEDIA_TYPE);
+        return filter;
+    }
+
+    public static QueryParameter getAlbumFilter(@NonNull QueryParameter photoFilter) {
+        QueryParameter result = setCsvColums(new QueryParameter())
+                .replaceFrom(photoFilter.toFrom());
+        String filePath = FotoSql.getFilePath(photoFilter, false);
+
+        if (filePath != null && !filePath.startsWith("%")) {
+            FotoSql.addPathWhere(result, filePath, 0);
+        }
+
+        result.addWhere(FotoSql.FILTER_EXPR_PATH_ALBUM);
+
+        return result;
+    }
+
+    /**
      * Executes add2zip for all found items of found query-result-item of zipConfig.
      *
      * @return config used oder null if there is an error.
@@ -147,6 +203,9 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
 
                 execQuery(filter, csvFromQuery, media2fileZipSaver);
 
+                QueryParameter albumFilter = getAlbumFilter(filter);
+                execQuery(albumFilter, csvFromQuery, media2fileZipSaver);
+
                 if (csvFromQuery != null) {
                     job.addTextToCompressQue("changes.csv", csvFromQuery.toString());
                 }
@@ -171,43 +230,6 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
             }
         }
         return null;
-    }
-
-    @Deprecated
-    public CompressItem addCompressItem(IFile item) {
-        return job.addToCompressQue("", item.getFile());
-    }
-
-    /**
-     * @return get query without filte-DateModified-min/max and with added zipConfig.getDateModifiedFrom
-     */
-    @NonNull
-    public static QueryParameter getEffectiveQueryParameter(@NonNull IZipConfig zipConfig) {
-        QueryParameter filter = QueryParameter.parse(zipConfig.getFilter());
-        if (filter == null) {
-            filter = new QueryParameter();
-            FotoSql.setWhereVisibility(filter, VISIBILITY.DEFAULT);
-        }
-
-        // remove lastModified from filter
-        FotoSql.parseDateModifiedMax(filter, true);
-        FotoSql.parseDateModifiedMin(filter, true);
-        filter.clearColumns().addColumn(TagSql.SQL_COL_PK
-                , TagSql.SQL_COL_PATH
-                , TagSql.SQL_COL_DATE_TAKEN
-                , TagSql.SQL_COL_EXT_TITLE
-                , TagSql.SQL_COL_EXT_DESCRIPTION
-                , TagSql.SQL_COL_EXT_TAGS
-                , TagSql.SQL_COL_LAT
-                , TagSql.SQL_COL_LON
-                , TagSql.SQL_COL_EXT_RATING
-                , TagSql.SQL_COL_EXT_MEDIA_TYPE);
-        final Date dateModifiedFrom = zipConfig.getDateModifiedFrom();
-        if (dateModifiedFrom != null) {
-            FotoSql.addWhereDateModifiedMinMax(filter, dateModifiedFrom.getTime(), 0);
-        }
-
-        return filter;
     }
 
     /** calls consumers for each found query-result-item */
