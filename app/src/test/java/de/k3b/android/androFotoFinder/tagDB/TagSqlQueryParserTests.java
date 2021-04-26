@@ -103,8 +103,8 @@ public class TagSqlQueryParserTests {
     public void assertGFilterQueryGFilter() {
         assertGFilterQueryGFilter("InAnyField", createPublicGalleryFilterParameter().setInAnyField("%1% %2%"));
         assertGFilterQueryGFilter("Date", createPublicGalleryFilterParameter().setDate("1997-12-24","2005-11-30"));
-        assertGFilterQueryGFilter("Date Modified", createPublicGalleryFilterParameter().setDateModified("1999-12-24","2009-11-30"));
-        assertGFilterQueryGFilter("Path", createPublicGalleryFilterParameter().setPath("%1%"));
+        assertGFilterQueryGFilter("Date Modified", createPublicGalleryFilterParameter().setDateModified("1999-12-24", "2009-11-30"));
+        assertGFilterQueryGFilter("Path", createPublicGalleryFilterParameter().setPath("%1"));
         GalleryFilterParameter gfLL = createPublicGalleryFilterParameter();
         gfLL.setLatitude("12.34", "34.56").setLogitude("45.67", "56.78");
         assertGFilterQueryGFilter("Latitude Logitude", gfLL);
