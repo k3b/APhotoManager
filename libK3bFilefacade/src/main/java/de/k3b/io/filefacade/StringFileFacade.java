@@ -229,7 +229,7 @@ public class StringFileFacade implements IFile {
     }
 
     @Override
-    public void invalidateParentDirCache() {
-
+    public IFile invalidateParentDirCache() {
+        return this;
     }
 }

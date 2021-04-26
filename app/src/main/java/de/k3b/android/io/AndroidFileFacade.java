@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.io.Converter;
 import de.k3b.io.FileUtils;
@@ -258,6 +259,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public IFile[] listFiles() {
+        reEnableCache();
         final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
             return get(androidFile.listFiles());
@@ -265,7 +267,15 @@ public class AndroidFileFacade extends FileFacade {
         return new IFile[0];
     }
 
+    private void reEnableCache() {
+        if (!Global.android_DocumentFile_find_cache) {
+            Global.android_DocumentFile_find_cache = true;
+            invalidateParentDirCache();
+        }
+    }
+
     public IFile[] listDirs() {
+        reEnableCache();
         List<IFile> found = new ArrayList<>();
         final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
@@ -303,12 +313,15 @@ public class AndroidFileFacade extends FileFacade {
             final DocumentFile documentFileParent = documentFileTranslator.getOrCreateDirectory(getFile().getParentFile());
             androidFile = this.androidFile = documentFileParent.createFile(null, getFile().getName());
             context = "openOutputStream create new ";
-            invalidateParentDirCache();
+
         }
         if (FileFacade.debugLogFacade) {
             Log.i(LOG_TAG, context + this);
         }
-        return documentFileTranslator.createOutputStream(androidFile);
+        OutputStream result = documentFileTranslator.createOutputStream(androidFile);
+        Global.android_DocumentFile_find_cache = false;
+        invalidateParentDirCache();
+        return result;
     }
 
     @Override
@@ -336,9 +349,11 @@ public class AndroidFileFacade extends FileFacade {
 
     //------- file cache support for android
     @Override
-    public void invalidateParentDirCache() {
-        if (documentFileTranslator != null)
+    public IFile invalidateParentDirCache() {
+        if (documentFileTranslator != null) {
             documentFileTranslator.documentFileCache.invalidateParentDirCache();
+        }
+        return this;
     }
 
 

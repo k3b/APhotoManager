@@ -149,8 +149,10 @@ public class Global {
     // Build.VERSION_CODES.??ANDROID10?? = 29
     public static boolean useAo10MediaImageDbReplacement = isAndroid10OrAbove();
 
-    // #169 Android SAF DocumentFile performance improvements fast but disabled because it is still error-prone
-    public final static boolean android_DocumentFile_find_cache = true;
+    // #169 Android SAF DocumentFile performance improvements fast find.
+    // automatically Disabled, if there are saf-Write operations
+    // automatically Enabled, if there are listFiles or listDirs
+    public static boolean android_DocumentFile_find_cache = true;
 
     /**
      * map with blue selection markers: how much to area to increase

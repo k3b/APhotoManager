@@ -95,5 +95,5 @@ public interface IFile {
 
     //------- file cache support
     // may be called after delete, renameTo, openOutputStream, mkdirs
-    void invalidateParentDirCache();
+    IFile invalidateParentDirCache();
 }

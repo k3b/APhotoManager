@@ -36,6 +36,7 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.io.filefacade.FileFacade;
 
 /**
@@ -231,6 +232,7 @@ public class DocumentFileTranslator {
                     result = findFile(parent, directory, true);
 
                     if (result == null) {
+                        Global.android_DocumentFile_find_cache = false;
                         result = parent.createDirectory(directory.getName());
                         add(directory, result);
                     }

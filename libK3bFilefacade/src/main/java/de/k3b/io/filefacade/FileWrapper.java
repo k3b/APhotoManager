@@ -178,8 +178,9 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public void invalidateParentDirCache() {
+    public IFile invalidateParentDirCache() {
         child.invalidateParentDirCache();
+        return this;
     }
 
     @Override

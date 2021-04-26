@@ -330,6 +330,7 @@ public class FileFacade implements IFile {
 
 
     @Override
-    public void invalidateParentDirCache() {
+    public IFile invalidateParentDirCache() {
+        return this;
     }
 }
