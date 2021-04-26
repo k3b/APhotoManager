@@ -46,8 +46,7 @@ public class FileCommandLogger implements IFileCommandLogger {
             OutputStream stream = null;
             try {
                 IFile logFile = FileFacade
-                        .convert("FileCommandLogger.openLogfile", mLogFilePath)
-                        .cacheStrategy(IFile.STRATEGY_OUTPUT);
+                        .convert("FileCommandLogger.openLogfile", mLogFilePath);
 
                 if (logFile.exists()) {
                     // open existing in append mode

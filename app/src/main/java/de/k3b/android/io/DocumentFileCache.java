@@ -18,43 +18,29 @@
  */
 package de.k3b.android.io;
 
-import android.util.Log;
-
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 import java.util.HashMap;
 
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesUtil;
 
 public class DocumentFileCache {
     private static final String TAG = DocumentFileTranslator.TAG;
 
-    private CurrentFileCache[] currentFileCaches = null;
+    private CurrentFileCache currentFileCache = null;
 
-    /**
-     * strategyID : IFile.STRATEGY_XXX.
-     */
-    public CurrentFileCache getCacheStrategy(int strategyID) {
-        if (currentFileCaches == null) {
-            currentFileCaches = new CurrentFileCache[IFile.STRATEGY_MAX + 1];
-            currentFileCaches[IFile.STRATEGY_INPUT] = new CurrentFileCache();
-            currentFileCaches[IFile.STRATEGY_OUTPUT] = new CurrentFileCache();
-            currentFileCaches[IFile.STRATEGY_NONE] = null;
+    public CurrentFileCache getCacheStrategy() {
+        if (currentFileCache == null) {
+            currentFileCache = new CurrentFileCache();
         }
-        if (strategyID >= 0 && strategyID < currentFileCaches.length) {
-            return currentFileCaches[strategyID];
-        }
-        Log.w(TAG, "DocumentFileCache.setCacheStrategy(id=" + strategyID +
-                ") unknow Strategy");
-        return currentFileCaches[IFile.STRATEGY_NONE];
+        return currentFileCache;
     }
 
-    public DocumentFile findFile(DocumentFile parentDoc, File parentFile, String displayName, int strategyID) {
+    public DocumentFile findFile(DocumentFile parentDoc, File parentFile, String displayName) {
         if (Global.android_DocumentFile_find_cache) {
-            CurrentFileCache currentFileCache = getCacheStrategy(strategyID);
+            CurrentFileCache currentFileCache = getCacheStrategy();
 
             if (currentFileCache != null) {
                 if (!parentFile.equals(currentFileCache.lastParentFile)) {
@@ -80,8 +66,8 @@ public class DocumentFileCache {
         return parentDoc.findFile(displayName);
     }
 
-    public void invalidateParentDirCache(int strategyID) {
-        CurrentFileCache currentFileCache = getCacheStrategy(strategyID);
+    public void invalidateParentDirCache() {
+        CurrentFileCache currentFileCache = getCacheStrategy();
         if (currentFileCache != null) currentFileCache.lastParentFile = null;
     }
 

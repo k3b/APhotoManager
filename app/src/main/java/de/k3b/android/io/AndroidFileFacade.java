@@ -95,14 +95,13 @@ public class AndroidFileFacade extends FileFacade {
         }
     }
 
-    private AndroidFileFacade(@Nullable DocumentFile parentFile, @NonNull File parentFile1, int strategyID) {
+    private AndroidFileFacade(@Nullable DocumentFile parentFile, @NonNull File parentFile1) {
         super(parentFile1);
         androidFile = parentFile;
-        this.strategyID = strategyID;
     }
 
     public AndroidFileFacade(@NonNull File file) {
-        this(null, file, IFile.STRATEGY_INPUT);
+        this(null, file);
     }
 
     @Override
@@ -119,7 +118,7 @@ public class AndroidFileFacade extends FileFacade {
     }
 
     private DocumentFile getDocumentFileOrDirOrNull(@NonNull File file) {
-        return documentFileTranslator.getDocumentFileOrDirOrNull(file, null, this.strategyID);
+        return documentFileTranslator.getDocumentFileOrDirOrNull(file, null);
     }
 
     private boolean copyImpl(@NonNull AndroidFileFacade targetFullPath, boolean deleteSourceWhenSuccess) {
@@ -209,7 +208,7 @@ public class AndroidFileFacade extends FileFacade {
     public IFile getParentFile() {
         final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
-            return new AndroidFileFacade(androidFile.getParentFile(), getFile().getParentFile(), strategyID);
+            return new AndroidFileFacade(androidFile.getParentFile(), getFile().getParentFile());
         } else {
             return super.getParentFile();
         }
@@ -252,7 +251,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public boolean mkdirs() {
-        this.androidFile = documentFileTranslator.getOrCreateDirectory(getFile(), strategyID);
+        this.androidFile = documentFileTranslator.getOrCreateDirectory(getFile());
         invalidateParentDirCache();
         return null != this.androidFile;
     }
@@ -261,7 +260,7 @@ public class AndroidFileFacade extends FileFacade {
     public IFile[] listFiles() {
         final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
-            return get(androidFile.listFiles(), strategyID);
+            return get(androidFile.listFiles());
         }
         return new IFile[0];
     }
@@ -275,7 +274,7 @@ public class AndroidFileFacade extends FileFacade {
                 if (file != null &&
                         (file.isDirectory() || accept(file.getName().toLowerCase()))) {
                     found.add(new AndroidFileFacade(
-                            file, new File(parent, file.getName()), strategyID));
+                            file, new File(parent, file.getName())));
                 }
             }
         }
@@ -299,11 +298,11 @@ public class AndroidFileFacade extends FileFacade {
     @Override
     public OutputStream openOutputStream() throws FileNotFoundException {
         DocumentFile androidFile = getAndroidFile(false);
-        String context = strategyID + "openOutputStream overwrite existing ";
+        String context = "openOutputStream overwrite existing ";
         if (androidFile == null) {
-            final DocumentFile documentFileParent = documentFileTranslator.getOrCreateDirectory(getFile().getParentFile(), strategyID);
+            final DocumentFile documentFileParent = documentFileTranslator.getOrCreateDirectory(getFile().getParentFile());
             androidFile = this.androidFile = documentFileParent.createFile(null, getFile().getName());
-            context = strategyID + "openOutputStream create new ";
+            context = "openOutputStream create new ";
             invalidateParentDirCache();
         }
         if (FileFacade.debugLogFacade) {
@@ -314,7 +313,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public InputStream openInputStream() throws FileNotFoundException {
-        String context = strategyID + "openInputStream ";
+        String context = "openInputStream ";
         if ((readUri != null)) {
             if (debugLogFacade) {
                 Log.i(LOG_TAG, context + this + " for uri " + readUri);
@@ -339,16 +338,16 @@ public class AndroidFileFacade extends FileFacade {
     @Override
     public void invalidateParentDirCache() {
         if (documentFileTranslator != null)
-            documentFileTranslator.documentFileCache.invalidateParentDirCache(strategyID);
+            documentFileTranslator.documentFileCache.invalidateParentDirCache();
     }
 
 
-    private IFile[] get(DocumentFile[] docs, int strategyID) {
+    private IFile[] get(DocumentFile[] docs) {
         AndroidFileFacade[] f = new AndroidFileFacade[docs.length];
         final File parent = getFile();
         for (int i = 0; i < docs.length; i++) {
             final DocumentFile doc = docs[i];
-            f[i] = new AndroidFileFacade(doc, new File(parent, doc.getName()), strategyID);
+            f[i] = new AndroidFileFacade(doc, new File(parent, doc.getName()));
         }
 
         return f;

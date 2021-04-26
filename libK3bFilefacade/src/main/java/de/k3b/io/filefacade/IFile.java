@@ -33,11 +33,6 @@ import java.io.OutputStream;
  * This interface has the similar method names/sinatures as de.k3b.io.File
  */
 public interface IFile {
-    int STRATEGY_INPUT = 0;
-    int STRATEGY_OUTPUT = 1;
-    int STRATEGY_NONE = 2;
-    int STRATEGY_MAX = STRATEGY_NONE;
-
     void set(IFile src);
 
     boolean renameTo(String newName);
@@ -99,8 +94,6 @@ public interface IFile {
     long length();
 
     //------- file cache support
-    IFile cacheStrategy(int strategyID);
-
     // may be called after delete, renameTo, openOutputStream, mkdirs
     void invalidateParentDirCache();
 }

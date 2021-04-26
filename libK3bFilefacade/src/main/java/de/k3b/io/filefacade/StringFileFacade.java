@@ -229,11 +229,6 @@ public class StringFileFacade implements IFile {
     }
 
     @Override
-    public IFile cacheStrategy(int strategyID) {
-        return this;
-    }
-
-    @Override
     public void invalidateParentDirCache() {
 
     }

@@ -178,12 +178,6 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public IFile cacheStrategy(int strategyID) {
-        child.cacheStrategy(strategyID);
-        return this;
-    }
-
-    @Override
     public void invalidateParentDirCache() {
         child.invalidateParentDirCache();
     }
