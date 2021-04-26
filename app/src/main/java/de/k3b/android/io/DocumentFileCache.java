@@ -18,12 +18,15 @@
  */
 package de.k3b.android.io;
 
+import android.util.Log;
+
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 import java.util.HashMap;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.io.filefacade.FileFacade;
 import de.k3b.media.PhotoPropertiesUtil;
 
 public class DocumentFileCache {
@@ -59,11 +62,21 @@ public class DocumentFileCache {
                 }
 
                 if (PhotoPropertiesUtil.isImage(displayName, PhotoPropertiesUtil.IMG_TYPE_ALL | PhotoPropertiesUtil.IMG_TYPE_XMP)) {
-                    return currentFileCache.lastChildDocFiles.get(displayName.toLowerCase());
+                    return logFindFileResult(parentFile, currentFileCache.lastChildDocFiles.get(displayName.toLowerCase()));
                 }
             }
         }
-        return parentDoc.findFile(displayName);
+        return logFindFileResult(parentFile, parentDoc.findFile(displayName));
+    }
+
+    private DocumentFile logFindFileResult(File parentFile, DocumentFile documentFile) {
+        if (FileFacade.debugLogSAFFacade) {
+            Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
+                    + ".findFile(" + parentFile + ",cache="
+                    + Global.android_DocumentFile_find_cache
+                    + ") ==> " + documentFile);
+        }
+        return documentFile;
     }
 
     public void invalidateParentDirCache() {

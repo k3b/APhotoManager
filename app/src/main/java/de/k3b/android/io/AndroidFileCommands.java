@@ -307,7 +307,7 @@ public class AndroidFileCommands extends AndroidFileCommandsDbImpl {
             return false;
         }
 
-        if (FileFacade.debugLogFacade) {
+        if (FileFacade.debugLogSAFFacade) {
             Log.i(FilePermissionActivity.TAG, "AndroidFileCommands.cmdDeleteFileWithQuestion.do");
         }
 

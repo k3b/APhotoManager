@@ -731,7 +731,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             return false;
         }
 
-        if (FileFacade.debugLogFacade) {
+        if (FileFacade.debugLogSAFFacade) {
             Log.i(FilePermissionActivity.TAG, "PhotoPropertiesEditActivity.execExifUpdate.do");
         }
 

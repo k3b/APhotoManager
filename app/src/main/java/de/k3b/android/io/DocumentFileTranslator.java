@@ -170,7 +170,7 @@ public class DocumentFileTranslator {
      */
     public DocumentFileTranslator add(File directory, DocumentFile documentFileDir) {
         if ((documentFileDir != null) && documentFileDir.isDirectory()) {
-            if (FileFacade.debugLogFacade) {
+            if (FileFacade.debugLogSAFFacade) {
                 Uri uri = (documentFileDir != null) ? documentFileDir.getUri() : null;
                 Log.d(TAG, mDebugPrefix + "dirCache.put(" + directory +
                         " -> " + uri + ")");
@@ -232,6 +232,11 @@ public class DocumentFileTranslator {
                     result = findFile(parent, directory, true);
 
                     if (result == null) {
+                        if (Global.android_DocumentFile_find_cache && FileFacade.debugLogSAFFacade) {
+                            Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
+                                    + " CreateDirectory: enableCache(false)");
+                        }
+
                         Global.android_DocumentFile_find_cache = false;
                         result = parent.createDirectory(directory.getName());
                         add(directory, result);
@@ -253,7 +258,7 @@ public class DocumentFileTranslator {
     public DocumentFile getDocumentFileOrDirOrNull(File fileOrDir, Boolean isDir) {
         DocumentFile result = null;
         String path = fileOrDir != null ? fileOrDir.getAbsolutePath() : "";
-        final String context = FileFacade.debugLogFacade ? (mDebugPrefix + "getDocumentFile('"
+        final String context = FileFacade.debugLogSAFFacade ? (mDebugPrefix + "getDocumentFile('"
                 + path + "') ") : null;
         try {
             result = getDocumentFileOrDirImpl(fileOrDir, isDir == Boolean.TRUE);
@@ -327,7 +332,7 @@ public class DocumentFileTranslator {
         public Root(Context context) {
             this.context = context.getApplicationContext();
             loadFromPrefs();
-            if (FileFacade.debugLogFacade) {
+            if (FileFacade.debugLogSAFFacade) {
                 Log.i(TAG, "DocumentFileTranslator.Root.loaded(" + this + ")");
             }
         }
@@ -390,7 +395,7 @@ public class DocumentFileTranslator {
                 Log.e(TAG, "err saveToPrefs(" + dir2uri + ")", ex);
             } finally {
                 edit.commit();
-                if (FileFacade.debugLogFacade) {
+                if (FileFacade.debugLogSAFFacade) {
                     Log.i(TAG, "DocumentFileTranslator.Root.saveToPrefs(" + this + ")");
                 }
 

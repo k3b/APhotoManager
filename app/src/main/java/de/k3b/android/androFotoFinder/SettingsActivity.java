@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -63,100 +63,7 @@ public class SettingsActivity extends PreferenceActivity {
     private ListPreference mediaUpdateStrategyPreference;
     private ListPreference themePreference;  // #21: Support to change locale at runtime
 
-    private int INSTALL_REQUEST_CODE = 1927;
-
-    @Override
-    protected void onCreate(final Bundle savedInstanceState) {
-        LocalizedActivity.fixThemeAndLocale(this);    // #21: Support to change locale at runtime
-        super.onCreate(savedInstanceState);
-
-        if (Global.debugEnabled) {
-            // todo create junit integration tests with arabic locale from this.
-            StringFormatResourceTests.test(this);
-        }
-
-        final Intent intent = getIntent();
-        if (Global.debugEnabled && (intent != null)){
-            Log.d(Global.LOG_CONTEXT, "SettingsActivity onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
-        }
-
-        if (FileFacade.debugLogFacade) {
-            this.addPreferencesFromResource(R.xml.preferences_saf169_test);
-            findPreference("debugClearSafCache").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    DocumentFileTranslator.clearCache();
-                    Toast.makeText(SettingsActivity.this, "debugClearSafCache",
-                            Toast.LENGTH_LONG).show();
-                    finish();
-                    return true; // do close
-                }
-            });
-        }
-
-        this.addPreferencesFromResource(R.xml.preferences);
-        prefsInstance = PreferenceManager
-                .getDefaultSharedPreferences(this);
-        global2Prefs(this.getApplication());
-
-		// #21: Support to change locale at runtime
-        defaultLocalePreference =
-                (ListPreference) findPreference(Global.PREF_KEY_USER_LOCALE);
-        defaultLocalePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                setLanguage((String) newValue);
-                LocalizedActivity.recreate(SettingsActivity.this);
-                return true; // change is allowed
-            }
-        });
-
-        themePreference = (ListPreference) findPreference(UserTheme.PREF_KEY_USER_THEME);
-        themePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                setUserTheme((String) newValue);
-                LocalizedActivity.recreate(SettingsActivity.this);
-                return true; // change is allowed
-            }
-        });
-        mediaUpdateStrategyPreference =
-                (ListPreference) findPreference("mediaUpdateStrategy");
-        mediaUpdateStrategyPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                LibGlobal.mediaUpdateStrategy = (String) newValue;
-                setPrefSummayFromKey(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
-                return true;
-            }
-        });
-        setPrefSummayFromKey(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
-
-        findPreference("debugClearLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                onDebugClearLogCat();
-                return false; // donot close
-            }
-        });
-        findPreference("debugSaveLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                onDebugSaveLogCat();
-                return false; // donot close
-            }
-        });
-        findPreference("translate").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                onTranslate();
-                return false; // donot close
-            }
-        });
-
-		// #21: Support to change locale at runtime
-        updateSummary();
-    }
+    private final int INSTALL_REQUEST_CODE = 1927;
 
     public static void global2Prefs(Context context) {
         fixDefaults(context, null, null);
@@ -190,7 +97,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
         prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
-        prefs.putBoolean("debugLogFacade", FileFacade.debugLogFacade);
+        prefs.putBoolean("debugLogFacade", FileFacade.debugLogSAFFacade);
         if (Global.allow_emulate_ao10) {
             prefs.putBoolean(PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT, Global.useAo10MediaImageDbReplacement);
         }
@@ -267,7 +174,7 @@ public class SettingsActivity extends PreferenceActivity {
         LibGlobal.preferLongXmpFormat       = getPref(prefs, "xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
         Global.mapsForgeEnabled = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
-        FileFacade.debugLogFacade = getPref(prefs, "debugLogFacade", FileFacade.debugLogFacade);
+        FileFacade.debugLogSAFFacade = getPref(prefs, "debugLogFacade", FileFacade.debugLogSAFFacade);
 
 
         boolean useAo10MediaImageDbReplacement = Global.useAo10MediaImageDbReplacement;
@@ -316,6 +223,99 @@ public class SettingsActivity extends PreferenceActivity {
         */
 
         fixDefaults(context, previousCacheRoot, previousMapsForgeDir);
+    }
+
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
+        LocalizedActivity.fixThemeAndLocale(this);    // #21: Support to change locale at runtime
+        super.onCreate(savedInstanceState);
+
+        if (Global.debugEnabled) {
+            // todo create junit integration tests with arabic locale from this.
+            StringFormatResourceTests.test(this);
+        }
+
+        final Intent intent = getIntent();
+        if (Global.debugEnabled && (intent != null)) {
+            Log.d(Global.LOG_CONTEXT, "SettingsActivity onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
+
+        if (FileFacade.debugLogSAFFacade) {
+            this.addPreferencesFromResource(R.xml.preferences_saf169_test);
+            findPreference("debugClearSafCache").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    DocumentFileTranslator.clearCache();
+                    Toast.makeText(SettingsActivity.this, "debugClearSafCache",
+                            Toast.LENGTH_LONG).show();
+                    finish();
+                    return true; // do close
+                }
+            });
+        }
+
+        this.addPreferencesFromResource(R.xml.preferences);
+        prefsInstance = PreferenceManager
+                .getDefaultSharedPreferences(this);
+        global2Prefs(this.getApplication());
+
+        // #21: Support to change locale at runtime
+        defaultLocalePreference =
+                (ListPreference) findPreference(Global.PREF_KEY_USER_LOCALE);
+        defaultLocalePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                setLanguage((String) newValue);
+                LocalizedActivity.recreate(SettingsActivity.this);
+                return true; // change is allowed
+            }
+        });
+
+        themePreference = (ListPreference) findPreference(UserTheme.PREF_KEY_USER_THEME);
+        themePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                setUserTheme((String) newValue);
+                LocalizedActivity.recreate(SettingsActivity.this);
+                return true; // change is allowed
+            }
+        });
+        mediaUpdateStrategyPreference =
+                (ListPreference) findPreference("mediaUpdateStrategy");
+        mediaUpdateStrategyPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                LibGlobal.mediaUpdateStrategy = (String) newValue;
+                setPrefSummayFromKey(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
+                return true;
+            }
+        });
+        setPrefSummayFromKey(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
+
+        findPreference("debugClearLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                onDebugClearLogCat();
+                return false; // donot close
+            }
+        });
+        findPreference("debugSaveLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                onDebugSaveLogCat();
+                return false; // donot close
+            }
+        });
+        findPreference("translate").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                onTranslate();
+                return false; // donot close
+            }
+        });
+
+        // #21: Support to change locale at runtime
+        updateSummary();
     }
 
     @Override

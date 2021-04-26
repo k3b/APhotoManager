@@ -43,12 +43,12 @@ import de.k3b.io.FileUtilsBase;
 public class FileFacade implements IFile {
     public static final String LOG_TAG = "k3b.FileFacade";
     private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
-    public static boolean debugLogFacade = false;
+    public static boolean debugLogSAFFacade = false;
     private static Converter<File, IFile> fileFacade = new Converter<File, IFile>() {
         @Override
         public IFile convert(String dbgContext, File file) {
             final IFile result = new FileFacade(file);
-            if (debugLogFacade) {
+            if (debugLogSAFFacade) {
                 logger.info(dbgContext + " convert => " + result);
             }
             return result;
@@ -318,7 +318,7 @@ public class FileFacade implements IFile {
 
     @Override
     public File getFile() {
-        if (debugLogFacade) {
+        if (debugLogSAFFacade) {
             logger.info("getFile() " + file + " from " + this);
         }
         return file;

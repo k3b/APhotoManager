@@ -271,7 +271,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
                             public void afterGrant(FilePermissionActivity activity) {
                                 // does not work in frag,emt
                                 mFileCommands.setContext(activity);
-                                if (FileFacade.debugLogFacade) {
+                                if (FileFacade.debugLogSAFFacade) {
                                     Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
                                             + ": afterGrant " + activity + "-" + this);
                                 }

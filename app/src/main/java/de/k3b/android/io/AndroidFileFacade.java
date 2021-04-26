@@ -80,7 +80,7 @@ public class AndroidFileFacade extends FileFacade {
         @Override
         public IFile convert(String dbgContext, File file) {
             final IFile result = new AndroidFileFacade(file);
-            if (debugLogFacade) {
+            if (debugLogSAFFacade) {
                 Log.i(LOG_TAG, dbgContext + " convert => " + result);
             }
             return result;
@@ -259,7 +259,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public IFile[] listFiles() {
-        reEnableCache();
+        enableCache("listFiles", true);
         final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
             return get(androidFile.listFiles());
@@ -267,15 +267,23 @@ public class AndroidFileFacade extends FileFacade {
         return new IFile[0];
     }
 
-    private void reEnableCache() {
-        if (!Global.android_DocumentFile_find_cache) {
-            Global.android_DocumentFile_find_cache = true;
-            invalidateParentDirCache();
+    private void enableCache(String dbgContext, boolean enable) {
+        if (enable != Global.android_DocumentFile_find_cache) {
+            if (FileFacade.debugLogSAFFacade) {
+                Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
+                        + " " + dbgContext + ": enableCache(" + enable + ")");
+            }
+
+            Global.android_DocumentFile_find_cache = enable;
+
+            if (enable) {
+                invalidateParentDirCache();
+            }
         }
     }
 
     public IFile[] listDirs() {
-        reEnableCache();
+        enableCache("listDirs", true);
         List<IFile> found = new ArrayList<>();
         final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
@@ -315,12 +323,11 @@ public class AndroidFileFacade extends FileFacade {
             context = "openOutputStream create new ";
 
         }
-        if (FileFacade.debugLogFacade) {
+        if (FileFacade.debugLogSAFFacade) {
             Log.i(LOG_TAG, context + this);
         }
         OutputStream result = documentFileTranslator.createOutputStream(androidFile);
-        Global.android_DocumentFile_find_cache = false;
-        invalidateParentDirCache();
+        enableCache("openOutputStream", false);
         return result;
     }
 
@@ -328,7 +335,7 @@ public class AndroidFileFacade extends FileFacade {
     public InputStream openInputStream() throws FileNotFoundException {
         String context = "openInputStream ";
         if ((readUri != null)) {
-            if (debugLogFacade) {
+            if (debugLogSAFFacade) {
                 Log.i(LOG_TAG, context + this + " for uri " + readUri);
             }
             return documentFileTranslator.openInputStream(readUri);
@@ -341,7 +348,7 @@ public class AndroidFileFacade extends FileFacade {
             Log.w(LOG_TAG, msg);
             getAndroidFile(true); // allow debugger to step in
             throw new FileNotFoundException(msg);
-        } else if (debugLogFacade) {
+        } else if (debugLogSAFFacade) {
             Log.i(LOG_TAG, context + this + " for uri " + androidFile.getUri());
         }
         return resultInputStream;

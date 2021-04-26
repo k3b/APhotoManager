@@ -93,7 +93,7 @@ public abstract class FilePermissionActivity extends ActivityWithAsyncTaskDialog
                         && (grantResults.length > 0)
                         && (grantResults[0] == PackageManager.PERMISSION_GRANTED);
                 if (success) {
-                    if (FileFacade.debugLogFacade) {
+                    if (FileFacade.debugLogSAFFacade) {
                         Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
                                 + ": onRequestPermissionsResult(success) ");
                     }
@@ -164,7 +164,7 @@ public abstract class FilePermissionActivity extends ActivityWithAsyncTaskDialog
                 final File dir = dirs[i];
                 if (!getDocumentFileTranslator().isKnownRoot(dir)) {
                     final File anddroidRootDir = FileNameUtil.getAnddroidRootDir(dir);
-                    if (FileFacade.debugLogFacade) {
+                    if (FileFacade.debugLogSAFFacade) {
                         Log.i(TAG, dbgContext + ":" + this.documentFileTranslator
                                 + ":getMissingRootDirFileOrNull(" + dir
                                 + ") needs " + anddroidRootDir);
@@ -204,7 +204,7 @@ public abstract class FilePermissionActivity extends ActivityWithAsyncTaskDialog
     }
 
     private void onRootUriResult(Uri documentRootUri) {
-        if (FileFacade.debugLogFacade) {
+        if (FileFacade.debugLogSAFFacade) {
             Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
                     + ": onRootUriResult(" + documentRootUri + ") ");
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 by k3b.
+ * Copyright (c) 2017-2022 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -278,7 +278,7 @@ public class PhotoPropertiesEditActivity extends BaseActivity implements Common 
 
         if (result == null) {
             String path = IntentUtil.getFilePath(ctx, IntentUtil.getUri(intent));
-            String fileNames[] = SelectedFiles.getFileNameList(path);
+            String[] fileNames = SelectedFiles.getFileNameList(path);
             Long[] ids = null;
             int itemCount = (fileNames != null) ? fileNames.length : 0;
 
@@ -849,7 +849,7 @@ public class PhotoPropertiesEditActivity extends BaseActivity implements Common 
             return false;
         }
 
-        if (FileFacade.debugLogFacade) {
+        if (FileFacade.debugLogSAFFacade) {
             Log.i(FilePermissionActivity.TAG, "PhotoPropertiesEditActivity.execExifUpdate.do");
         }
 
