@@ -41,11 +41,12 @@ import de.k3b.io.filefacade.FileFacade;
 
 /**
  * Handles Translation from File to android specific DocumentFileUtils
- *
- * @// TODO: 25.03.2020 update cache if rename or delete dir
+ * <p>
+ * // TODO: 25.03.2020 update cache if rename or delete dir
  */
 public class DocumentFileTranslator {
     public static final String TAG = "k3b.DocFileTranslator";
+    public static final boolean debugLogSAFCache = true;
 
     // used by android.support.v4.provider.DocumentFile
     public static final String TAG_DOCFILE = "DocumentFile";
@@ -92,15 +93,16 @@ public class DocumentFileTranslator {
 
     private DocumentFileTranslator init() {
         File rootFile = getInternalStorageRoot();
+        String debugContext = "init";
         if (rootFile != null) {
             rootFile = rootFile.getAbsoluteFile();
             DocumentFile docRoot = DocumentFile.fromFile(rootFile);
             if ((docRoot != null) && docRoot.exists() && docRoot.isDirectory() && docRoot.canWrite()) {
-                add(rootFile, docRoot);
+                add(debugContext, rootFile, docRoot);
             }
         }
         for (Map.Entry<String, String> enty : root.dir2uri.entrySet()) {
-            add(new File(enty.getKey()), DocumentFile.fromTreeUri(context, Uri.parse(enty.getValue())));
+            add(debugContext, new File(enty.getKey()), DocumentFile.fromTreeUri(context, Uri.parse(enty.getValue())));
         }
         documentFileCache = new DocumentFileCache();
 
@@ -140,7 +142,7 @@ public class DocumentFileTranslator {
 
     public DocumentFileTranslator addRoot(File directory, Uri documentRootUri) {
         if (root.add(directory.getAbsolutePath(), documentRootUri.toString())) {
-            add(directory, DocumentFile.fromTreeUri(context, documentRootUri));
+            add("addRoot", directory, DocumentFile.fromTreeUri(context, documentRootUri));
             invalidate(this);
             root.saveToPrefs();
         }
@@ -156,45 +158,51 @@ public class DocumentFileTranslator {
         }
         return dirCache;
     }
-    
-    protected DocumentFile getFromCache(File fileOrDir) {
-        return getDirCache().get(fileOrDir);
+
+    protected DocumentFile getFromCache(String debugContext, File fileOrDir, boolean isDir) {
+        DocumentFile result = getDirCache().get(fileOrDir);
+        if (result == null && DocumentFileTranslator.debugLogSAFCache) {
+            Log.i(FileFacade.LOG_TAG,
+                    ((debugContext == null) ? "" : debugContext)
+                            + this.getClass().getSimpleName()
+                            + ".getFromCache(" + fileOrDir
+                            + ",dir=" + isDir
+                            + ") ==> failed");
+
+        }
+        return result;
     }
 
     /**
      * add mapping from file-sdcard, -usbstick, -networkstorage to documentFileDirRoot
-     *
-     * @param directory
-     * @param documentFileDir
-     * @return
      */
-    public DocumentFileTranslator add(File directory, DocumentFile documentFileDir) {
+    private DocumentFileTranslator add(String debugContext, File directory, DocumentFile documentFileDir) {
         if ((documentFileDir != null) && documentFileDir.isDirectory()) {
-            if (FileFacade.debugLogSAFFacade) {
+            if (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache) {
                 Uri uri = (documentFileDir != null) ? documentFileDir.getUri() : null;
                 Log.d(TAG, mDebugPrefix + "dirCache.put(" + directory +
-                        " -> " + uri + ")");
+                        " -> " + uri + ") because of " + debugContext);
             }
             getDirCache().put(directory, documentFileDir);
         }
         return this;
     }
 
-    private DocumentFile getDocumentFileOrDirImpl(File fileOrDir, boolean isDir) {
+    private DocumentFile getDocumentFileOrDirImpl(String debugContext, File fileOrDir, boolean isDir) {
         DocumentFile result = null;
         if (fileOrDir != null) {
-            result = getFromCache(fileOrDir);
+            result = getFromCache(debugContext, fileOrDir, isDir);
             if (result == null) {
-                DocumentFile parent = getDocumentFileOrDirImpl(fileOrDir.getParentFile(), true);
+                DocumentFile parent = getDocumentFileOrDirImpl(debugContext, fileOrDir.getParentFile(), true);
                 if (parent != null) {
-                    result = findFile(parent, fileOrDir, isDir);
+                    result = findFile(debugContext, parent, fileOrDir, isDir);
                 }
             }
         }
         return result;
     }
 
-    private DocumentFile findFile(DocumentFile parentDoc, File fileOrDir, boolean isDir) {
+    private DocumentFile findFile(String debugContext, DocumentFile parentDoc, File fileOrDir, boolean isDir) {
         String displayName = fileOrDir.getName();
         File parentFile = fileOrDir.getParentFile();
         if (isDir) {
@@ -208,12 +216,12 @@ public class DocumentFileTranslator {
                     foundDoc = childDoc;
                 }
                 if (childDoc.isDirectory()) {
-                    add(new File(parentFile, childDocName), foundDoc);
+                    add(debugContext + " findFile ", new File(parentFile, childDocName), foundDoc);
                 }
             }
             return foundDoc;
         } else {
-            return documentFileCache.findFile(parentDoc, parentFile, displayName);
+            return documentFileCache.findFile(debugContext + " findFile ", parentDoc, parentFile, displayName);
         }
     }
 
@@ -222,24 +230,24 @@ public class DocumentFileTranslator {
      *
      * @return the found or created directory
      */
-    public DocumentFile getOrCreateDirectory(File directory) {
+    public DocumentFile getOrCreateDirectory(String debugContext, File directory) {
         DocumentFile result = null;
         if (directory != null) {
-            result = getFromCache(directory);
+            result = getFromCache(debugContext, directory, true);
             if (result == null) {
-                DocumentFile parent = getOrCreateDirectory(directory.getParentFile());
+                DocumentFile parent = getOrCreateDirectory(debugContext, directory.getParentFile());
                 if ((parent != null) && parent.isDirectory()) {
-                    result = findFile(parent, directory, true);
+                    result = findFile(debugContext, parent, directory, true);
 
                     if (result == null) {
-                        if (Global.android_DocumentFile_find_cache && FileFacade.debugLogSAFFacade) {
+                        if ((Global.android_DocumentFile_find_cache && FileFacade.debugLogSAFFacade) || DocumentFileTranslator.debugLogSAFCache) {
                             Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
                                     + " CreateDirectory: enableCache(false)");
                         }
 
                         Global.android_DocumentFile_find_cache = false;
                         result = parent.createDirectory(directory.getName());
-                        add(directory, result);
+                        add(debugContext + " created dir ", directory, result);
                     }
                 }
             }
@@ -255,18 +263,20 @@ public class DocumentFileTranslator {
      * @param isDir     if null: return null if isDir is matchning
      * @return DocumentFile or null
      */
-    public DocumentFile getDocumentFileOrDirOrNull(File fileOrDir, Boolean isDir) {
+    public DocumentFile getDocumentFileOrDirOrNull(String debugContext, File fileOrDir, Boolean isDir) {
         DocumentFile result = null;
         String path = fileOrDir != null ? fileOrDir.getAbsolutePath() : "";
-        final String context = FileFacade.debugLogSAFFacade ? (mDebugPrefix + "getDocumentFile('"
-                + path + "') ") : null;
         try {
-            result = getDocumentFileOrDirImpl(fileOrDir, isDir == Boolean.TRUE);
+            final String context = (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache)
+                    ? (debugContext + ":" + mDebugPrefix + "getDocumentFile('" + path + "') ")
+                    : null;
+
+            result = getDocumentFileOrDirImpl(context, fileOrDir, isDir == Boolean.TRUE);
             if ((context != null) && (result == null)) {
                 Log.i(TAG, context + "not found");
             }
         } catch (Exception ex) {
-            Log.w(TAG, mDebugPrefix + "getDocumentFile('" + path +
+            Log.w(TAG, debugContext + ":" + mDebugPrefix + "getDocumentFile('" + path +
                     "') ", ex);
 
         }
@@ -332,7 +342,7 @@ public class DocumentFileTranslator {
         public Root(Context context) {
             this.context = context.getApplicationContext();
             loadFromPrefs();
-            if (FileFacade.debugLogSAFFacade) {
+            if (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache) {
                 Log.i(TAG, "DocumentFileTranslator.Root.loaded(" + this + ")");
             }
         }
@@ -395,7 +405,7 @@ public class DocumentFileTranslator {
                 Log.e(TAG, "err saveToPrefs(" + dir2uri + ")", ex);
             } finally {
                 edit.commit();
-                if (FileFacade.debugLogSAFFacade) {
+                if (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache) {
                     Log.i(TAG, "DocumentFileTranslator.Root.saveToPrefs(" + this + ")");
                 }
 

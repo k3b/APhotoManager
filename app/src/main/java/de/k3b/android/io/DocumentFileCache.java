@@ -41,40 +41,52 @@ public class DocumentFileCache {
         return currentFileCache;
     }
 
-    public DocumentFile findFile(DocumentFile parentDoc, File parentFile, String displayName) {
+    public DocumentFile findFile(String debugContext, DocumentFile parentDoc, File parentFile, String displayName) {
         if (Global.android_DocumentFile_find_cache) {
             CurrentFileCache currentFileCache = getCacheStrategy();
 
             if (currentFileCache != null) {
                 if (!parentFile.equals(currentFileCache.lastParentFile)) {
+                    HashMap<String, DocumentFile> lastChildDocFiles = currentFileCache.lastChildDocFiles;
                     currentFileCache.lastParentFile = parentFile;
-                    currentFileCache.lastChildDocFiles.clear();
+                    lastChildDocFiles.clear();
+                    int count = 0;
                     DocumentFile[] childDocuments = parentDoc.listFiles();
                     for (DocumentFile childDoc : childDocuments) {
                         if (childDoc.isFile()) {
                             String childDocName = childDoc.getName().toLowerCase();
                             if (PhotoPropertiesUtil.isImage(childDocName, PhotoPropertiesUtil.IMG_TYPE_ALL | PhotoPropertiesUtil.IMG_TYPE_XMP)) {
-                                currentFileCache.lastChildDocFiles.put(childDocName, childDoc);
+                                lastChildDocFiles.put(childDocName, childDoc);
+                                count++;
                             }
                         }
+                    }
+                    if (DocumentFileTranslator.debugLogSAFCache) {
+                        Log.i(TAG,
+                                ((debugContext == null) ? "" : debugContext)
+                                        + this.getClass().getSimpleName()
+                                        + ".reload cache from (" + parentFile + ") ==> " + count
+                                        + " items");
                     }
 
                 }
 
                 if (PhotoPropertiesUtil.isImage(displayName, PhotoPropertiesUtil.IMG_TYPE_ALL | PhotoPropertiesUtil.IMG_TYPE_XMP)) {
-                    return logFindFileResult(parentFile, currentFileCache.lastChildDocFiles.get(displayName.toLowerCase()));
+                    return logFindFileResult(debugContext, parentFile, currentFileCache.lastChildDocFiles.get(displayName.toLowerCase()));
                 }
             }
         }
-        return logFindFileResult(parentFile, parentDoc.findFile(displayName));
+        return logFindFileResult(debugContext, parentFile, parentDoc.findFile(displayName));
     }
 
-    private DocumentFile logFindFileResult(File parentFile, DocumentFile documentFile) {
-        if (FileFacade.debugLogSAFFacade) {
-            Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
-                    + ".findFile(" + parentFile + ",cache="
-                    + Global.android_DocumentFile_find_cache
-                    + ") ==> " + documentFile);
+    private DocumentFile logFindFileResult(String debugContext, File parentFile, DocumentFile documentFile) {
+        if (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache) {
+            Log.i(TAG,
+                    ((debugContext == null) ? "" : debugContext)
+                            + this.getClass().getSimpleName()
+                            + ".findFile(" + parentFile + ",cache="
+                            + Global.android_DocumentFile_find_cache
+                            + ") ==> " + documentFile);
         }
         return documentFile;
     }
