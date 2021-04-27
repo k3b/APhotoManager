@@ -214,7 +214,7 @@ public abstract class FilePermissionActivity extends ActivityWithAsyncTaskDialog
         currentRootFileRequest = null;
 
         if ((rootFile != null) && (documentRootUri != null)) {
-            getDocumentFileTranslator().addRoot(rootFile, documentRootUri);
+            getDocumentFileTranslator().addRoot2DirCache(rootFile, documentRootUri);
             if (permissionGrantedHandler != null) {
                 permissionGrantedHandler.afterGrant(this);
             }

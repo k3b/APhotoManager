@@ -70,8 +70,6 @@ public class DocumentFileTranslator {
      */
     private final Map<File, DocumentFile> dirCache = new HashMap<>();
     protected DocumentFileCache documentFileCache = new DocumentFileCache();
-
-
     private static final File internalRootCandidate = new File("/storage/emulated/0");
     // for debugging
     private static int id = 1;
@@ -88,24 +86,34 @@ public class DocumentFileTranslator {
             root = new Root(context.getApplicationContext());
 
         }
-        return new DocumentFileTranslator(context, "").init();
+        return new DocumentFileTranslator(context, "").initCache();
     }
 
-    private DocumentFileTranslator init() {
+    /**
+     * Livecycle: Indicate that {@link #getDirCache()} is invalid and must be reloaded
+     *
+     * @param eventSourceOrNull the class that initiated the invalidate
+     */
+    public static void invalidateDirCache(Object eventSourceOrNull) {
+        if (eventSourceOrNull instanceof DocumentFileTranslator) {
+            ((DocumentFileTranslator) eventSourceOrNull).dirCacheGeneratetionID++;
+        }
+        dirCacheGlobalGeneratetionID++;
+    }
+
+    private DocumentFileTranslator initDirCache() {
         File rootFile = getInternalStorageRoot();
         String debugContext = "init";
         if (rootFile != null) {
             rootFile = rootFile.getAbsoluteFile();
             DocumentFile docRoot = DocumentFile.fromFile(rootFile);
             if ((docRoot != null) && docRoot.exists() && docRoot.isDirectory() && docRoot.canWrite()) {
-                add(debugContext, rootFile, docRoot);
+                add2DirCache(debugContext, rootFile, docRoot);
             }
         }
         for (Map.Entry<String, String> enty : root.dir2uri.entrySet()) {
-            add(debugContext, new File(enty.getKey()), DocumentFile.fromTreeUri(context, Uri.parse(enty.getValue())));
+            add2DirCache(debugContext, new File(enty.getKey()), DocumentFile.fromTreeUri(context, Uri.parse(enty.getValue())));
         }
-        documentFileCache = new DocumentFileCache();
-
         return this;
     }
 
@@ -117,16 +125,10 @@ public class DocumentFileTranslator {
         return null;
     }
 
-    /**
-     * Livecycle: Indicate that {@link #getDirCache()} is invalid and must be reloaded
-     *
-     * @param eventSourceOrNull the class that initiated the invalidate
-     */
-    public static void invalidate(Object eventSourceOrNull) {
-        if (eventSourceOrNull instanceof DocumentFileTranslator) {
-            ((DocumentFileTranslator) eventSourceOrNull).dirCacheGeneratetionID++;
-        }
-        dirCacheGlobalGeneratetionID ++;
+    private DocumentFileTranslator initCache() {
+        initDirCache();
+        documentFileCache = new DocumentFileCache();
+        return this;
     }
 
     public boolean isKnownRoot(File candidate) {
@@ -140,26 +142,26 @@ public class DocumentFileTranslator {
         return false;
     }
 
-    public DocumentFileTranslator addRoot(File directory, Uri documentRootUri) {
+    public DocumentFileTranslator addRoot2DirCache(File directory, Uri documentRootUri) {
         if (root.add(directory.getAbsolutePath(), documentRootUri.toString())) {
-            add("addRoot", directory, DocumentFile.fromTreeUri(context, documentRootUri));
-            invalidate(this);
+            add2DirCache("addRoot2DirCache", directory, DocumentFile.fromTreeUri(context, documentRootUri));
+            invalidateDirCache(this);
             root.saveToPrefs();
         }
         return this;
     }
 
-    protected Map<File, DocumentFile> getDirCache() {
+    private Map<File, DocumentFile> getDirCache() {
         if (dirCacheGeneratetionID != dirCacheGlobalGeneratetionID) {
             // dirCache was invalidated from outside. Must be re-created
             dirCache.clear();
             dirCacheGeneratetionID = dirCacheGlobalGeneratetionID;
-            init();
+            initCache();
         }
         return dirCache;
     }
 
-    protected DocumentFile getFromCache(String debugContext, File fileOrDir, boolean isDir) {
+    private DocumentFile getFromDirCache(String debugContext, File fileOrDir, boolean isDir) {
         DocumentFile result = getDirCache().get(fileOrDir);
         if (result == null && DocumentFileTranslator.debugLogSAFCache) {
             Log.i(FileFacade.LOG_TAG,
@@ -176,7 +178,7 @@ public class DocumentFileTranslator {
     /**
      * add mapping from file-sdcard, -usbstick, -networkstorage to documentFileDirRoot
      */
-    private DocumentFileTranslator add(String debugContext, File directory, DocumentFile documentFileDir) {
+    private DocumentFileTranslator add2DirCache(String debugContext, File directory, DocumentFile documentFileDir) {
         if ((documentFileDir != null) && documentFileDir.isDirectory()) {
             if (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache) {
                 Uri uri = (documentFileDir != null) ? documentFileDir.getUri() : null;
@@ -191,7 +193,7 @@ public class DocumentFileTranslator {
     private DocumentFile getDocumentFileOrDirImpl(String debugContext, File fileOrDir, boolean isDir) {
         DocumentFile result = null;
         if (fileOrDir != null) {
-            result = getFromCache(debugContext, fileOrDir, isDir);
+            result = getFromDirCache(debugContext, fileOrDir, isDir);
             if (result == null) {
                 DocumentFile parent = getDocumentFileOrDirImpl(debugContext, fileOrDir.getParentFile(), true);
                 if (parent != null) {
@@ -216,7 +218,7 @@ public class DocumentFileTranslator {
                     foundDoc = childDoc;
                 }
                 if (childDoc.isDirectory()) {
-                    add(debugContext + " findFile ", new File(parentFile, childDocName), foundDoc);
+                    add2DirCache(debugContext + " findFile ", new File(parentFile, childDocName), foundDoc);
                 }
             }
             return foundDoc;
@@ -233,7 +235,7 @@ public class DocumentFileTranslator {
     public DocumentFile getOrCreateDirectory(String debugContext, File directory) {
         DocumentFile result = null;
         if (directory != null) {
-            result = getFromCache(debugContext, directory, true);
+            result = getFromDirCache(debugContext, directory, true);
             if (result == null) {
                 DocumentFile parent = getOrCreateDirectory(debugContext, directory.getParentFile());
                 if ((parent != null) && parent.isDirectory()) {
@@ -247,7 +249,7 @@ public class DocumentFileTranslator {
 
                         Global.android_DocumentFile_find_cache = false;
                         result = parent.createDirectory(directory.getName());
-                        add(debugContext + " created dir ", directory, result);
+                        add2DirCache(debugContext + " created dir ", directory, result);
                     }
                 }
             }
