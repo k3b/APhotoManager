@@ -42,9 +42,17 @@ import de.k3b.io.FileNameUtil;
 import de.k3b.io.filefacade.FileFacade;
 
 /**
- * Manage permission
+ * Manage permission in lifecycle for Android-6 ff {@link android.app.Activity}
  * * write to external-storage and
  * * write to sdcard/usbstick,....
+ * <p>
+ * implemented in {@link #onCreate(Bundle)}
+ * when done executes in {@link #onCreateEx(Bundle)} in inherited class
+ * <p>
+ * how to use:
+ * * In all activities replace ".... extends {@link android.app.Activity} with extends {@link FilePermissionActivity}
+ * * rename {@link #onCreate(Bundle)} to {@link #onCreateEx(Bundle)}
+ * * make shure that in onCreateEx() that there is no call to super.onCreate()
  */
 public abstract class FilePermissionActivity extends ActivityWithAsyncTaskDialog {
     private static final int REQUEST_ROOT_DIR = 2001;

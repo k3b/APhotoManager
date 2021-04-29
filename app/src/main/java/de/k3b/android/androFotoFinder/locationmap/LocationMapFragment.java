@@ -169,6 +169,12 @@ public class LocationMapFragment extends DialogFragment {
 
         if (mFotoMarkerRecycler != null) mFotoMarkerRecycler.empty();
         mSelectedItemsHandler = null;
+
+        // prevent exception "LocationMapViewer has leaked IntentReceiver"
+        // search for "osmdroid MinimapOverlay unregisterReceiver" found this solution
+        // https://stackoverflow.com/questions/37304905/leaked-intentreceiver-exception-using-osmdroid
+        this.mMapView.onDetach();
+
         super.onDestroy();
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(getActivity());
         // refWatcher.watch(this);
@@ -272,7 +278,7 @@ public class LocationMapFragment extends DialogFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_location_map, container, false);
 
-        mMapView = (MapView) view.findViewById(R.id.mapview);
+        mMapView = view.findViewById(R.id.mapview);
 
         if ((Global.mapsForgeDir == null) || (!Global.mapsForgeDir.exists()) || (!Global.mapsForgeDir.isDirectory())) {
             Global.mapsForgeEnabled = false;
@@ -282,7 +288,7 @@ public class LocationMapFragment extends DialogFragment {
             MapsForgeSupport.load(getActivity(), mMapView, Global.mapsForgeDir);
         }
 
-        this.mCurrentPhoto = (ImageView) view.findViewById(R.id.image);
+        this.mCurrentPhoto = view.findViewById(R.id.image);
         this.mCurrentPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -387,7 +393,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     protected void defineButtons(View view) {
-        Button cmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
+        Button cmdCancel = view.findViewById(R.id.cmd_cancel);
         if (cmdCancel != null) {
             // only available on tablets.
             // on small screen it would block the zoom out button
@@ -400,7 +406,7 @@ public class LocationMapFragment extends DialogFragment {
             });
         }
 
-        Button cmdOk = (Button) view.findViewById(R.id.ok);
+        Button cmdOk = view.findViewById(R.id.ok);
         cmdOk.setVisibility(View.VISIBLE);
         cmdOk.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -434,7 +440,7 @@ public class LocationMapFragment extends DialogFragment {
     private void createZoomBar(View view) {
         mMapView.setBuiltInZoomControls(true);
 
-        mZoomBar = (SeekBar) view.findViewById(R.id.zoomBar);
+        mZoomBar = view.findViewById(R.id.zoomBar);
         mMinZoomLevel = mMapView.getMinZoomLevel();
         mMaxZoomLevel = OsmdroidUtil.getMaximumZoomLevel(mMapView);
 
