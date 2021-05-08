@@ -90,3 +90,11 @@ Feedback, translation and contributions are welcomed.
 * [Discuss pro and cons, features, featurerequests and to provide news and support about the app on reddit.](https://www.reddit.com/r/APhotoManager/)
 * [Issue tracker](https://github.com/k3b/APhotoManager/issues)
 * You can help to translate this app via https://crowdin.com/project/AndroFotoFinder
+-----
+
+## Donations: 
+
+If you like this app please consider to donating to https://wiki.openstreetmap.org/wiki/Donations .
+
+Since android-developping is a hobby (and an education tool) i donot want any 
+money for my apps so donation should go to projects i benefit from.
