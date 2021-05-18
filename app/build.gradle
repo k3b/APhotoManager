@@ -20,6 +20,11 @@ android {
 								// Android 6.0 Marshmallow (API 23); Android 7.0 Nougat (API 24)
         // maxSdkVersion 28        // #155: android-10=api29
 
+        /* from https://developer.android.com/training/data-storage/shared/media
+            If your app targets Android 10 (API level 29) or higher, in order for your app
+            to retrieve unredacted Exif metadata from photos, you need to declare the ACCESS_MEDIA_LOCATION
+            permission in your app's manifest, then request this permission at runtime.
+        * */
         targetSdkVersion 23  // Android 6.0 Marshmallow (API 23) below compileSdkVersion to enamble more backward-compatibility
 
 		// Releases on f-droid

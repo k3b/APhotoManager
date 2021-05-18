@@ -127,6 +127,7 @@ public class DocumentFileTranslator {
 
     private DocumentFileTranslator initCache() {
         initDirCache();
+        // !!! one DocumentFileCache per dir ????
         documentFileCache = new DocumentFileCache();
         return this;
     }
