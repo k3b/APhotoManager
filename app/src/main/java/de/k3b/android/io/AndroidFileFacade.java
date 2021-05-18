@@ -25,7 +25,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,6 +36,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.widget.FilePermissionActivity;
+import de.k3b.androidx.Documentfile.DocumentFileEx;
 import de.k3b.io.Converter;
 import de.k3b.io.FileUtils;
 import de.k3b.io.filefacade.FileFacade;
@@ -44,7 +44,7 @@ import de.k3b.io.filefacade.IFile;
 
 /**
  * de.k3b.android.io.AndroidFileFacade has the same methods as java.io.File
- * but is implemented through Android specific {@link DocumentFile}
+ * but is implemented through Android specific {@link DocumentFileEx}
  */
 public class AndroidFileFacade extends FileFacade {
     public static final String LOG_TAG = "k3b.AndFileFacade";
@@ -52,10 +52,10 @@ public class AndroidFileFacade extends FileFacade {
     private static DocumentFileTranslator documentFileTranslator = null;
 
     /**
-     * androidFile=null && !androidFileMayExist means: DocumentFile does not exist (yet)
+     * androidFile=null && !androidFileMayExist means: DocumentFileEx does not exist (yet)
      */
     @Nullable
-    private DocumentFile androidFile = null;
+    private DocumentFileEx androidFile = null;
 
     /**
      * original android media content URI
@@ -96,7 +96,7 @@ public class AndroidFileFacade extends FileFacade {
         }
     }
 
-    private AndroidFileFacade(@Nullable DocumentFile parentFile, @NonNull File parentFile1) {
+    private AndroidFileFacade(@Nullable DocumentFileEx parentFile, @NonNull File parentFile1) {
         super(parentFile1);
         androidFile = parentFile;
     }
@@ -118,7 +118,7 @@ public class AndroidFileFacade extends FileFacade {
         super.set(src);
     }
 
-    private DocumentFile getDocumentFileOrDirOrNull(String debugContext, @NonNull File file) {
+    private DocumentFileEx getDocumentFileOrDirOrNull(String debugContext, @NonNull File file) {
         return documentFileTranslator.getDocumentFileOrDirOrNull(debugContext, file, null);
     }
 
@@ -162,37 +162,37 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public boolean exists() {
-        DocumentFile androidFile = getAndroidFile("exists", false);
+        DocumentFileEx androidFile = getAndroidFile("exists", false);
         return (androidFile != null) && androidFile.exists();
     }
 
     @Override
     public boolean canWrite() {
-        final DocumentFile androidFile = getAndroidFile("canWrite", false);
+        final DocumentFileEx androidFile = getAndroidFile("canWrite", false);
         return (androidFile != null) && androidFile.canWrite();
     }
 
     @Override
     public boolean canRead() {
-        final DocumentFile androidFile = getAndroidFile("canRead", false);
+        final DocumentFileEx androidFile = getAndroidFile("canRead", false);
         return (androidFile != null) && androidFile.canRead();
     }
 
     @Override
     public boolean isFile() {
-        final DocumentFile androidFile = getAndroidFile("isFile", false);
+        final DocumentFileEx androidFile = getAndroidFile("isFile", false);
         return (androidFile != null) && androidFile.isFile();
     }
 
     @Override
     public boolean isDirectory() {
-        final DocumentFile androidFile = getAndroidFile("isDirectory", false);
+        final DocumentFileEx androidFile = getAndroidFile("isDirectory", false);
         return (androidFile != null) && androidFile.isDirectory();
     }
 
     @Override
     public boolean isHidden() {
-        final DocumentFile androidFile = getAndroidFile("isHidden", false);
+        final DocumentFileEx androidFile = getAndroidFile("isHidden", false);
         if ((androidFile != null)) {
             final String name = androidFile.getName();
             return (name == null) || name.startsWith(".");
@@ -207,7 +207,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public IFile getParentFile() {
-        final DocumentFile androidFile = getAndroidFile("getParentFile", false);
+        final DocumentFileEx androidFile = getAndroidFile("getParentFile", false);
         if (androidFile != null) {
             return new AndroidFileFacade(androidFile.getParentFile(), getFile().getParentFile());
         } else {
@@ -219,7 +219,7 @@ public class AndroidFileFacade extends FileFacade {
     public String getAsUriString() {
         if (readUri != null) return readUri.toString();
 
-        final DocumentFile androidFile = getAndroidFile("getAsUriString", false);
+        final DocumentFileEx androidFile = getAndroidFile("getAsUriString", false);
         final Uri uri = (androidFile != null) ? androidFile.getUri() : null;
         if (uri != null) {
             return uri.toString();
@@ -234,7 +234,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public String getName() {
-        final DocumentFile androidFile = getAndroidFile("getName", false);
+        final DocumentFileEx androidFile = getAndroidFile("getName", false);
         if (androidFile != null) {
             return androidFile.getName();
         }
@@ -243,7 +243,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public long lastModified() {
-        final DocumentFile androidFile = getAndroidFile("lastModified", false);
+        final DocumentFileEx androidFile = getAndroidFile("lastModified", false);
         if (androidFile != null) {
             return androidFile.lastModified();
         }
@@ -261,7 +261,7 @@ public class AndroidFileFacade extends FileFacade {
     public IFile[] listFiles() {
         String debugContext = "listFiles";
         enableCache(debugContext, true);
-        final DocumentFile androidFile = getAndroidFile(debugContext, false);
+        final DocumentFileEx androidFile = getAndroidFile(debugContext, false);
         if (androidFile != null) {
             return get(androidFile.listFiles());
         }
@@ -287,10 +287,10 @@ public class AndroidFileFacade extends FileFacade {
         String dbgContext = "listDirs";
         enableCache(dbgContext, true);
         List<IFile> found = new ArrayList<>();
-        final DocumentFile androidFile = getAndroidFile(dbgContext, false);
+        final DocumentFileEx androidFile = getAndroidFile(dbgContext, false);
         if (androidFile != null) {
             final File parent = getFile();
-            for (DocumentFile file : androidFile.listFiles()) {
+            for (DocumentFileEx file : androidFile.listFiles()) {
                 if (file != null &&
                         (file.isDirectory() || accept(file.getName().toLowerCase()))) {
                     found.add(new AndroidFileFacade(
@@ -303,7 +303,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public long length() {
-        final DocumentFile androidFile = getAndroidFile("length", false);
+        final DocumentFileEx androidFile = getAndroidFile("length", false);
         if (androidFile != null) {
             return androidFile.length();
         }
@@ -318,10 +318,10 @@ public class AndroidFileFacade extends FileFacade {
     @Override
     public OutputStream openOutputStream() throws FileNotFoundException {
         String debugContext = "openOutputStream";
-        DocumentFile androidFile = getAndroidFile(debugContext, false);
+        DocumentFileEx androidFile = getAndroidFile(debugContext, false);
         String context = "openOutputStream overwrite existing ";
         if (androidFile == null) {
-            final DocumentFile documentFileParent = documentFileTranslator.getOrCreateDirectory(debugContext, getFile().getParentFile());
+            final DocumentFileEx documentFileParent = documentFileTranslator.getOrCreateDirectory(debugContext, getFile().getParentFile());
             androidFile = this.androidFile = documentFileParent.createFile(null, getFile().getName());
             context = "openOutputStream create new ";
 
@@ -343,7 +343,7 @@ public class AndroidFileFacade extends FileFacade {
             }
             return documentFileTranslator.openInputStream(readUri);
         }
-        final DocumentFile androidFile = getAndroidFile(debugContext, true);
+        final DocumentFileEx androidFile = getAndroidFile(debugContext, true);
         final InputStream resultInputStream = documentFileTranslator.openInputStream(androidFile);
         if (resultInputStream == null) {
             final String msg = debugContext + this + " for uri "
@@ -367,11 +367,11 @@ public class AndroidFileFacade extends FileFacade {
     }
 
 
-    private IFile[] get(DocumentFile[] docs) {
+    private IFile[] get(DocumentFileEx[] docs) {
         AndroidFileFacade[] f = new AndroidFileFacade[docs.length];
         final File parent = getFile();
         for (int i = 0; i < docs.length; i++) {
-            final DocumentFile doc = docs[i];
+            final DocumentFileEx doc = docs[i];
             f[i] = new AndroidFileFacade(doc, new File(parent, doc.getName()));
         }
 
@@ -381,10 +381,10 @@ public class AndroidFileFacade extends FileFacade {
     /**
      * implements loads on demand.
      *
-     * @return null means: DocumentFile does not exist (yet)
+     * @return null means: DocumentFileEx does not exist (yet)
      */
     @Nullable
-    private DocumentFile getAndroidFile(String debugContext, boolean forOpenInputStream) {
+    private DocumentFileEx getAndroidFile(String debugContext, boolean forOpenInputStream) {
         if ((androidFile == null) && (forOpenInputStream || androidFileMayExist)) {
             androidFile = getDocumentFileOrDirOrNull(debugContext, getFile());
             androidFileMayExist = false;

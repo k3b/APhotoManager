@@ -20,12 +20,11 @@ package de.k3b.android.io;
 
 import android.util.Log;
 
-import androidx.documentfile.provider.DocumentFile;
-
 import java.io.File;
 import java.util.HashMap;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.androidx.Documentfile.DocumentFileEx;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.media.PhotoPropertiesUtil;
 
@@ -41,18 +40,18 @@ public class DocumentFileCache {
         return currentFileCache;
     }
 
-    public DocumentFile findFile(String debugContext, DocumentFile parentDoc, File parentFile, String displayName) {
+    public DocumentFileEx findFile(String debugContext, DocumentFileEx parentDoc, File parentFile, String displayName) {
         if (Global.android_DocumentFile_find_cache) {
             CurrentFileCache currentFileCache = getCacheStrategy();
 
             if (currentFileCache != null) {
                 if (!parentFile.equals(currentFileCache.lastParentFile)) {
-                    HashMap<String, DocumentFile> lastChildDocFiles = currentFileCache.lastChildDocFiles;
+                    HashMap<String, DocumentFileEx> lastChildDocFiles = currentFileCache.lastChildDocFiles;
                     currentFileCache.lastParentFile = parentFile;
                     lastChildDocFiles.clear();
                     int count = 0;
-                    DocumentFile[] childDocuments = parentDoc.listFiles();
-                    for (DocumentFile childDoc : childDocuments) {
+                    DocumentFileEx[] childDocuments = parentDoc.listFiles();
+                    for (DocumentFileEx childDoc : childDocuments) {
                         if (childDoc.isFile()) {
                             String childDocName = childDoc.getName().toLowerCase();
                             if (PhotoPropertiesUtil.isImage(childDocName, PhotoPropertiesUtil.IMG_TYPE_ALL | PhotoPropertiesUtil.IMG_TYPE_XMP)) {
@@ -79,7 +78,7 @@ public class DocumentFileCache {
         return logFindFileResult(debugContext, parentFile, parentDoc.findFile(displayName));
     }
 
-    private DocumentFile logFindFileResult(String debugContext, File parentFile, DocumentFile documentFile) {
+    private DocumentFileEx logFindFileResult(String debugContext, File parentFile, DocumentFileEx documentFile) {
         if (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache) {
             Log.i(TAG,
                     ((debugContext == null) ? "" : debugContext)
@@ -100,7 +99,7 @@ public class DocumentFileCache {
      * Mapping from local file name inside lastParentFile to photo-related-DocumentFiles
      */
     private static class CurrentFileCache {
-        private final HashMap<String, DocumentFile> lastChildDocFiles = new HashMap<>();
+        private final HashMap<String, DocumentFileEx> lastChildDocFiles = new HashMap<>();
         private File lastParentFile = null;
     }
 

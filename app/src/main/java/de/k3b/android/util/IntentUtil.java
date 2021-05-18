@@ -32,7 +32,6 @@ import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 
@@ -41,6 +40,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.io.DocumentFileTranslator;
 import de.k3b.android.widget.ActivityWithCallContext;
+import de.k3b.androidx.Documentfile.DocumentFileEx;
 import de.k3b.io.StringUtils;
 import de.k3b.io.filefacade.IFile;
 
@@ -76,7 +76,7 @@ public class IntentUtil implements Common {
             String scheme = uri.getScheme();
             if ((scheme == null) || ("file".equals(scheme))) {
                 path = uri.getPath();
-            } else if (DocumentFile.isDocumentUri(context, uri)) {
+            } else if (DocumentFileEx.isDocumentUri(context, uri)) {
                 path = DocumentFileTranslator.pathFromUri(uri.toString());
             } else if ("content".equals(scheme)) {
                 // try to translate via media db

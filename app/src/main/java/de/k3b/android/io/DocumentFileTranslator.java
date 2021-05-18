@@ -26,8 +26,6 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import androidx.documentfile.provider.DocumentFile;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -37,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.androidx.Documentfile.DocumentFileEx;
 import de.k3b.io.filefacade.FileFacade;
 
 /**
@@ -48,8 +47,8 @@ public class DocumentFileTranslator {
     public static final String TAG = "k3b.DocFileTranslator";
     public static final boolean debugLogSAFCache = true;
 
-    // used by android.support.v4.provider.DocumentFile
-    public static final String TAG_DOCFILE = "DocumentFile";
+    // used by android.support.v4.provider.DocumentFileEx
+    public static final String TAG_DOCFILE = "DocumentFileEx";
 
     private static final String SAFROOTPREF_KEY_SAF_ROOT_PREFIX = "safroot-";
     private final Context context;
@@ -66,9 +65,9 @@ public class DocumentFileTranslator {
     private int dirCacheGeneratetionID = dirCacheGlobalGeneratetionID;
 
     /**
-     * Mapping from known File to DocumentFile-Directory translation
+     * Mapping from known File to DocumentFileEx-Directory translation
      */
-    private final Map<File, DocumentFile> dirCache = new HashMap<>();
+    private final Map<File, DocumentFileEx> dirCache = new HashMap<>();
     protected DocumentFileCache documentFileCache = new DocumentFileCache();
     private static final File internalRootCandidate = new File("/storage/emulated/0");
     // for debugging
@@ -106,13 +105,13 @@ public class DocumentFileTranslator {
         String debugContext = "init";
         if (rootFile != null) {
             rootFile = rootFile.getAbsoluteFile();
-            DocumentFile docRoot = DocumentFile.fromFile(rootFile);
+            DocumentFileEx docRoot = DocumentFileEx.fromFile(rootFile);
             if ((docRoot != null) && docRoot.exists() && docRoot.isDirectory() && docRoot.canWrite()) {
                 add2DirCache(debugContext, rootFile, docRoot);
             }
         }
         for (Map.Entry<String, String> enty : root.dir2uri.entrySet()) {
-            add2DirCache(debugContext, new File(enty.getKey()), DocumentFile.fromTreeUri(context, Uri.parse(enty.getValue())));
+            add2DirCache(debugContext, new File(enty.getKey()), DocumentFileEx.fromTreeUri(context, Uri.parse(enty.getValue())));
         }
         return this;
     }
@@ -145,14 +144,14 @@ public class DocumentFileTranslator {
 
     public DocumentFileTranslator addRoot2DirCache(File directory, Uri documentRootUri) {
         if (root.add(directory.getAbsolutePath(), documentRootUri.toString())) {
-            add2DirCache("addRoot2DirCache", directory, DocumentFile.fromTreeUri(context, documentRootUri));
+            add2DirCache("addRoot2DirCache", directory, DocumentFileEx.fromTreeUri(context, documentRootUri));
             invalidateDirCache(this);
             root.saveToPrefs();
         }
         return this;
     }
 
-    private Map<File, DocumentFile> getDirCache() {
+    private Map<File, DocumentFileEx> getDirCache() {
         if (dirCacheGeneratetionID != dirCacheGlobalGeneratetionID) {
             // dirCache was invalidated from outside. Must be re-created
             dirCache.clear();
@@ -162,8 +161,8 @@ public class DocumentFileTranslator {
         return dirCache;
     }
 
-    private DocumentFile getFromDirCache(String debugContext, File fileOrDir, boolean isDir) {
-        DocumentFile result = getDirCache().get(fileOrDir);
+    private DocumentFileEx getFromDirCache(String debugContext, File fileOrDir, boolean isDir) {
+        DocumentFileEx result = getDirCache().get(fileOrDir);
         if (result == null && DocumentFileTranslator.debugLogSAFCache) {
             Log.i(FileFacade.LOG_TAG,
                     ((debugContext == null) ? "" : debugContext)
@@ -179,7 +178,7 @@ public class DocumentFileTranslator {
     /**
      * add mapping from file-sdcard, -usbstick, -networkstorage to documentFileDirRoot
      */
-    private DocumentFileTranslator add2DirCache(String debugContext, File directory, DocumentFile documentFileDir) {
+    private DocumentFileTranslator add2DirCache(String debugContext, File directory, DocumentFileEx documentFileDir) {
         if ((documentFileDir != null) && documentFileDir.isDirectory()) {
             if (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache) {
                 Uri uri = (documentFileDir != null) ? documentFileDir.getUri() : null;
@@ -191,12 +190,12 @@ public class DocumentFileTranslator {
         return this;
     }
 
-    private DocumentFile getDocumentFileOrDirImpl(String debugContext, File fileOrDir, boolean isDir) {
-        DocumentFile result = null;
+    private DocumentFileEx getDocumentFileOrDirImpl(String debugContext, File fileOrDir, boolean isDir) {
+        DocumentFileEx result = null;
         if (fileOrDir != null) {
             result = getFromDirCache(debugContext, fileOrDir, isDir);
             if (result == null) {
-                DocumentFile parent = getDocumentFileOrDirImpl(debugContext, fileOrDir.getParentFile(), true);
+                DocumentFileEx parent = getDocumentFileOrDirImpl(debugContext, fileOrDir.getParentFile(), true);
                 if (parent != null) {
                     result = findFile(debugContext, parent, fileOrDir, isDir);
                 }
@@ -205,15 +204,15 @@ public class DocumentFileTranslator {
         return result;
     }
 
-    private DocumentFile findFile(String debugContext, DocumentFile parentDoc, File fileOrDir, boolean isDir) {
+    private DocumentFileEx findFile(String debugContext, DocumentFileEx parentDoc, File fileOrDir, boolean isDir) {
         String displayName = fileOrDir.getName();
         File parentFile = fileOrDir.getParentFile();
         if (isDir) {
             // The original parentDoc.findFile(fileOrDir.getName()) is implemented
             // as expensive, frequent called parentDoc.listFiles().
             // Optimisation: Sideeffect fill the dir cache while searching for file.
-            DocumentFile foundDoc = null;
-            for (DocumentFile childDoc : parentDoc.listFiles()) {
+            DocumentFileEx foundDoc = null;
+            for (DocumentFileEx childDoc : parentDoc.listFiles()) {
                 String childDocName = childDoc.getName();
                 if (foundDoc == null && displayName.equals(childDocName)) {
                     foundDoc = childDoc;
@@ -233,12 +232,12 @@ public class DocumentFileTranslator {
      *
      * @return the found or created directory
      */
-    public DocumentFile getOrCreateDirectory(String debugContext, File directory) {
-        DocumentFile result = null;
+    public DocumentFileEx getOrCreateDirectory(String debugContext, File directory) {
+        DocumentFileEx result = null;
         if (directory != null) {
             result = getFromDirCache(debugContext, directory, true);
             if (result == null) {
-                DocumentFile parent = getOrCreateDirectory(debugContext, directory.getParentFile());
+                DocumentFileEx parent = getOrCreateDirectory(debugContext, directory.getParentFile());
                 if ((parent != null) && parent.isDirectory()) {
                     result = findFile(debugContext, parent, directory, true);
 
@@ -259,15 +258,15 @@ public class DocumentFileTranslator {
     }
 
     /**
-     * gets existing DocumentFile that correspondws to fileOrDir
+     * gets existing DocumentFileEx that correspondws to fileOrDir
      * or null if not exists or no write permissions
      *
-     * @param fileOrDir where DocumentFile is searched for
+     * @param fileOrDir where DocumentFileEx is searched for
      * @param isDir     if null: return null if isDir is matchning
-     * @return DocumentFile or null
+     * @return DocumentFileEx or null
      */
-    public DocumentFile getDocumentFileOrDirOrNull(String debugContext, File fileOrDir, Boolean isDir) {
-        DocumentFile result = null;
+    public DocumentFileEx getDocumentFileOrDirOrNull(String debugContext, File fileOrDir, Boolean isDir) {
+        DocumentFileEx result = null;
         String path = fileOrDir != null ? fileOrDir.getAbsolutePath() : "";
         try {
             final String context = (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache)
@@ -294,7 +293,7 @@ public class DocumentFileTranslator {
         return result;
     }
 
-    public InputStream openInputStream(DocumentFile doc) throws FileNotFoundException {
+    public InputStream openInputStream(DocumentFileEx doc) throws FileNotFoundException {
         if (doc != null) {
             return getContentResolver().openInputStream(doc.getUri());
         }
@@ -305,7 +304,7 @@ public class DocumentFileTranslator {
         return context.getContentResolver().openInputStream(readUri);
     }
 
-    public OutputStream createOutputStream(DocumentFile doc) throws FileNotFoundException {
+    public OutputStream createOutputStream(DocumentFileEx doc) throws FileNotFoundException {
         if (doc != null) {
             return getContentResolver().openOutputStream(doc.getUri());
         }
