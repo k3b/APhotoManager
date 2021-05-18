@@ -108,7 +108,7 @@ public class OsUtils {
             }
 
             // legacy support: assume sd-card is sibling to externalStorageFile. (i.e. /mnt/sdcard may also has a sibling /mnt/extsd)
-            final IFile mountRootFile = externalStorageFile.getParentIFile();
+            final IFile mountRootFile = externalStorageFile.getParentFile();
             final IFile[] mounts = (mountRootFile == null) ? null : mountRootFile.listIFiles();
             if ((mounts != null) && mounts.length > 1) {
                 for (IFile mnt : mounts) {

@@ -52,7 +52,7 @@ public class XmpFile extends FileWrapper implements IFile {
     public static XmpFile getSidecar(IFile file, boolean longFormat) {
         if (file == null) return null;
         String name = file.getName();
-        return getSidecar(file.getParentIFile(), name, longFormat);
+        return getSidecar(file.getParentFile(), name, longFormat);
     }
 
     public static XmpFile getSidecar(IFile parent, String name, boolean longFormat) {

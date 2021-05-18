@@ -63,7 +63,7 @@ public interface IFile {
 
     void setReadUri(String readUri);
 
-    IFile getParentIFile();
+    IFile getParentFile();
 
     String getParent();
 

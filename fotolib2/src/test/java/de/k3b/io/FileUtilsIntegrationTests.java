@@ -48,7 +48,7 @@ public class FileUtilsIntegrationTests {
     public void shouldBeHidden_Nomedia() throws IOException {
         IFile root = OUTDIR_ROOT.createIFile("nomedia/sub");
         root.mkdirs();
-        IFile marker = root.getParentIFile().createIFile(FileUtils.MEDIA_IGNORE_FILENAME);
+        IFile marker = root.getParentFile().createIFile(FileUtils.MEDIA_IGNORE_FILENAME);
         final OutputStream outputStream = marker.openOutputStream();
         outputStream.close();
 

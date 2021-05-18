@@ -206,12 +206,12 @@ public class AndroidFileFacade extends FileFacade {
     }
 
     @Override
-    public IFile getParentIFile() {
+    public IFile getParentFile() {
         final DocumentFileEx androidFile = getAndroidFile("getParentFile", false);
         if (androidFile != null) {
             return new AndroidFileFacade(androidFile.getParentFile(), getFile().getParentFile());
         } else {
-            return super.getParentIFile();
+            return super.getParentFile();
         }
     }
 

@@ -84,7 +84,7 @@ public class OSDirectory extends FileCacheItem<OSDirectory> implements IDirector
         OSDirectory provider = root.findViaFile(root, file);
         if (provider != null) return provider;
 
-        OSDirectory parentDir = find(root, file.getParentIFile());
+        OSDirectory parentDir = find(root, file.getParentFile());
         if (parentDir == null) return null;
 
         String name = file.getName();
@@ -191,7 +191,7 @@ public class OSDirectory extends FileCacheItem<OSDirectory> implements IDirector
      */
     @Override
     public void rename(String oldFolderName, String newFolderName) {
-        this.setCurrent(getCurrent().getParentIFile().createIFile(newFolderName));
+        this.setCurrent(getCurrent().getParentFile().createIFile(newFolderName));
     }
 
     /**

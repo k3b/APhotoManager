@@ -148,7 +148,7 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
                         Log.i(Global.LOG_CONTEXT, DBG_CONTEXT + "start form " + uri.toString());
 
                         reader = new InputStreamReader(getContentResolver().openInputStream(uri));
-                        mLoader = new MediaCsvLoader(csvFile.getParentIFile());
+                        mLoader = new MediaCsvLoader(csvFile.getParentFile());
 
                         mLoader.load(reader, new PhotoPropertiesCsvItem());
 

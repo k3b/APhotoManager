@@ -1,8 +1,5 @@
 package de.k3b.androidx.Documentfile;
 
-import android.net.Uri;
-
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.File;
@@ -18,175 +15,103 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
         super(parent);
     }
 
-    @Nullable
-
-    public DocumentFileEx createFile(@NonNull String mimeType, @NonNull String displayName) {
-        return null;
-    }
-
-    @Nullable
-
-    public DocumentFileEx createDirectory(@NonNull String displayName) {
-        return null;
-    }
-
-
-    public Uri getUri() {
-        return null;
-    }
-
-    @Nullable
-
-    public String getName() {
-        return null;
-    }
-
-    public void setLastModified(long fileTime) {
-
-    }
-
-    @Nullable
-
-    public String getType() {
-        return null;
-    }
-
-
-    public boolean isDirectory() {
-        return false;
-    }
-
-    public boolean isHidden() {
-        return false;
-    }
-
-    public boolean isAbsolute() {
-        return false;
-    }
-
-    public String getAbsolutePath() {
-        return null;
-    }
-
-    public IFile getCanonicalIFile() {
-        return null;
-    }
-
-
-    public DocumentFileEx getParentFile() {
-        return null; // super.getParentFile();
-    }
-
-    public String getCanonicalPath() {
-        return null;
-    }
-
-    public String getAsUriString() {
-        return null;
-    }
-
-
-    public void setReadUri(String readUri) {
-
-    }
-
-
-    public String getParent() {
-        return null;
-    }
-
-
-    public boolean isFile() {
-        return false;
-    }
-
-
-    public boolean isVirtual() {
-        return false;
-    }
-
-
-    public long lastModified() {
-        return 0;
-    }
-
-
-    public boolean mkdirs() {
-        return false;
-    }
-
-
-    public long length() {
-        return 0;
-    }
-
-
-    public IFile invalidateParentDirCache() {
-        return null;
-    }
-
-
-    public boolean canRead() {
-        return false;
-    }
-
-
-    public boolean canWrite() {
-        return false;
-    }
-
-
-    public boolean delete() {
-        return false;
-    }
-
-
-    public boolean exists() {
-        return false;
-    }
-
-
-    public IFile[] listIFiles() {
-        return new IFile[0];
-    }
-
-
-    public IFile[] listIDirs() {
-        return new IFile[0];
-    }
-
-
-    public boolean copy(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
-        return false;
-    }
-
-
-    public OutputStream openOutputStream() throws FileNotFoundException {
-        return null;
-    }
-
-
-    public InputStream openInputStream() throws FileNotFoundException {
-        return null;
-    }
-
-
-    public IFile createIFile(String name) {
-        return null;
-    }
-
-
-    public File getFile() {
-        return null;
-    }
-
-
+    @Override
     public void set(IFile src) {
 
     }
 
-
-    public boolean renameTo(@NonNull String displayName) {
+    @Override
+    public boolean isHidden() {
         return false;
+    }
+
+    @Override
+    public boolean isAbsolute() {
+        return false;
+    }
+
+    @Override
+    public String getAbsolutePath() {
+        return null;
+    }
+
+    @Override
+    public IFile getCanonicalIFile() {
+        return null;
+    }
+
+    @Override
+    public String getCanonicalPath() {
+        return null;
+    }
+
+    @Override
+    public String getAsUriString() {
+        return null;
+    }
+
+    @Override
+    public void setReadUri(String readUri) {
+
+    }
+
+    @Override
+    public String getParent() {
+        return null;
+    }
+
+    @Override
+    public void setLastModified(long fileTime) {
+
+    }
+
+    @Override
+    public boolean mkdirs() {
+        return false;
+    }
+
+    @Override
+    public IFile[] listIFiles() {
+        DocumentFileEx[] files = listFiles();
+        IFile[] result = new IFile[files.length];
+        for (int i = files.length - 1; i >= 0; i--) {
+            result[i] = files[i];
+        }
+        return result;
+    }
+
+    @Override
+    public IFile[] listIDirs() {
+        return new IFile[0];
+    }
+
+    @Override
+    public boolean copy(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
+        return false;
+    }
+
+    @Override
+    public OutputStream openOutputStream() throws FileNotFoundException {
+        return null;
+    }
+
+    @Override
+    public InputStream openInputStream() throws FileNotFoundException {
+        return null;
+    }
+
+    @Override
+    public IFile createIFile(String name) {
+        return null;
+    }
+
+    @Override
+    public File getFile() {
+        return null;
+    }
+
+    @Override
+    public IFile invalidateParentDirCache() {
+        return null;
     }
 }

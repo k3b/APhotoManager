@@ -170,7 +170,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         mCurrentOutDir = FileFacade.convert(DEBUG_PREFIX + " mCurrentOutDir",
                 IntentUtil.getFile(intent.getData()));
         if (mCurrentOutDir != null) {
-            if (mCurrentOutDir.isFile()) mCurrentOutDir = mCurrentOutDir.getParentIFile();
+            if (mCurrentOutDir.isFile()) mCurrentOutDir = mCurrentOutDir.getParentFile();
         }
 
         mCurrentAutoprocessingData = null;
@@ -191,7 +191,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         }
 
         if ((mCurrentOutDir == null) && (mSelectedFiles != null) && (mSelectedFiles.size() > 0)) {
-            mCurrentOutDir = mSelectedFiles.getIFile(0).getParentIFile();
+            mCurrentOutDir = mSelectedFiles.getIFile(0).getParentFile();
         }
 
         if (Global.debugEnabled) {

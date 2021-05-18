@@ -42,7 +42,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         if (file == null) return false;
         if (osFileExists(file)) return true;
 
-        IFile parent = file.getParentIFile();
+        IFile parent = file.getParentFile();
         String name = file.getName();
         return osFileExists(XmpFile.getSidecar(parent, name, false))
                 || osFileExists(XmpFile.getSidecar(parent, name, true));
@@ -57,7 +57,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
             return file;
         }
 
-        IFile parent = file.getParentIFile();
+        IFile parent = file.getParentFile();
 
         String filename = file.getName();
         String extension = ")";

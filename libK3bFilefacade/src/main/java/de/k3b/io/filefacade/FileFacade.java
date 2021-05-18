@@ -207,7 +207,7 @@ public class FileFacade implements IFile {
     }
 
     @Override
-    public IFile getParentIFile() {
+    public IFile getParentFile() {
         return convert("FileFacade getParentFile", file.getParentFile());
     }
 

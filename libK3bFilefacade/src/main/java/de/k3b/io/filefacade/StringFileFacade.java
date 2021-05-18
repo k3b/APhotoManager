@@ -154,7 +154,7 @@ public class StringFileFacade implements IFile {
     }
 
     @Override
-    public IFile getParentIFile() {
+    public IFile getParentFile() {
         return parent;
     }
 

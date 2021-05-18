@@ -108,8 +108,8 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public IFile getParentIFile() {
-        return child.getParentIFile();
+    public IFile getParentFile() {
+        return child.getParentFile();
     }
 
     @Override

@@ -207,7 +207,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     @Override
     public IFile getNextFile(IFile sourceFile, Date sourceFileDate, int firstFileInstanceNumber) {
         String name = getFile(sourceFile).getName();
-        IFile outDir = (this.mOutDir != null) ? this.mOutDir : sourceFile.getParentIFile();
+        IFile outDir = (this.mOutDir != null) ? this.mOutDir : sourceFile.getParentFile();
 
         if (!mustRename(name)) {
 			// no rename rule or file already matches rules
@@ -269,7 +269,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     }
 
     public String getParentDirBaseName() {
-        IFile parent = (mOutDir != null) ? mOutDir.getParentIFile() : null;
+        IFile parent = (mOutDir != null) ? mOutDir.getParentFile() : null;
         if (parent != null) return getBaseName(parent.getName());
         return null;
     }

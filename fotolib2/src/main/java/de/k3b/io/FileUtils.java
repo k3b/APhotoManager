@@ -150,7 +150,7 @@ public class FileUtils extends FileUtilsBase {
 
     /** return parent of file if path is not a dir. else return file */
     public static IFile getDir(IFile file) {
-        return ((file != null) && (!file.isDirectory())) ? file.getParentIFile() : file;
+        return ((file != null) && (!file.isDirectory())) ? file.getParentFile() : file;
     }
 
     /** find cildren by regular expression */
@@ -175,7 +175,7 @@ public class FileUtils extends FileUtilsBase {
         if (path != null) {
             if (isHiddenFolder(path))
                 return true;
-            IFile file = path.getParentIFile();
+            IFile file = path.getParentFile();
             String firstDir = file.getAbsolutePath();
             Boolean cacheFind;
             int level = maxLevel;
@@ -194,7 +194,7 @@ public class FileUtils extends FileUtilsBase {
                     }
                     return true;
                 }
-                file = file.getParentIFile();
+                file = file.getParentFile();
             }
             if (nomediaCache != null) {
                 nomediaCache.put(firstDir, false);
@@ -306,7 +306,7 @@ public class FileUtils extends FileUtilsBase {
 
     public static void copyReplace(InputStream sourceStream, IFile destinationFile) throws IOException {
         if (destinationFile.exists()) destinationFile.delete();
-        destinationFile.getParentIFile().mkdirs();
+        destinationFile.getParentFile().mkdirs();
         FileUtilsBase.copy(sourceStream, destinationFile.openOutputStream(), " copyReplace ");
     }
 
@@ -330,7 +330,7 @@ public class FileUtils extends FileUtilsBase {
 
     public static IFile getFirstExistingDir(IFile root) {
         while ((root != null) && (!root.exists() || !root.isDirectory())) {
-            root = root.getParentIFile();
+            root = root.getParentFile();
         }
         return root;
     }

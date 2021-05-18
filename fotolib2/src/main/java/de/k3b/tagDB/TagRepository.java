@@ -288,7 +288,7 @@ public class TagRepository {
         try {
             if ((mItemList != null) && (mItemList.size() > 0)) {
                 if (!this.mFile.exists()) {
-                    this.mFile.getParentIFile().mkdirs();
+                    this.mFile.getParentFile().mkdirs();
                 }
 
                 logger.debug(dbg_context + "save(): " + mItemList.size() + " items to " + this.mFile);
