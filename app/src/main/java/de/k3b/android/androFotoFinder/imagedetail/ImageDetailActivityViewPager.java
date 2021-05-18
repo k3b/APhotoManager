@@ -181,7 +181,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         ArrayList<IFile> missing = new ArrayList<>();
         dbPathSearch = dirToScan.getAbsolutePath() + "/%";
         List<String> known = FotoSql.execGetFotoPaths(dbPathSearch);
-        IFile[] existing = dirToScan.listFiles();
+        IFile[] existing = dirToScan.listIFiles();
 
         if (existing != null) {
             for (IFile file : existing) {
@@ -663,7 +663,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                 this.mWaitingForMediaScannerResult = true;
                 int numberOfNewItems = updateIncompleteMediaDatabase(mDebugPrefix, this,
                         mDebugPrefix + "checkForIncompleteMediaDatabase-" + why,
-                        fileToLoad.getParentFile());
+                        fileToLoad.getParentIFile());
 
                 String message = getString(R.string.image_err_not_in_db_format, jpgFullFilePath, numberOfNewItems);
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show();
@@ -677,7 +677,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     private void onRenameFileAnswer(final CharSequence title, final SelectedFiles currentFoto, final long fotoId,
                                     final String fotoSourcePath, final String newFileName) {
         IFile src = FileFacade.convert("ImageDetailActivityViewPager.onRenameFileAnswer", fotoSourcePath);
-        IFile dest = src.getParentFile().create(newFileName);
+        IFile dest = src.getParentIFile().createIFile(newFileName);
 
         IFile srcXmpShort = XmpFile.getSidecar(src, false);
         boolean hasSideCarShort = ((srcXmpShort != null) && srcXmpShort.exists());
@@ -1140,7 +1140,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
     private void onRenameSubDirAnswer(final CharSequence title, SelectedFiles currentFoto, final long fotoId, final String fotoSourcePath, String newFileName) {
         IFile src = FileFacade.convert("ImageDetailActivityViewPager.onRenameSubDirAnswer", fotoSourcePath);
-        IFile dest = src.getParentFile().create(newFileName);
+        IFile dest = src.getParentIFile().createIFile(newFileName);
 
         IFile srcXmpShort = XmpFile.getSidecar(src, false);
         boolean hasSideCarShort = ((srcXmpShort != null) && (mFileCommands.osFileExists(srcXmpShort)));
@@ -1271,7 +1271,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     protected String getCurrentDir() {
         try {
             final IFile currentIFile = getCurrentIFile();
-            if (currentIFile != null) return currentIFile.getParentFile().getAbsolutePath();
+            if (currentIFile != null) return currentIFile.getParentIFile().getAbsolutePath();
         } catch (Exception ignore) {}
         return null;
     }

@@ -35,7 +35,7 @@ import de.k3b.io.filefacade.IFile;
 public class ZipConfigRepositoryTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZipConfigRepositoryTest.class);
 
-    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.create("ZipRepositoryTests");
+    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.createIFile("ZipRepositoryTests");
 
     @BeforeClass
     public static void initDirectories() {
@@ -104,7 +104,7 @@ public class ZipConfigRepositoryTest {
     }
 
     private ZipConfigRepository createUnsavedZipConfigRepository(String zipName) {
-        IFile repositoryFile = OUTDIR.create(zipName);
+        IFile repositoryFile = OUTDIR.createIFile(zipName);
         repositoryFile.delete();
         ZipConfigDto dto = new ZipConfigDto(null);
         dto.setZipName(zipName);

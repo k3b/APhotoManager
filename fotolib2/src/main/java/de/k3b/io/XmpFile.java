@@ -52,15 +52,15 @@ public class XmpFile extends FileWrapper implements IFile {
     public static XmpFile getSidecar(IFile file, boolean longFormat) {
         if (file == null) return null;
         String name = file.getName();
-        return getSidecar(file.getParentFile(), name, longFormat);
+        return getSidecar(file.getParentIFile(), name, longFormat);
     }
 
     public static XmpFile getSidecar(IFile parent, String name, boolean longFormat) {
         XmpFile result;
         if (longFormat) {
-            result = new XmpFile(parent.create(name + EXT_SIDECAR), longFormat);
+            result = new XmpFile(parent.createIFile(name + EXT_SIDECAR), longFormat);
         } else {
-            result = new XmpFile(parent.create(FileUtils.replaceExtension(name, EXT_SIDECAR)), longFormat);
+            result = new XmpFile(parent.createIFile(FileUtils.replaceExtension(name, EXT_SIDECAR)), longFormat);
         }
         return result;
 

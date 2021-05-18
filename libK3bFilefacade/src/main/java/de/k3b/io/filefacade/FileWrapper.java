@@ -88,8 +88,8 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public IFile getCanonicalFile() {
-        return child.getCanonicalFile();
+    public IFile getCanonicalIFile() {
+        return child.getCanonicalIFile();
     }
 
     @Override
@@ -108,8 +108,8 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public IFile getParentFile() {
-        return child.getParentFile();
+    public IFile getParentIFile() {
+        return child.getParentIFile();
     }
 
     @Override
@@ -138,13 +138,13 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public IFile[] listFiles() {
-        return child.listFiles();
+    public IFile[] listIFiles() {
+        return child.listIFiles();
     }
 
     @Override
-    public IFile[] listDirs() {
-        return child.listDirs();
+    public IFile[] listIDirs() {
+        return child.listIDirs();
     }
 
     @Override
@@ -163,8 +163,8 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public IFile create(String name) {
-        return child.create(name);
+    public IFile createIFile(String name) {
+        return child.createIFile(name);
     }
 
     @Override

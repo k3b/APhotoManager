@@ -119,7 +119,7 @@ public abstract class SaveAsPickerFragment extends DirectoryPickerFragment {
                 result = selection;
             } else if (sel.isDirectory() && !StringUtils.isNullOrEmpty(filenameWithoutExtension)) {
                 final String newName = filenameWithoutExtension + AlbumFile.SUFFIX_VALBUM;
-                final IFile newFile = sel.create(newName);
+                final IFile newFile = sel.createIFile(newName);
                 result = selection.find(newFile.getAbsolutePath());
                 if (result == null) {
                     result = selection.createOsDirectory(newFile, selection, null);

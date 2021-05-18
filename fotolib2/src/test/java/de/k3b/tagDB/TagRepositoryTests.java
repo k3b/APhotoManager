@@ -44,7 +44,7 @@ import de.k3b.io.filefacade.IFile;
 public class TagRepositoryTests {
     // Obtain a logger instance
     private static final Logger LOGGER = LoggerFactory.getLogger(TagRepositoryTests.class);
-    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.create("TagRepositoryTests");
+    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.createIFile("TagRepositoryTests");
     private IFile repositoryFile = null;
 
     @BeforeClass
@@ -69,7 +69,7 @@ public class TagRepositoryTests {
         if (fileName.indexOf(".") < 0) {
             fileName += "-repo.txt";
         }
-        this.repositoryFile = outdir.create(fileName);
+        this.repositoryFile = outdir.createIFile(fileName);
         repositoryFile.delete();
 
         TagRepository result = new TagRepository(this.repositoryFile);
@@ -153,9 +153,9 @@ public class TagRepositoryTests {
     }
 
     private IFile createRepoDirWithoutRepo(String repoDirName) {
-        IFile oldReproFile = OUTDIR.create(repoDirName);
+        IFile oldReproFile = OUTDIR.createIFile(repoDirName);
         oldReproFile.mkdirs();
-        oldReproFile.create(TagRepository.DB_NAME).delete();
+        oldReproFile.createIFile(TagRepository.DB_NAME).delete();
         return oldReproFile;
     }
 

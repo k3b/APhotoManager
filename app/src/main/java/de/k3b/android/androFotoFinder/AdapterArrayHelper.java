@@ -55,7 +55,7 @@ public class AdapterArrayHelper {
     /** refreshLocal files from inital path */
     public void reload(String why) {
         final List<IFile> iFiles = new ArrayList<>();
-        for (IFile f : mRootDir.listFiles()) {
+        for (IFile f : mRootDir.listIFiles()) {
             if (PhotoPropertiesUtil.isImage(f, PhotoPropertiesUtil.IMG_TYPE_ALL)) {
                 iFiles.add(f);
             }

@@ -201,17 +201,17 @@ public class AndroidFileFacade extends FileFacade {
     }
 
     @Override
-    public IFile getCanonicalFile() {
+    public IFile getCanonicalIFile() {
         return this;
     }
 
     @Override
-    public IFile getParentFile() {
+    public IFile getParentIFile() {
         final DocumentFileEx androidFile = getAndroidFile("getParentFile", false);
         if (androidFile != null) {
             return new AndroidFileFacade(androidFile.getParentFile(), getFile().getParentFile());
         } else {
-            return super.getParentFile();
+            return super.getParentIFile();
         }
     }
 
@@ -258,7 +258,7 @@ public class AndroidFileFacade extends FileFacade {
     }
 
     @Override
-    public IFile[] listFiles() {
+    public IFile[] listIFiles() {
         String debugContext = "listFiles";
         enableCache(debugContext, true);
         final DocumentFileEx androidFile = getAndroidFile(debugContext, false);
@@ -283,7 +283,7 @@ public class AndroidFileFacade extends FileFacade {
         }
     }
 
-    public IFile[] listDirs() {
+    public IFile[] listIDirs() {
         String dbgContext = "listDirs";
         enableCache(dbgContext, true);
         List<IFile> found = new ArrayList<>();

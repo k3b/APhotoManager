@@ -197,7 +197,7 @@ public class FileFacade implements IFile {
     }
 
     @Override
-    public IFile getCanonicalFile() {
+    public IFile getCanonicalIFile() {
         return convert("FileFacade getCanonicalFile", FileUtilsBase.tryGetCanonicalFile(file));
     }
 
@@ -207,7 +207,7 @@ public class FileFacade implements IFile {
     }
 
     @Override
-    public IFile getParentFile() {
+    public IFile getParentIFile() {
         return convert("FileFacade getParentFile", file.getParentFile());
     }
 
@@ -237,7 +237,7 @@ public class FileFacade implements IFile {
     }
 
     @Override
-    public IFile[] listFiles() {
+    public IFile[] listIFiles() {
         return get(null, file.listFiles());
     }
 
@@ -257,7 +257,7 @@ public class FileFacade implements IFile {
         return false;
     }
 
-    public IFile[] listDirs() {
+    public IFile[] listIDirs() {
         List<IFile> found = new ArrayList<>();
         File[] files = (file != null) ? file.listFiles() : null;
         if (files != null) {
@@ -301,7 +301,7 @@ public class FileFacade implements IFile {
     }
 
     @Override
-    public IFile create(String name) {
+    public IFile createIFile(String name) {
         final File file = new File(this.file, name).getAbsoluteFile();
         return convert("FileFacade create", file);
     }

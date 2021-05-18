@@ -53,9 +53,9 @@ public class OSDirectoryTests {
 
     @Test
     public void shoudFindCurrentDirIntegrationTest() {
-        final IFile rootFile = FileFacade.convert("OSDirectoryTests ", "/").getCanonicalFile();
+        final IFile rootFile = FileFacade.convert("OSDirectoryTests ", "/").getCanonicalIFile();
         mRoot = new OSDirectory(rootFile, null, null);
-        final IFile currentDir = FileFacade.convert("OSDirectoryTests ", ".").getCanonicalFile();
+        final IFile currentDir = FileFacade.convert("OSDirectoryTests ", ".").getCanonicalIFile();
         IDirectory found = OSDirectory.find(mRoot, currentDir);
         assertNotNull(found);
         assertEquals(currentDir.getAbsolutePath(), found.getAbsolute());

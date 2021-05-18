@@ -95,7 +95,7 @@ public class PhotoPropertiesBulkUpdateService {
                 ? createDebugStringBuilder(inFilePath)
                 : null;
         if (outFile == null) outFile = inFilePath;
-        if ((inFilePath != null) && outFile.getParentFile().canWrite()) {
+        if ((inFilePath != null) && outFile.getParentIFile().canWrite()) {
             PhotoPropertiesUpdateHandler exifHandler = null;
             try {
                 long lastModified = inFilePath.lastModified();
@@ -122,7 +122,7 @@ public class PhotoPropertiesBulkUpdateService {
                     IFile jpgFileDir = null;
                     String jpgFileNameDeleted = null;
                     if (!sameFile && deleteOriginalWhenFinished) {
-                        jpgFileDir = inFilePath.getParentFile();
+                        jpgFileDir = inFilePath.getParentIFile();
                         jpgFileNameDeleted = inFilePath.getName();
                     }
 

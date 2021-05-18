@@ -43,7 +43,7 @@ public class MediaXmpTests {
     // D:\prj\eve\android\prj\fotos-android.wrk\FotoGallery\FotoGallery\fotolib2\src\test\resources\testdata
     // test-WitExtraData.xmp
     private static final String RESOURCES_ROOT = "testdata/";
-    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.create("MediaXmpTests");
+    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.createIFile("MediaXmpTests");
 
     @BeforeClass
     public static void initDirectories() {
@@ -112,7 +112,7 @@ public class MediaXmpTests {
         PhotoPropertiesUtil.copy(sut, content, true, true);
 
         OUTDIR.mkdirs();
-        IFile outFile = OUTDIR.create("shouldSaveAsXmp.xmp");
+        IFile outFile = OUTDIR.createIFile("shouldSaveAsXmp.xmp");
         OutputStream fos = outFile.openOutputStream();
         sut.save(fos, true, "JUnit");
         fos.close();

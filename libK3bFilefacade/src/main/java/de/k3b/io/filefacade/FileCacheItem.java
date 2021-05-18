@@ -64,7 +64,7 @@ public class FileCacheItem<T extends FileCacheItem> implements Comparable<T> {
      */
     public T[] getChildDirs(IFileCache<T> cache) {
         if (childDirs == null && current != null && cache != null) {
-            IFile[] iFiles = current.listDirs();
+            IFile[] iFiles = current.listIDirs();
             if (iFiles != null) {
                 List<T> resultList = new ArrayList<>(iFiles.length);
                 boolean containsNomedia = false;

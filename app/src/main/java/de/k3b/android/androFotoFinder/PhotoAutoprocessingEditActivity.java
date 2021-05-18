@@ -170,7 +170,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         mCurrentOutDir = FileFacade.convert(DEBUG_PREFIX + " mCurrentOutDir",
                 IntentUtil.getFile(intent.getData()));
         if (mCurrentOutDir != null) {
-            if (mCurrentOutDir.isFile()) mCurrentOutDir = mCurrentOutDir.getParentFile();
+            if (mCurrentOutDir.isFile()) mCurrentOutDir = mCurrentOutDir.getParentIFile();
         }
 
         mCurrentAutoprocessingData = null;
@@ -191,7 +191,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         }
 
         if ((mCurrentOutDir == null) && (mSelectedFiles != null) && (mSelectedFiles.size() > 0)) {
-            mCurrentOutDir = mSelectedFiles.getIFile(0).getParentFile();
+            mCurrentOutDir = mSelectedFiles.getIFile(0).getParentIFile();
         }
 
         if (Global.debugEnabled) {
@@ -626,7 +626,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
             String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
             IFile rootDirFile = FileFacade.convert(DEBUG_PREFIX + ".getSelectedFiles", path);
 
-            IFile[] files = rootDirFile.listFiles();
+            IFile[] files = rootDirFile.listIFiles();
             if (files != null) {
                 IFile[] fileNames = new IFile[files.length];
                 int itemCount = 0;

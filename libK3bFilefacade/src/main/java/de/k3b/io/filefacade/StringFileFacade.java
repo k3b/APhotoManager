@@ -135,7 +135,7 @@ public class StringFileFacade implements IFile {
     }
 
     @Override
-    public IFile getCanonicalFile() {
+    public IFile getCanonicalIFile() {
         return this;
     }
 
@@ -154,7 +154,7 @@ public class StringFileFacade implements IFile {
     }
 
     @Override
-    public IFile getParentFile() {
+    public IFile getParentIFile() {
         return parent;
     }
 
@@ -188,12 +188,12 @@ public class StringFileFacade implements IFile {
     }
 
     @Override
-    public IFile[] listFiles() {
+    public IFile[] listIFiles() {
         return listFiles.toArray(new IFile[listFiles.size()]);
     }
 
     @Override
-    public IFile[] listDirs() {
+    public IFile[] listIDirs() {
         List<IFile> found = new ArrayList<>();
         for (IFile file : listFiles) {
             if (file != null &&
@@ -214,7 +214,7 @@ public class StringFileFacade implements IFile {
      * @return null if file already exist
      */
     @Override
-    public IFile create(String name) {
+    public IFile createIFile(String name) {
         return null;
     }
 

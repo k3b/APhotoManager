@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,7 +105,7 @@ public abstract class ImageContextController {
     }
 
     private static IFile getPropertiesFile() {
-        return Global.reportDir.create(DEFINITION_FILE);
+        return Global.reportDir.createIFile(DEFINITION_FILE);
     }
 
     protected Properties loadFromFile() {
@@ -141,7 +142,7 @@ public abstract class ImageContextController {
                     mContext.getString(R.string.app_name),
                     GuiUtil.getAppVersionName(mContext));
 
-            br = new BufferedWriter(new OutputStreamWriter(propFile.openOutputStream(), "UTF-8"));
+            br = new BufferedWriter(new OutputStreamWriter(propFile.openOutputStream(), StandardCharsets.UTF_8));
             br.write(header);
             br.write("\n");
             properties.store(br, null);

@@ -171,7 +171,7 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
             }
 
             if (fullScan) {
-                IFile[] childFileNames = file.listFiles();
+                IFile[] childFileNames = file.listIFiles();
 
                 if (childFileNames != null) {
                     resultCount += runScanner(fullFilePath, childFileNames);
@@ -179,7 +179,7 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
             }
 
             if (fullScan || scanForDeleted) {
-                IFile[] subDirs = file.listDirs();
+                IFile[] subDirs = file.listIDirs();
 
                 if (subDirs != null) {
                     // #33

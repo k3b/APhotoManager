@@ -108,7 +108,7 @@ public class TestUtil {
 
         for(int i = 0; i <resourceNames.length; i++) {
             String resourceName = resourceNames[i];
-            result[i] = saveTestResourceAs(resourceName, destinationFolder.create(resourceName));
+            result[i] = saveTestResourceAs(resourceName, destinationFolder.createIFile(resourceName));
         }
         return result;
     }

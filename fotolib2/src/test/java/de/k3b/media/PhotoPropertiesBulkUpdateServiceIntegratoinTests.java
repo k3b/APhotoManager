@@ -42,7 +42,7 @@ public class PhotoPropertiesBulkUpdateServiceIntegratoinTests {
     // Obtain a logger instance
     private static final Logger LOGGER = LoggerFactory.getLogger(PhotoPropertiesBulkUpdateServiceIntegratoinTests.class);
     private static final String SUT_CLASS_NAME = PhotoPropertiesBulkUpdateServiceIntegratoinTests.class.getSimpleName();
-    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.create(SUT_CLASS_NAME);
+    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.createIFile(SUT_CLASS_NAME);
 
     @BeforeClass
     public static void initDirectories() {
@@ -61,7 +61,7 @@ public class PhotoPropertiesBulkUpdateServiceIntegratoinTests {
     }
 
     private static IFile copy(String resourceName, String fileNameDest) throws IOException {
-        final IFile sutFile = OUTDIR.create(fileNameDest);
+        final IFile sutFile = OUTDIR.createIFile(fileNameDest);
         TestUtil.saveTestResourceAs(resourceName, sutFile);
         return sutFile;
     }

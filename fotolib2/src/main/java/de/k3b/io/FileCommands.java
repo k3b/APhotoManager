@@ -295,7 +295,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
             if (renameProcessor != null) {
                 destFile = renameProcessor.getNextFile(srcFile, getRenameSourceFileDate(srcFile, datesLastModified, pos), -1);
             } else {
-                destFile = destDirFolder.create(srcFile.getName());
+                destFile = destDirFolder.createIFile(srcFile.getName());
             }
             result[pos++] = destFile;
         }
@@ -353,7 +353,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 //!!! TODO ??begin transaction??
                 while (pos < fileCount) {
                     IFile sourceFile = sourceFiles[pos];
-                    IFile destFile = destFiles[pos].getCanonicalFile();
+                    IFile destFile = destFiles[pos].getCanonicalIFile();
                     Long id = ids[pos];
 
                     boolean deleteOriginalAfterFinish = move;
@@ -379,7 +379,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                         if (exifChanges == null) {
                             // get info for potential xmp sidecare BEFORE jpg (sourceFile) is moved away
                             String jpgName = sourceFile.getName();//!!!
-                            final IFile jpgParentFile = sourceFile.getParentFile();
+                            final IFile jpgParentFile = sourceFile.getParentIFile();
 
                             // old style move/copy image with sidecarfile(s)
                             if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;

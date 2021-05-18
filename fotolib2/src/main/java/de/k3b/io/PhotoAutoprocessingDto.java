@@ -72,7 +72,7 @@ public class PhotoAutoprocessingDto implements Serializable {
     }
 
     public static IFile getApmFile(IFile outDir) {
-        return outDir.create(RuleFileNameProcessor.APM_FILE_NAME);
+        return outDir.createIFile(RuleFileNameProcessor.APM_FILE_NAME);
     }
 
     public void paste(PhotoAutoprocessingDto newData) {

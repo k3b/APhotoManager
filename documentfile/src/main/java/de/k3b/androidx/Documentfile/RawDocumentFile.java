@@ -153,7 +153,7 @@ class RawDocumentFile extends DocumentFileEx {
 
     @Override
     public DocumentFileEx[] listFiles() {
-        final ArrayList<DocumentFileOld> results = new ArrayList<DocumentFileOld>();
+        final ArrayList<DocumentFileOrininal> results = new ArrayList<DocumentFileOrininal>();
         final File[] files = mFile.listFiles();
         if (files != null) {
             for (File file : files) {

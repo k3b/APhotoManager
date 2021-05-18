@@ -33,7 +33,7 @@ import de.k3b.io.filefacade.IFile;
  * Created by k3b on 25.06.2015.
  */
 public class QueryParameterTests {
-    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.create("QueryParameterTests");
+    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.createIFile("QueryParameterTests");
     private static final String sqlResultQueryCFWGHO =
             "select c1, c2 from f where (w1=?) and (w2=?) parameters w1param, w2param group by g1, gg2 having (h1) and (h2) parameters h1param, h2param order by o1, o2";
 
@@ -110,7 +110,7 @@ public class QueryParameterTests {
     @Test
     public void shoudSaveLoad() throws IOException {
         OUTDIR.mkdirs();
-        IFile f = OUTDIR.create("shoudSaveLoad");
+        IFile f = OUTDIR.createIFile("shoudSaveLoad");
         f.delete();
         QueryParameter original = new QueryParameter(createTestQueryCFWGHO());
         original.save(f.openOutputStream());

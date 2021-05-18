@@ -42,7 +42,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         if (file == null) return false;
         if (osFileExists(file)) return true;
 
-        IFile parent = file.getParentFile();
+        IFile parent = file.getParentIFile();
         String name = file.getName();
         return osFileExists(XmpFile.getSidecar(parent, name, false))
                 || osFileExists(XmpFile.getSidecar(parent, name, true));
@@ -57,7 +57,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
             return file;
         }
 
-        IFile parent = file.getParentFile();
+        IFile parent = file.getParentIFile();
 
         String filename = file.getName();
         String extension = ")";
@@ -70,7 +70,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         while (true) {
             id++;
             String candidateName = filename + id + extension;
-            IFile candidate = parent.create(candidateName);
+            IFile candidate = parent.createIFile(candidateName);
             if (!fileOrSidecarExists(candidate)) {
                 log("rem renamed from '", filename, "' to '", candidateName,"'");
                 return candidate;

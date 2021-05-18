@@ -207,11 +207,11 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     @Override
     public IFile getNextFile(IFile sourceFile, Date sourceFileDate, int firstFileInstanceNumber) {
         String name = getFile(sourceFile).getName();
-        IFile outDir = (this.mOutDir != null) ? this.mOutDir : sourceFile.getParentFile();
+        IFile outDir = (this.mOutDir != null) ? this.mOutDir : sourceFile.getParentIFile();
 
         if (!mustRename(name)) {
 			// no rename rule or file already matches rules
-            IFile result = outDir.create(name);
+            IFile result = outDir.createIFile(name);
 
             // usecase: apply auto where inFile is already in outdir: no modification
             if ((sourceFile != null) && sourceFile.equals(result)) return result;
@@ -234,7 +234,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
         IFile result = null;
         int tryCount = 0;
         do {
-            result = outDir.create(generateFileName(dateFormatted, mNextFileInstanceNumber, fileExtension));
+            result = outDir.createIFile(generateFileName(dateFormatted, mNextFileInstanceNumber, fileExtension));
             mNextFileInstanceNumber++;
             if (!fileOrSidecarExists(result)) return result; // filename not in use yet
             tryCount++;
@@ -269,7 +269,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     }
 
     public String getParentDirBaseName() {
-        IFile parent = (mOutDir != null) ? mOutDir.getParentFile() : null;
+        IFile parent = (mOutDir != null) ? mOutDir.getParentIFile() : null;
         if (parent != null) return getBaseName(parent.getName());
         return null;
     }

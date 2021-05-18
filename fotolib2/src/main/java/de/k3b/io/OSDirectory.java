@@ -84,7 +84,7 @@ public class OSDirectory extends FileCacheItem<OSDirectory> implements IDirector
         OSDirectory provider = root.findViaFile(root, file);
         if (provider != null) return provider;
 
-        OSDirectory parentDir = find(root, file.getParentFile());
+        OSDirectory parentDir = find(root, file.getParentIFile());
         if (parentDir == null) return null;
 
         String name = file.getName();
@@ -161,13 +161,13 @@ public class OSDirectory extends FileCacheItem<OSDirectory> implements IDirector
     protected int getCalculateFlags(IFile directory) {
         int result = 0;
         if ((directory != null) && (directory.isDirectory())) {
-            if (directory.create(FileUtils.MEDIA_IGNORE_FILENAME).exists()) {
+            if (directory.createIFile(FileUtils.MEDIA_IGNORE_FILENAME).exists()) {
                 result = DIR_FLAG_NOMEDIA_ROOT;
             } else if (FileUtils.isHiddenFolder(directory.getAbsolutePath())) {
                 result = DIR_FLAG_NOMEDIA;
             }
 
-            if (directory.create(RuleFileNameProcessor.APM_FILE_NAME).exists()) {
+            if (directory.createIFile(RuleFileNameProcessor.APM_FILE_NAME).exists()) {
                 result |= DIR_FLAG_APM_DIR;
             }
         }
@@ -191,7 +191,7 @@ public class OSDirectory extends FileCacheItem<OSDirectory> implements IDirector
      */
     @Override
     public void rename(String oldFolderName, String newFolderName) {
-        this.setCurrent(getCurrent().getParentFile().create(newFolderName));
+        this.setCurrent(getCurrent().getParentIFile().createIFile(newFolderName));
     }
 
     /**
@@ -233,7 +233,7 @@ public class OSDirectory extends FileCacheItem<OSDirectory> implements IDirector
     @Override
     public OSDirectory find(String path) {
         if (path == null) return null;
-        return find(FileFacade.convert("OSDirectory find ", path).getCanonicalFile());
+        return find(FileFacade.convert("OSDirectory find ", path).getCanonicalIFile());
     }
 
     protected OSDirectory find(IFile file) {
@@ -316,7 +316,7 @@ public class OSDirectory extends FileCacheItem<OSDirectory> implements IDirector
             result = (OSDirectory) findChildByRelPath(children, newCildFolderName);
 
             if (result == null) {
-                IFile newChildFile = getCurrent().create(newCildFolderName).getCanonicalFile();
+                IFile newChildFile = getCurrent().createIFile(newCildFolderName).getCanonicalIFile();
                 result = createOsDirectory(newChildFile, this, grandChilden);
                 if (result != null) {
                     this.addChild(result);

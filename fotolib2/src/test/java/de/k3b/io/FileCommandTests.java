@@ -80,7 +80,7 @@ public class FileCommandTests {
     }
 
     private static IFile createTestFile(IFile destDir, String name) {
-        return destDir.create(name);
+        return destDir.createIFile(name);
     }
 
     @Test

@@ -83,13 +83,13 @@ public class FileNameProcessorTests {
     }
 
     private static IFile createTestFile(IFile dir, String filename) {
-        return dir.create(filename);
+        return dir.createIFile(filename);
     }
 
     @Test
     public void shouldGetNextFreeFileWithoutRename() {
         IFileNameProcessor sut = spy(new RuleFileNameProcessor(null, "Hello", null, X_FAKE_OUTPUT_DIR));
-        IFile outFile = sut.getNextFile(X_FAKE_INPUT_DIR.create("171224Hello1234.jpg"), null, 0);
+        IFile outFile = sut.getNextFile(X_FAKE_INPUT_DIR.createIFile("171224Hello1234.jpg"), null, 0);
         Assert.assertEquals("171224Hello1234.jpg", outFile.getName());
     }
 

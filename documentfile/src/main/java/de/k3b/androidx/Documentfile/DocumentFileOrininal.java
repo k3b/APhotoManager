@@ -70,13 +70,13 @@ import java.io.File;
  * @see android.provider.DocumentsProvider
  * @see android.provider.DocumentsContract
  */
-public abstract class DocumentFileOld {
+public abstract class DocumentFileOrininal {
     static final String TAG = "DocumentFileEx";
 
     @Nullable
     private final DocumentFileEx mParent;
 
-    protected DocumentFileOld(@Nullable DocumentFileEx parent) {
+    protected DocumentFileOrininal(@Nullable DocumentFileEx parent) {
         mParent = parent;
     }
 

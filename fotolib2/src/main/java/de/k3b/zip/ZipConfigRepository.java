@@ -38,7 +38,7 @@ public class ZipConfigRepository implements IZipConfig {
     private static final Logger logger = LoggerFactory.getLogger(LibZipGlobal.LOG_TAG);
 
     public static final String FILE_SUFFIX = ".zip.apm.config";
-    private Properties data = new Properties();
+    private final Properties data = new Properties();
 
     /** added to every serialized item if != null. Example "Generated on 2015-10-19 with myApp Version 0815." */
     public static String sFileComment = null;
@@ -64,7 +64,7 @@ public class ZipConfigRepository implements IZipConfig {
             IFile repositoryFile = getZipConfigFile(zipName);
             if ((repositoryFile != null) && (repositoryFile.exists())) {
                 IZipConfig repo = loadExisting(repositoryFile);
-                if (repo != null) return repo;
+                return repo;
             }
         }
         return null;
@@ -91,7 +91,7 @@ public class ZipConfigRepository implements IZipConfig {
         String fileName = FileUtils.replaceExtension(zipName, ZipConfigRepository.FILE_SUFFIX);
         if ((zipFileDir == null) || (fileName == null)) return null;
 
-        IFile configFile = zipFileDir.create(fileName);
+        IFile configFile = zipFileDir.createIFile(fileName);
         return configFile;
     }
 

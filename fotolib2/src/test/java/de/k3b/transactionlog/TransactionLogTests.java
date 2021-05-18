@@ -91,7 +91,7 @@ public class TransactionLogTests {
         transactionLogger.addChangesCopyMove(false, FileFacade.convert("junit", testMedia.path + ".newCopy.jpg"), "junit");
         transactionLogger.addChangesCopyMove(true, FileFacade.convert("junit", testMedia.path + ".newMove.jpg"), "junit");
         transactionLogger.addChanges(MediaTransactionLogEntryType.DELETE, null, true);
-        transactionLogger.set(id + 100, testFile.getParentFile());
+        transactionLogger.set(id + 100, testFile.getParentIFile());
         transactionLogger.addChanges(MediaTransactionLogEntryType.MOVE_DIR, "/path/to/other/dir", true);
     }
 

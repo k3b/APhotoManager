@@ -44,7 +44,7 @@ import de.k3b.io.filefacade.IFile;
 public class ExifInterfaceIntegrationTests {
     // Obtain a logger instance
     private static final Logger LOGGER = LoggerFactory.getLogger(ExifInterfaceIntegrationTests.class);
-    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.create("ExifInterfaceIntegrationTests");
+    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.createIFile("ExifInterfaceIntegrationTests");
     private static final HashMap<String, String> testItems = new HashMap<String, String>();
 
 	private static final String specialChars = "\r\n日本人 (Japanese)\n" + 
@@ -163,7 +163,7 @@ public class ExifInterfaceIntegrationTests {
     private ExifInterface assertUpdateSameAsAfterWrite(String fileNameDest, String fileNameSrc, HashMap<String, String> testItems) throws IOException {
         InputStream inputStream = PhotoPropertiesImageReaderIntegrationTests.class.getResourceAsStream("images/" + fileNameSrc);
 
-        final IFile sutFile = OUTDIR.create(fileNameDest);
+        final IFile sutFile = OUTDIR.createIFile(fileNameDest);
         OutputStream outputStream = sutFile.openOutputStream();
 
         ExifInterface sutWrite = new ExifInterface().loadAttributes(inputStream, null, sutFile.getAbsolutePath());

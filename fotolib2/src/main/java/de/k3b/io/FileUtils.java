@@ -150,7 +150,7 @@ public class FileUtils extends FileUtilsBase {
 
     /** return parent of file if path is not a dir. else return file */
     public static IFile getDir(IFile file) {
-        return ((file != null) && (!file.isDirectory())) ? file.getParentFile() : file;
+        return ((file != null) && (!file.isDirectory())) ? file.getParentIFile() : file;
     }
 
     /** find cildren by regular expression */
@@ -175,7 +175,7 @@ public class FileUtils extends FileUtilsBase {
         if (path != null) {
             if (isHiddenFolder(path))
                 return true;
-            IFile file = path.getParentFile();
+            IFile file = path.getParentIFile();
             String firstDir = file.getAbsolutePath();
             Boolean cacheFind;
             int level = maxLevel;
@@ -187,14 +187,14 @@ public class FileUtils extends FileUtilsBase {
                     return cacheFind.booleanValue();
                 }
 
-                if (file.create(MEDIA_IGNORE_FILENAME).exists()) {
+                if (file.createIFile(MEDIA_IGNORE_FILENAME).exists()) {
                     if (nomediaCache != null) {
                         nomediaCache.put(absolutePath, true);
                         nomediaCache.put(firstDir, true);
                     }
                     return true;
                 }
-                file = file.getParentFile();
+                file = file.getParentIFile();
             }
             if (nomediaCache != null) {
                 nomediaCache.put(firstDir, false);
@@ -248,7 +248,7 @@ public class FileUtils extends FileUtilsBase {
         if (file.exists()) {
             //check if the file is a directory
             if (file.isDirectory()) {
-                IFile[] files = file.listFiles();
+                IFile[] files = file.listIFiles();
                 for (IFile f : files) {
                     //call deletion of file individually
                     delete(f, fileExt);
@@ -306,7 +306,7 @@ public class FileUtils extends FileUtilsBase {
 
     public static void copyReplace(InputStream sourceStream, IFile destinationFile) throws IOException {
         if (destinationFile.exists()) destinationFile.delete();
-        destinationFile.getParentFile().mkdirs();
+        destinationFile.getParentIFile().mkdirs();
         FileUtilsBase.copy(sourceStream, destinationFile.openOutputStream(), " copyReplace ");
     }
 
@@ -330,7 +330,7 @@ public class FileUtils extends FileUtilsBase {
 
     public static IFile getFirstExistingDir(IFile root) {
         while ((root != null) && (!root.exists() || !root.isDirectory())) {
-            root = root.getParentFile();
+            root = root.getParentIFile();
         }
         return root;
     }
@@ -345,10 +345,10 @@ public class FileUtils extends FileUtilsBase {
 
         parentDir.mkdirs();
         final String mime = "*/*";
-        IFile candidate = parentDir.create(newFilePrefix + newFileSuffix);
+        IFile candidate = parentDir.createIFile(newFilePrefix + newFileSuffix);
         while (candidate.exists()) {
-            number ++;
-            candidate = parentDir.create(newFilePrefix + number + newFileSuffix);
+            number++;
+            candidate = parentDir.createIFile(newFilePrefix + number + newFileSuffix);
         }
         return candidate;
     }

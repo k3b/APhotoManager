@@ -390,7 +390,7 @@ public class AndroidFileCommands extends AndroidFileCommandsDbImpl {
         if ((AndroidFileCommands.canProcessFile(activity, this.isInBackground)) || (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null)) {
 
             // remove ".nomedia" file from scan root
-            IFile nomedia = scanRootDir.create(PhotoPropertiesMediaFilesScanner.MEDIA_IGNORE_FILENAME);
+            IFile nomedia = scanRootDir.createIFile(PhotoPropertiesMediaFilesScanner.MEDIA_IGNORE_FILENAME);
             if (nomedia.exists()) {
                 if (Global.debugEnabled) {
                     Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onMediaScannerAnswer deleting " + nomedia);

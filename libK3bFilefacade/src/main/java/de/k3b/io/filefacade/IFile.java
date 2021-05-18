@@ -55,7 +55,7 @@ public interface IFile {
 
     String getAbsolutePath();
 
-    IFile getCanonicalFile();
+    IFile getCanonicalIFile();
 
     String getCanonicalPath();
 
@@ -63,7 +63,7 @@ public interface IFile {
 
     void setReadUri(String readUri);
 
-    IFile getParentFile();
+    IFile getParentIFile();
 
     String getParent();
 
@@ -74,9 +74,9 @@ public interface IFile {
 
     boolean mkdirs();
 
-    IFile[] listFiles();
+    IFile[] listIFiles();
 
-    IFile[] listDirs();
+    IFile[] listIDirs();
 
     boolean copy(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException;
 
@@ -87,7 +87,7 @@ public interface IFile {
     /**
      * @return null if file already exist
      */
-    IFile create(String name);
+    IFile createIFile(String name);
 
     File getFile();
 

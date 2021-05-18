@@ -92,7 +92,7 @@ public class TagRepository {
         if (parentDir == null) throw new IllegalArgumentException("TagRepository.setInstance(null)");
 
         List<Tag> old = null;
-        IFile newFile = parentDir.create(DB_NAME);
+        IFile newFile = parentDir.createIFile(DB_NAME);
         if (TagRepository.sInstance != null){
             if (TagRepository.sInstance.mFile.equals(newFile)) return; // no change: nothing to do
 
@@ -288,7 +288,7 @@ public class TagRepository {
         try {
             if ((mItemList != null) && (mItemList.size() > 0)) {
                 if (!this.mFile.exists()) {
-                    this.mFile.getParentFile().mkdirs();
+                    this.mFile.getParentIFile().mkdirs();
                 }
 
                 logger.debug(dbg_context + "save(): " + mItemList.size() + " items to " + this.mFile);
