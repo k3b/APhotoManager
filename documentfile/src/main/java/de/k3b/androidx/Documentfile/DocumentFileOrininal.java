@@ -74,7 +74,7 @@ public abstract class DocumentFileOrininal {
     static final String TAG = "DocumentFileEx";
 
     @Nullable
-    private final DocumentFileEx mParent;
+    protected DocumentFileEx mParent;
 
     protected DocumentFileOrininal(@Nullable DocumentFileEx parent) {
         mParent = parent;
