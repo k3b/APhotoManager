@@ -61,17 +61,45 @@ public interface IFile {
 
     String getAsUriString();
 
+    /**
+     * For Android: an alternative uri, where data can be read from.
+     * For Example a content-media uri instead of DocumentFile-uri
+     */
     void setReadUri(String readUri);
 
     IFile getParentFile();
 
+    /**
+     * Returns the pathname string of this abstract pathname's parent, or
+     * <code>null</code> if this pathname does not name a parent directory.
+     *
+     * <p> The <em>parent</em> of an abstract pathname consists of the
+     * pathname's prefix, if any, and each name in the pathname's name
+     * sequence except for the last.  If the name sequence is empty then
+     * the pathname does not name a parent directory.
+     *
+     * @return The pathname string of the parent directory named by this
+     * abstract pathname, or <code>null</code> if this pathname
+     * does not name a parent
+     */
     String getParent();
 
     String getName();
 
     void setLastModified(long fileTime);
+
     long lastModified();
 
+    /**
+     * Creates the directory named by this abstract pathname, including any
+     * necessary but nonexistent parent directories.  Note that if this
+     * operation fails it may have succeeded in creating some of the necessary
+     * parent directories.
+     *
+     * @return <code>true</code> if and only if the directory was created,
+     * along with all necessary parent directories; <code>false</code>
+     * otherwise
+     */
     boolean mkdirs();
 
     IFile[] listIFiles();

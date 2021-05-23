@@ -1,5 +1,6 @@
 package de.k3b.androidx.documentfile;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.File;
@@ -7,6 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.FileWrapper;
@@ -20,15 +23,13 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
 
     protected DocumentFileFacade(@Nullable DocumentFileEx parent) {
         super(parent);
-        if (parent != null) {
-            mFile = new File(parent.mFile, getName());
-        }
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof File) return this.mFile.equals(o);
-        if (o instanceof FileFacade) return this.mFile.equals(((FileFacade) o).getFile());
+        if (o instanceof File) return o.equals(getFile());
+        if (o instanceof FileFacade && getFile() != null)
+            return getFile().equals(((FileFacade) o).getFile());
         if (o instanceof FileWrapper) return equals(((FileWrapper) o).getChild());
         return super.equals(o);
     }
@@ -40,7 +41,6 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
             if (src instanceof FileWrapper) {
                 set(((FileWrapper) src).getChild());
             }
-            mFile = src.getFile();
         }
     }
 
@@ -52,27 +52,29 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
 
     @Override
     public boolean isAbsolute() {
-        return mFile.isAbsolute();
+        File file = getFile();
+        return (file != null) && file.isAbsolute();
     }
 
     @Override
     public String getAbsolutePath() {
-        return mFile.getAbsolutePath();
+        File file = getFile();
+        return (file != null) ? file.getAbsolutePath() : null;
     }
 
     @Override
     public IFile getCanonicalFile() {
-        return null;
+        return this;
     }
 
     @Override
     public String getCanonicalPath() {
-        return null;
+        return getAbsolutePath();
     }
 
     @Override
     public String getAsUriString() {
-        return null;
+        return getUri().toString();
     }
 
     @Override
@@ -82,7 +84,8 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
 
     @Override
     public String getParent() {
-        return null;
+        File file = getFile();
+        return (file != null) ? file.getParent() : null;
     }
 
     @Override
@@ -97,7 +100,11 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
 
     @Override
     public IFile[] listIFiles() {
-        DocumentFileEx[] files = listFiles();
+        return toIFiles(listFiles());
+    }
+
+    @NonNull
+    protected IFile[] toIFiles(DocumentFileEx[] files) {
         IFile[] result = new IFile[files.length];
         for (int i = files.length - 1; i >= 0; i--) {
             result[i] = files[i];
@@ -107,7 +114,14 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
 
     @Override
     public IFile[] listIDirs() {
-        return new IFile[0];
+        List<IFile> found = new ArrayList<>();
+        for (DocumentFileEx file : listFiles()) {
+            if (file != null &&
+                    (file.isDirectory() || FileFacade.accept(file.getName().toLowerCase()))) {
+                found.add(file);
+            }
+        }
+        return found.toArray(new IFile[found.size()]);
     }
 
     @Override
@@ -132,7 +146,14 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
 
     @Override
     public File getFile() {
-        return null;
+        if (mFile == null) {
+            DocumentFileEx parentDoc = getParentFile();
+            File parentFile = (parentDoc == null) ? null : parentDoc.getFile();
+            if (parentFile != null) {
+                mFile = new File(parentFile, getName());
+            }
+        }
+        return mFile;
     }
 
     @Override

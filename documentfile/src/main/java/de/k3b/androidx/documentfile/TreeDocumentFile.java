@@ -12,6 +12,8 @@ import android.provider.DocumentsContract;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
+import de.k3b.io.filefacade.IFile;
+
 /**
  * This class contains changes made to TreeDocumentFileOriginal
  */
@@ -28,5 +30,12 @@ class TreeDocumentFile extends CachedTreeDocumentFile {
         DocumentFileEx[] files = listFiles(query, new String[]{displayName, DocumentsContract.Document.MIME_TYPE_DIR});
         if (files == null || files.length == 0) return null;
         return (TreeDocumentFile) files[0];
+    }
+
+    @Override
+    public IFile[] listIDirs() {
+        //!!!
+        String query = DocumentsContract.Document.COLUMN_MIME_TYPE + "= ?";
+        return toIFiles(listFiles(query, new String[]{DocumentsContract.Document.MIME_TYPE_DIR}));
     }
 }

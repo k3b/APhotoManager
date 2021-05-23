@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
@@ -22,10 +23,10 @@ import java.util.ArrayList;
  */
 @RequiresApi(21)
 class TreeDocumentFileOriginal extends DocumentFileEx {
-    private final Context mContext;
-    private Uri mUri;
+    protected final Context mContext;
+    protected Uri mUri;
 
-    TreeDocumentFileOriginal(@Nullable DocumentFileEx parent, Context context, Uri uri) {
+    TreeDocumentFileOriginal(@Nullable DocumentFileEx parent, @NonNull Context context, Uri uri) {
         super(parent);
         mContext = context;
         mUri = uri;
@@ -63,9 +64,13 @@ class TreeDocumentFileOriginal extends DocumentFileEx {
     @Override
     @Nullable
     public DocumentFileEx createDirectory(String displayName) {
-        final Uri result = TreeDocumentFileOriginal.createFile(
-                mContext, mUri, DocumentsContract.Document.MIME_TYPE_DIR, displayName);
+        final Uri result = createDirectoryUri(displayName);
         return (result != null) ? new TreeDocumentFileOriginal(this, mContext, result) : null;
+    }
+
+    protected Uri createDirectoryUri(String displayName) {
+        return TreeDocumentFileOriginal.createFile(
+                mContext, mUri, DocumentsContract.Document.MIME_TYPE_DIR, displayName);
     }
 
     @Override
