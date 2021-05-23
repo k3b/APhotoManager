@@ -201,7 +201,7 @@ public class AndroidFileFacade extends FileFacade {
     }
 
     @Override
-    public IFile getCanonicalIFile() {
+    public IFile getCanonicalFile() {
         return this;
     }
 

@@ -192,7 +192,7 @@ public class PhotoPropertiesUtilTests {
     }
 
     /***** Integrationtests via file system *********/
-    private static final IFile INDIR = TestUtil.OUTDIR_ROOT.createIFile("PhotoPropertiesUtilTests");
+    private static final IFile INDIR = TestUtil.OUTDIR_ROOT.createFile("PhotoPropertiesUtilTests");
 
     @Test
     public void shouldInferAutoprocessingExifDefaultsFromExistingFiles() throws IOException {

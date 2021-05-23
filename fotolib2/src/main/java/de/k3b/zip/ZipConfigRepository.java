@@ -91,7 +91,7 @@ public class ZipConfigRepository implements IZipConfig {
         String fileName = FileUtils.replaceExtension(zipName, ZipConfigRepository.FILE_SUFFIX);
         if ((zipFileDir == null) || (fileName == null)) return null;
 
-        IFile configFile = zipFileDir.createIFile(fileName);
+        IFile configFile = zipFileDir.createFile(fileName);
         return configFile;
     }
 

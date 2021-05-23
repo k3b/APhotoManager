@@ -161,13 +161,13 @@ public class OSDirectory extends FileCacheItem<OSDirectory> implements IDirector
     protected int getCalculateFlags(IFile directory) {
         int result = 0;
         if ((directory != null) && (directory.isDirectory())) {
-            if (directory.createIFile(FileUtils.MEDIA_IGNORE_FILENAME).exists()) {
+            if (directory.createFile(FileUtils.MEDIA_IGNORE_FILENAME).exists()) {
                 result = DIR_FLAG_NOMEDIA_ROOT;
             } else if (FileUtils.isHiddenFolder(directory.getAbsolutePath())) {
                 result = DIR_FLAG_NOMEDIA;
             }
 
-            if (directory.createIFile(RuleFileNameProcessor.APM_FILE_NAME).exists()) {
+            if (directory.createFile(RuleFileNameProcessor.APM_FILE_NAME).exists()) {
                 result |= DIR_FLAG_APM_DIR;
             }
         }
@@ -191,7 +191,7 @@ public class OSDirectory extends FileCacheItem<OSDirectory> implements IDirector
      */
     @Override
     public void rename(String oldFolderName, String newFolderName) {
-        this.setCurrent(getCurrent().getParentFile().createIFile(newFolderName));
+        this.setCurrent(getCurrent().getParentFile().createFile(newFolderName));
     }
 
     /**
@@ -233,7 +233,7 @@ public class OSDirectory extends FileCacheItem<OSDirectory> implements IDirector
     @Override
     public OSDirectory find(String path) {
         if (path == null) return null;
-        return find(FileFacade.convert("OSDirectory find ", path).getCanonicalIFile());
+        return find(FileFacade.convert("OSDirectory find ", path).getCanonicalFile());
     }
 
     protected OSDirectory find(IFile file) {
@@ -316,7 +316,7 @@ public class OSDirectory extends FileCacheItem<OSDirectory> implements IDirector
             result = (OSDirectory) findChildByRelPath(children, newCildFolderName);
 
             if (result == null) {
-                IFile newChildFile = getCurrent().createIFile(newCildFolderName).getCanonicalIFile();
+                IFile newChildFile = getCurrent().createFile(newCildFolderName).getCanonicalFile();
                 result = createOsDirectory(newChildFile, this, grandChilden);
                 if (result != null) {
                     this.addChild(result);

@@ -55,7 +55,7 @@ public interface IFile {
 
     String getAbsolutePath();
 
-    IFile getCanonicalIFile();
+    IFile getCanonicalFile();
 
     String getCanonicalPath();
 
@@ -87,7 +87,7 @@ public interface IFile {
     /**
      * @return null if file already exist
      */
-    IFile createIFile(String name);
+    IFile createFile(String name);
 
     File getFile();
 

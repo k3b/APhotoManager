@@ -88,8 +88,8 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public IFile getCanonicalIFile() {
-        return child.getCanonicalIFile();
+    public IFile getCanonicalFile() {
+        return child.getCanonicalFile();
     }
 
     @Override
@@ -163,8 +163,8 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public IFile createIFile(String name) {
-        return child.createIFile(name);
+    public IFile createFile(String name) {
+        return child.createFile(name);
     }
 
     @Override

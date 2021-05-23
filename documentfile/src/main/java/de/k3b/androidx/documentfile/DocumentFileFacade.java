@@ -61,7 +61,7 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
     }
 
     @Override
-    public IFile getCanonicalIFile() {
+    public IFile getCanonicalFile() {
         return null;
     }
 
@@ -126,7 +126,7 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
     }
 
     @Override
-    public IFile createIFile(String name) {
+    public IFile createFile(String name) {
         return null;
     }
 

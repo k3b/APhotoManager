@@ -140,7 +140,7 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
         }
 
         protected String processUri(Uri uri) {
-            IFile csvFile = FileFacade.convert("PhotoPropertiesMediaDBCsvImportActivity processUri", IntentUtil.getFile(uri)).getCanonicalIFile();
+            IFile csvFile = FileFacade.convert("PhotoPropertiesMediaDBCsvImportActivity processUri", IntentUtil.getFile(uri)).getCanonicalFile();
             if (csvFile != null) {
                 Reader reader = null;
                 try {
@@ -267,7 +267,7 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
                         Date fileModifyDate = next.getFileModifyDate();
                         long fileModifyDateMilliSecs = (fileModifyDate != null) ? fileModifyDate.getTime() : TagSql.EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV;
 
-                        String canonicalPath = mCsvRootDir.createIFile(path).getCanonicalPath();
+                        String canonicalPath = mCsvRootDir.createFile(path).getCanonicalPath();
                         updateDB("MediaCsvLoader.onNextItem", canonicalPath, fileModifyDateMilliSecs, mDbValues);
                         TagRepository.getInstance().includeTagNamesIfNotFound(mMediaValueAdapter.getTags());
                         if (next.getLastErrorColumnNumber() != -1) {

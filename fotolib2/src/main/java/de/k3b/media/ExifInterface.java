@@ -1417,7 +1417,7 @@ public class ExifInterface {
             final String name = inFile.getName();
             final String tempName = name + TMP_FILE_SUFFIX;
             inFile = renameSouraceFileBeforeReplaceOrThrow(inFile, tempName);
-            currentOutFile = outFile.getParentFile().createIFile(name);
+            currentOutFile = outFile.getParentFile().createFile(name);
         }
 
         saveJpegAttributes(
@@ -1442,7 +1442,7 @@ public class ExifInterface {
             throw new IOException("Filesystem: Could'nt rename sourcefile from " + oldSourcefile +
                     " to " + newName);
         }
-        return oldSourcefile.getParentFile().createIFile(newName);
+        return oldSourcefile.getParentFile().createFile(newName);
     }
 
     /** repairs wrong/missing attributes */

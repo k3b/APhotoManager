@@ -211,7 +211,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
 
         if (!mustRename(name)) {
 			// no rename rule or file already matches rules
-            IFile result = outDir.createIFile(name);
+            IFile result = outDir.createFile(name);
 
             // usecase: apply auto where inFile is already in outdir: no modification
             if ((sourceFile != null) && sourceFile.equals(result)) return result;
@@ -234,7 +234,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
         IFile result = null;
         int tryCount = 0;
         do {
-            result = outDir.createIFile(generateFileName(dateFormatted, mNextFileInstanceNumber, fileExtension));
+            result = outDir.createFile(generateFileName(dateFormatted, mNextFileInstanceNumber, fileExtension));
             mNextFileInstanceNumber++;
             if (!fileOrSidecarExists(result)) return result; // filename not in use yet
             tryCount++;

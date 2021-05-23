@@ -92,7 +92,7 @@ public class TagRepository {
         if (parentDir == null) throw new IllegalArgumentException("TagRepository.setInstance(null)");
 
         List<Tag> old = null;
-        IFile newFile = parentDir.createIFile(DB_NAME);
+        IFile newFile = parentDir.createFile(DB_NAME);
         if (TagRepository.sInstance != null){
             if (TagRepository.sInstance.mFile.equals(newFile)) return; // no change: nothing to do
 

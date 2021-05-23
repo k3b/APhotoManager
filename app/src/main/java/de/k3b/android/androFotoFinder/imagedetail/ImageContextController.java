@@ -105,7 +105,7 @@ public abstract class ImageContextController {
     }
 
     private static IFile getPropertiesFile() {
-        return Global.reportDir.createIFile(DEFINITION_FILE);
+        return Global.reportDir.createFile(DEFINITION_FILE);
     }
 
     protected Properties loadFromFile() {

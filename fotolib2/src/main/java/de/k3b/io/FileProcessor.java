@@ -70,7 +70,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         while (true) {
             id++;
             String candidateName = filename + id + extension;
-            IFile candidate = parent.createIFile(candidateName);
+            IFile candidate = parent.createFile(candidateName);
             if (!fileOrSidecarExists(candidate)) {
                 log("rem renamed from '", filename, "' to '", candidateName,"'");
                 return candidate;

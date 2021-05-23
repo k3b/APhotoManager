@@ -51,7 +51,7 @@ public class DestDirFileNameProcessor  extends FileProcessor implements IFileNam
         if (doNotRenameIfSourceInDestFolder && this.destDirFolder.equals(sourceFile.getParentFile()))
             return sourceFile;
 
-        IFile dest = renameDuplicate(this.destDirFolder.createIFile(sourceFile.getName()));
+        IFile dest = renameDuplicate(this.destDirFolder.createFile(sourceFile.getName()));
         return dest;
     }
 }

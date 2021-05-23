@@ -295,7 +295,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
             if (renameProcessor != null) {
                 destFile = renameProcessor.getNextFile(srcFile, getRenameSourceFileDate(srcFile, datesLastModified, pos), -1);
             } else {
-                destFile = destDirFolder.createIFile(srcFile.getName());
+                destFile = destDirFolder.createFile(srcFile.getName());
             }
             result[pos++] = destFile;
         }
@@ -353,7 +353,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 //!!! TODO ??begin transaction??
                 while (pos < fileCount) {
                     IFile sourceFile = sourceFiles[pos];
-                    IFile destFile = destFiles[pos].getCanonicalIFile();
+                    IFile destFile = destFiles[pos].getCanonicalFile();
                     Long id = ids[pos];
 
                     boolean deleteOriginalAfterFinish = move;

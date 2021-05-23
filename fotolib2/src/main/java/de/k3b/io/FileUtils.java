@@ -187,7 +187,7 @@ public class FileUtils extends FileUtilsBase {
                     return cacheFind.booleanValue();
                 }
 
-                if (file.createIFile(MEDIA_IGNORE_FILENAME).exists()) {
+                if (file.createFile(MEDIA_IGNORE_FILENAME).exists()) {
                     if (nomediaCache != null) {
                         nomediaCache.put(absolutePath, true);
                         nomediaCache.put(firstDir, true);
@@ -345,10 +345,10 @@ public class FileUtils extends FileUtilsBase {
 
         parentDir.mkdirs();
         final String mime = "*/*";
-        IFile candidate = parentDir.createIFile(newFilePrefix + newFileSuffix);
+        IFile candidate = parentDir.createFile(newFilePrefix + newFileSuffix);
         while (candidate.exists()) {
             number++;
-            candidate = parentDir.createIFile(newFilePrefix + number + newFileSuffix);
+            candidate = parentDir.createFile(newFilePrefix + number + newFileSuffix);
         }
         return candidate;
     }

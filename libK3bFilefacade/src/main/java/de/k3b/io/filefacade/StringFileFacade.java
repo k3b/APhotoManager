@@ -135,7 +135,7 @@ public class StringFileFacade implements IFile {
     }
 
     @Override
-    public IFile getCanonicalIFile() {
+    public IFile getCanonicalFile() {
         return this;
     }
 
@@ -214,7 +214,7 @@ public class StringFileFacade implements IFile {
      * @return null if file already exist
      */
     @Override
-    public IFile createIFile(String name) {
+    public IFile createFile(String name) {
         return null;
     }
 

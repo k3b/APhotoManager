@@ -197,7 +197,7 @@ public class FileFacade implements IFile {
     }
 
     @Override
-    public IFile getCanonicalIFile() {
+    public IFile getCanonicalFile() {
         return convert("FileFacade getCanonicalFile", FileUtilsBase.tryGetCanonicalFile(file));
     }
 
@@ -301,7 +301,7 @@ public class FileFacade implements IFile {
     }
 
     @Override
-    public IFile createIFile(String name) {
+    public IFile createFile(String name) {
         final File file = new File(this.file, name).getAbsoluteFile();
         return convert("FileFacade create", file);
     }
