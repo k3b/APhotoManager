@@ -71,7 +71,7 @@ import java.io.File;
  * @see android.provider.DocumentsContract
  */
 public abstract class DocumentFileOrininal {
-    static final String TAG = "DocumentFileEx";
+    static final String TAG = "DocumentFile";
 
     @Nullable
     protected DocumentFileEx mParent;

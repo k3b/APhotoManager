@@ -8,31 +8,56 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.FileWrapper;
 import de.k3b.io.filefacade.IFile;
 
+/**
+ * Inheritance layer to make DocumentFileFacade compatible with IFile
+ */
 public abstract class DocumentFileFacade extends DocumentFileOrininal implements IFile {
+    protected File mFile = null;
+
     protected DocumentFileFacade(@Nullable DocumentFileEx parent) {
         super(parent);
+        if (parent != null) {
+            mFile = new File(parent.mFile, getName());
+        }
     }
 
     @Override
-    public void set(IFile src) {
+    public boolean equals(Object o) {
+        if (o instanceof File) return this.mFile.equals(o);
+        if (o instanceof FileFacade) return this.mFile.equals(((FileFacade) o).getFile());
+        if (o instanceof FileWrapper) return equals(((FileWrapper) o).getChild());
+        return super.equals(o);
+    }
 
+
+    @Override
+    public void set(IFile src) {
+        if (src != null) {
+            if (src instanceof FileWrapper) {
+                set(((FileWrapper) src).getChild());
+            }
+            mFile = src.getFile();
+        }
     }
 
     @Override
     public boolean isHidden() {
-        return false;
+        String name = getName();
+        return name == null || name.startsWith(".");
     }
 
     @Override
     public boolean isAbsolute() {
-        return false;
+        return mFile.isAbsolute();
     }
 
     @Override
     public String getAbsolutePath() {
-        return null;
+        return mFile.getAbsolutePath();
     }
 
     @Override
@@ -113,5 +138,13 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
     @Override
     public IFile invalidateParentDirCache() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "uri='" + getUri() +
+                ", file='" + mFile +
+                "'}";
     }
 }

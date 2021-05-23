@@ -136,6 +136,11 @@ class TreeDocumentFileOriginal extends DocumentFileEx {
 
     @Override
     public DocumentFileEx[] listFiles() {
+        return listFiles(null, null);
+    }
+
+    protected DocumentFileEx[] listFiles(@Nullable String selection,
+                                         @Nullable String[] selectionArgs) {
         final ContentResolver resolver = mContext.getContentResolver();
         final Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(mUri,
                 DocumentsContract.getDocumentId(mUri));
@@ -144,7 +149,7 @@ class TreeDocumentFileOriginal extends DocumentFileEx {
         Cursor c = null;
         try {
             c = resolver.query(childrenUri, new String[]{
-                    DocumentsContract.Document.COLUMN_DOCUMENT_ID}, null, null, null);
+                    DocumentsContract.Document.COLUMN_DOCUMENT_ID}, selection, selectionArgs, null);
             while (c.moveToNext()) {
                 final String documentId = c.getString(0);
                 final Uri documentUri = DocumentsContract.buildDocumentUriUsingTree(mUri,

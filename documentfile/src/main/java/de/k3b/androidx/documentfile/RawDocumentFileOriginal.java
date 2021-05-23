@@ -19,11 +19,11 @@ import java.util.ArrayList;
  * Sourcecode taken from Android api-29/documentfile-1.0.0-sources.jar
  */
 class RawDocumentFileOriginal extends DocumentFileEx {
-    private File mFile;
+    // private File mFile; // moved as protected to baseclass so all DocumentFileEx successors have mFile
 
     RawDocumentFileOriginal(@Nullable DocumentFileEx parent, File file) {
         super(parent);
-        mFile = file;
+        this.mFile = file;
     }
 
     private static String getTypeForName(String name) {

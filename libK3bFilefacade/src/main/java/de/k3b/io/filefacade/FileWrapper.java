@@ -192,4 +192,8 @@ public class FileWrapper implements IFile {
     public String toString() {
         return getClass().getSimpleName() + "@" + child.toString();
     }
+
+    public IFile getChild() {
+        return child;
+    }
 }

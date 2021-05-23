@@ -3,6 +3,7 @@ package de.k3b.androidx.documentfile;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,6 +15,10 @@ import java.util.Map;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class DocumentFileCache {
+    static final String TAG = DocumentFileEx.TAG;
+    public static boolean debug = false;
+    public static boolean debug_find = false;
+
     private final Map<String, RootTreeDocumentFile> fileRootPath2RootDoc = new HashMap<>();
 
     private static @NonNull
@@ -32,6 +37,9 @@ public class DocumentFileCache {
     public @NonNull
     TreeDocumentFile register(@NonNull Context context, @NonNull Uri uri, @NonNull File file) {
         RootTreeDocumentFile result = new RootTreeDocumentFile(context, uri, getKey(file));
+        if (debug) {
+            Log.i(TAG, "register([" + file + "]) => '" + uri + "' in " + this);
+        }
         fileRootPath2RootDoc.put(result.pathPrefix, result);
         return result;
     }
@@ -39,24 +47,29 @@ public class DocumentFileCache {
     public @Nullable
     TreeDocumentFile find(@NonNull File file) {
         String path = getKey(file);
-        RootTreeDocumentFile result = findRootTreeDocumentFile(path);
-        if (result != null) {
-            return result.find(path);
+        RootTreeDocumentFile root = findRootTreeDocumentFile(path);
+        if (root != null) {
+            TreeDocumentFile result = root.find(path);
+            if (debug_find) {
+                Log.d(TAG, "find([" + file + "]) => [" + result + "] in " + this);
+            }
+            return result;
         }
-        return result;
+        Log.w(TAG, "Failed to find root for " + file);
+        return null;
     }
 
     private @Nullable
     RootTreeDocumentFile findRootTreeDocumentFile(@NonNull String path) {
-        for (String root : fileRootPath2RootDoc.keySet()) {
-            if (path.startsWith(root)) {
-                return fileRootPath2RootDoc.get(root);
+        for (Map.Entry<String, RootTreeDocumentFile> entry : fileRootPath2RootDoc.entrySet()) {
+            if (path.startsWith(entry.getKey())) {
+                return entry.getValue();
             }
         }
         return null;
     }
 
-    private static class RootTreeDocumentFile extends TreeDocumentFile {
+    static class RootTreeDocumentFile extends TreeDocumentFile {
         /**
          * without trailing "/"
          */
@@ -67,7 +80,7 @@ public class DocumentFileCache {
          */
         String pathPrefix;
 
-        RootTreeDocumentFile(@NonNull Context context, @NonNull Uri uri, @NonNull String pathPrefix) {
+        private RootTreeDocumentFile(@NonNull Context context, @NonNull Uri uri, @NonNull String pathPrefix) {
             super(null, context, uri);
             assert pathPrefix.endsWith("/");
             this.pathPrefix = pathPrefix;
@@ -83,10 +96,11 @@ public class DocumentFileCache {
         }
 
         @Nullable
-        public TreeDocumentFile find(@NonNull String path) {
+        protected TreeDocumentFile find(@NonNull String path) {
             assert !path.endsWith("/");
             assert path.startsWith(pathPrefix);
 
+            String state = "";
             TreeDocumentFile result = path2Doc.get(path);
             if (result == null) {
                 int pos = path.lastIndexOf("/");
@@ -95,14 +109,28 @@ public class DocumentFileCache {
                     TreeDocumentFile parent = find(parentPath);
                     if (parent != null) {
                         String name = path.substring(pos);
-                        result = (TreeDocumentFile) parent.findFile(name);
+                        result = parent.findDirByName(name);
                         if (result != null) {
+                            state = "added from filesystem";
                             path2Doc.put(path, result);
+                        } else {
+                            state = "not in filesystem";
                         }
                     }
                 }
+            } else {
+                state = "found in cache";
+            }
+            if (debug_find) {
+                Log.d(TAG, "find('" + path + "') => " + state + "[" + result + "] in " + this);
+                return null;
             }
             return result;
+        }
+
+        @Override
+        public String toString() {
+            return "'" + pathPrefix + "'(" + this.path2Doc.size() + ") => " + super.toString();
         }
     }
 }
