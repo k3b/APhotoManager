@@ -197,7 +197,7 @@ public class StringFileFacade implements IFile {
         List<IFile> found = new ArrayList<>();
         for (IFile file : listFiles) {
             if (file != null &&
-                    (file.isDirectory() || FileFacade.accept(file.getName().toLowerCase()))) {
+                    (file.isDirectory() || DirectoryFilter.accept(file.getName().toLowerCase()))) {
                 found.add(file);
             }
         }

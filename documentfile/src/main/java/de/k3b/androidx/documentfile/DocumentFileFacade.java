@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.k3b.io.filefacade.DirectoryFilter;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.FileWrapper;
 import de.k3b.io.filefacade.IFile;
@@ -117,7 +118,7 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
         List<IFile> found = new ArrayList<>();
         for (DocumentFileEx file : listFiles()) {
             if (file != null &&
-                    (file.isDirectory() || FileFacade.accept(file.getName().toLowerCase()))) {
+                    (file.isDirectory() || DirectoryFilter.accept(file.getName().toLowerCase()))) {
                 found.add(file);
             }
         }

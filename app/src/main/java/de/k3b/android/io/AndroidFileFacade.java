@@ -39,6 +39,7 @@ import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.androidx.documentfile.DocumentFileEx;
 import de.k3b.io.Converter;
 import de.k3b.io.FileUtils;
+import de.k3b.io.filefacade.DirectoryFilter;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 
@@ -292,7 +293,7 @@ public class AndroidFileFacade extends FileFacade {
             final File parent = getFile();
             for (DocumentFileEx file : androidFile.listFiles()) {
                 if (file != null &&
-                        (file.isDirectory() || accept(file.getName().toLowerCase()))) {
+                        (file.isDirectory() || DirectoryFilter.accept(file.getName().toLowerCase()))) {
                     found.add(new AndroidFileFacade(
                             file, new File(parent, file.getName())));
                 }

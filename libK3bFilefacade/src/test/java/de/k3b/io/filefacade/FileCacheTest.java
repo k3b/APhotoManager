@@ -28,7 +28,7 @@ import de.k3b.io.FileUtilsBase;
 public class FileCacheTest {
     @BeforeClass
     public static void init() {
-        FileFacade.init();
+        DirectoryFilter.init();
     }
 
     @Test

@@ -57,16 +57,6 @@ public class FileFacade implements IFile {
 
     private File file;
 
-    private static final List<String> allowedFileSuffixesLowercase = new ArrayList<>();
-
-    static {
-        init();
-    }
-
-    public static void init() {
-        includeFileSuffixesForListDir(FileUtilsBase.MEDIA_IGNORE_FILENAME);
-    }
-
     @Override
     public void set(IFile src) {
         if (src != null) {
@@ -241,29 +231,13 @@ public class FileFacade implements IFile {
         return get(null, file.listFiles());
     }
 
-    public static void includeFileSuffixesForListDir(String... allowedFileSuffixes) {
-        for (String suffix : allowedFileSuffixes) {
-            String suffixLowerCase = suffix.toLowerCase();
-            if (!allowedFileSuffixesLowercase.contains(suffixLowerCase)) {
-                allowedFileSuffixesLowercase.add(suffixLowerCase);
-            }
-        }
-    }
-
-    public static boolean accept(String nameLowerCase) {
-        for (String suffix : allowedFileSuffixesLowercase) {
-            if (nameLowerCase.endsWith(suffix)) return true;
-        }
-        return false;
-    }
-
     public IFile[] listIDirs() {
         List<IFile> found = new ArrayList<>();
         File[] files = (file != null) ? file.listFiles() : null;
         if (files != null) {
             for (File file : files) {
                 if (file != null &&
-                        (file.isDirectory() || accept(file.getName().toLowerCase()))) {
+                        (file.isDirectory() || DirectoryFilter.accept(file.getName().toLowerCase()))) {
                     found.add(convert(null, file));
                 }
             }

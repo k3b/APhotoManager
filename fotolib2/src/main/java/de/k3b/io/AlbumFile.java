@@ -22,7 +22,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.DirectoryFilter;
 
 /**
  * Created by k3b on 17.04.2018.
@@ -37,7 +37,7 @@ public class AlbumFile {
     }
 
     public static void init() {
-        FileFacade.includeFileSuffixesForListDir(SUFFIX_QUERY, SUFFIX_VALBUM);
+        DirectoryFilter.includeFileSuffixesForListDir(SUFFIX_QUERY, SUFFIX_VALBUM);
     }
 
     public static boolean isQueryFile(String uri) {
