@@ -36,7 +36,7 @@ public class DocumentFileCache {
      */
     public @NonNull
     TreeDocumentFile register(@NonNull Context context, @NonNull Uri uri, @NonNull File file) {
-        RootTreeDocumentFile result = new RootTreeDocumentFile(context, uri, getKey(file));
+        RootTreeDocumentFile result = new RootTreeDocumentFile(context, uri, file);
         if (debug) {
             Log.i(TAG, "register([" + file + "]) => '" + uri + "' in " + this);
         }
@@ -80,11 +80,10 @@ public class DocumentFileCache {
          */
         String pathPrefix;
 
-        private RootTreeDocumentFile(@NonNull Context context, @NonNull Uri uri, @NonNull String pathPrefix) {
+        private RootTreeDocumentFile(@NonNull Context context, @NonNull Uri uri, @NonNull File file) {
             super(null, context, uri);
-            assert pathPrefix.endsWith("/");
-            this.pathPrefix = pathPrefix;
-            path2Doc.put(withoutTrailing(pathPrefix), this);
+            this.pathPrefix = getKey(file);
+            path2Doc.put(withoutTrailing(this.pathPrefix), this);
         }
 
         @NonNull

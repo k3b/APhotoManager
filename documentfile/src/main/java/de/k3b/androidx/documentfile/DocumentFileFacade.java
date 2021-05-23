@@ -148,6 +148,7 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
     @Override
     public File getFile() {
         if (mFile == null) {
+            // calculate on demand from parent file
             DocumentFileEx parentDoc = getParentFile();
             File parentFile = (parentDoc == null) ? null : parentDoc.getFile();
             if (parentFile != null) {

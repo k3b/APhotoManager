@@ -12,6 +12,10 @@ import android.provider.DocumentsContract;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import de.k3b.io.filefacade.DirectoryFilter;
 import de.k3b.io.filefacade.IFile;
 
 /**
@@ -34,8 +38,22 @@ class TreeDocumentFile extends CachedTreeDocumentFile {
 
     @Override
     public IFile[] listIDirs() {
-        //!!!
-        String query = DocumentsContract.Document.COLUMN_MIME_TYPE + "= ?";
-        return toIFiles(listFiles(query, new String[]{DocumentsContract.Document.MIME_TYPE_DIR}));
+        StringBuilder query = new StringBuilder().append(DocumentsContract.Document.COLUMN_MIME_TYPE).append("= ?");
+        List<String> params = new ArrayList<>();
+        params.add(DocumentsContract.Document.MIME_TYPE_DIR);
+        List<String> allowedFileSuffixesLowercase = DirectoryFilter.getAllowedFileSuffixesLowercase();
+        if (allowedFileSuffixesLowercase != null && allowedFileSuffixesLowercase.size() > 0) {
+            query.append(" AND (");
+            String delimiter = " ";
+            for (String s : allowedFileSuffixesLowercase) {
+                query.append(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                        .append(" like ?")
+                        .append(delimiter);
+                params.add("%" + s);
+                delimiter = " OR ";
+            }
+            query.append(")");
+        }
+        return toIFiles(listFiles(query.toString(), params.toArray(new String[params.size()])));
     }
 }

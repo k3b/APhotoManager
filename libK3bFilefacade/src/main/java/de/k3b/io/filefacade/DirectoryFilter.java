@@ -24,6 +24,10 @@ import java.util.List;
 import de.k3b.io.FileUtilsBase;
 
 public class DirectoryFilter {
+    public static List<String> getAllowedFileSuffixesLowercase() {
+        return allowedFileSuffixesLowercase;
+    }
+
     private static final List<String> allowedFileSuffixesLowercase = new ArrayList<>();
 
     static {
