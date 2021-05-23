@@ -40,7 +40,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.io.DocumentFileTranslator;
 import de.k3b.android.widget.ActivityWithCallContext;
-import de.k3b.androidx.Documentfile.DocumentFileEx;
+import de.k3b.androidx.documentfile.DocumentFileEx;
 import de.k3b.io.StringUtils;
 import de.k3b.io.filefacade.IFile;
 

@@ -23,4 +23,4 @@
  * <p>
  * Sourcecode taken from Android api-29/documentfile-1.0.0-sources.jar
  **/
-package de.k3b.androidx.Documentfile;
+package de.k3b.androidx.documentfile;

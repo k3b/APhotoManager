@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.androidx.Documentfile.DocumentFileEx;
+import de.k3b.androidx.documentfile.DocumentFileEx;
 import de.k3b.io.filefacade.FileFacade;
 
 /**

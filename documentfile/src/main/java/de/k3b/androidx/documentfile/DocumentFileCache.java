@@ -1,4 +1,4 @@
-package de.k3b.androidx.Documentfile;
+package de.k3b.androidx.documentfile;
 
 import android.content.Context;
 import android.net.Uri;

@@ -3,7 +3,7 @@
  * Copyright 2021 by k3b under (Licensed under the GPL v3 (the "License"))
  */
 
-package de.k3b.androidx.Documentfile;
+package de.k3b.androidx.documentfile;
 
 import androidx.annotation.Nullable;
 

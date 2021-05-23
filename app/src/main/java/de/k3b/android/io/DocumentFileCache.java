@@ -24,7 +24,7 @@ import java.io.File;
 import java.util.HashMap;
 
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.androidx.Documentfile.DocumentFileEx;
+import de.k3b.androidx.documentfile.DocumentFileEx;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.media.PhotoPropertiesUtil;
 

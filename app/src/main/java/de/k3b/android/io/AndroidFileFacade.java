@@ -36,7 +36,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.widget.FilePermissionActivity;
-import de.k3b.androidx.Documentfile.DocumentFileEx;
+import de.k3b.androidx.documentfile.DocumentFileEx;
 import de.k3b.io.Converter;
 import de.k3b.io.FileUtils;
 import de.k3b.io.filefacade.FileFacade;
