@@ -29,9 +29,6 @@ class TreeDocumentFileOriginal extends DocumentFileEx {
         super(parent);
         mContext = context;
         mUri = uri;
-        if (parent == null) {
-            rootDocumentFile = this;
-        }
     }
 
     @Nullable
