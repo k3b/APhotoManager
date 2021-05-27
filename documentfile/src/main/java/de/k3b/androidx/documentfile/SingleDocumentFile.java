@@ -84,4 +84,29 @@ class SingleDocumentFile extends SingleDocumentFileOriginal {
                 "readUri='" + readUri +
                 "'}";
     }
+
+    private String name = null;
+
+    @Nullable
+    @Override
+    public String getName() {
+        if (name == null) {
+            name = super.getName();
+        }
+        return name;
+    }
+
+    @Override
+    public boolean renameTo(String displayName) {
+        // IFile newFile = getParentFile().createFile(displayName, this.getType());
+        boolean result = super.renameTo(displayName);
+        /*
+        if (result) {
+            name = displayName;
+            // DocumentsContract.getTreeDocumentId()
+        }
+
+         */
+        return result;
+    }
 }

@@ -56,4 +56,16 @@ class TreeDocumentFile extends CachedTreeDocumentFile {
         }
         return toIFiles(listFiles(query.toString(), params.toArray(new String[params.size()])));
     }
+
+    private String name = null;
+
+    @Nullable
+    @Override
+    public String getName() {
+        if (name == null) {
+            name = super.getName();
+        }
+        return name;
+    }
+
 }

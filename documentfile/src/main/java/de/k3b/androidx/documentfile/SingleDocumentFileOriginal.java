@@ -18,7 +18,7 @@ import androidx.annotation.RequiresApi;
 @RequiresApi(19)
 class SingleDocumentFileOriginal extends DocumentFileEx {
     protected final Context mContext;
-    private final Uri mUri;
+    protected Uri mUri;
 
     SingleDocumentFileOriginal(@Nullable DocumentFileEx parent, Context context, Uri uri) {
         super(parent);
