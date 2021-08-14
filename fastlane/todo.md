@@ -1,3 +1,5 @@
+bug: edit existing .apm autoprocessing does not work anymore
+
 input :
 
 * ~/StudioProjects/APhotoManager/app/src/debug/res/values-de/fdroid.xml
@@ -5,14 +7,13 @@ input :
 potential output
 
 * ~/StudioProjects/APhotoManager/fastlane/metadata/android/de-DE/full_description.txt
-* 
+*
 * ~/StudioProjects/APhotoManager.wiki/home_de.html
 * ~/StudioProjects/APhotoManager.wiki/home_de.md
 
 ## todo py script pseudo code:
 
-for each ~/StudioProjects/APhotoManager/app/src/debug/res/values-*/fdroid.xml
-    if fdroid.date > fastlane/metadata/android/de-DE/full_description.txt.date or null regenerate
+for each ~/StudioProjects/APhotoManager/app/src/debug/res/values-*/fdroid.xml if fdroid.date > fastlane/metadata/android/de-DE/full_description.txt.date or null regenerate
 
 ## resources:
 

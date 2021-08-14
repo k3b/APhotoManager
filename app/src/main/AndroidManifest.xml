@@ -97,7 +97,10 @@ To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permi
         android:theme="@style/AppTheme.Light"
         android:requestLegacyExternalStorage="true">
         <!-- android:requestLegacyExternalStorage="true" see
-            https://www.reddit.com/r/androiddev/comments/jh5uif/observations_of_requestlegacyexternalstorage/ -->
+            https://www.reddit.com/r/androiddev/comments/jh5uif/observations_of_requestlegacyexternalstorage/
+            see also
+            https://developer.android.com/training/data-storage/manage-all-files
+            -->
 
         <activity
             android:name=".FotoGalleryActivity"

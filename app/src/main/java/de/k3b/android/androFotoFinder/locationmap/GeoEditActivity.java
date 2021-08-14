@@ -43,6 +43,7 @@ import java.util.Arrays;
 import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.GlobalFiles;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.io.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
@@ -132,37 +133,14 @@ public class GeoEditActivity extends FilePermissionActivity implements Common {
         }
     }
 
-    private void onCreateButtos() {
-        this.mLatitudeFrom = (EditText) findViewById(R.id.edit_latitude_from);
-        this.mLongitudeFrom = (EditText) findViewById(R.id.edit_longitude_from);
-        mHistory = new HistoryEditText(GeoEditActivity.this, new int[] {
-                R.id.cmd_lat_from_history, R.id.cmd_lon_from_history} ,
-                mLatitudeFrom, mLongitudeFrom);
-
-        Button cmd = (Button) findViewById(R.id.cmd_select_lat_lon);
-        cmd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//              showDirectoryPicker(FotoSql.queryGroupByPlace);
-                showLatLonPicker(fromGui());
-            }
-        });
-
-        this.cmdOk = (Button) findViewById(R.id.cmd_ok);
-        cmdOk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onOk();
-            }
-        });
-        this.cmdCancel = (Button) findViewById(R.id.cmd_cancel);
-        cmdCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setResult(RESULT_NOCHANGE);
-                finish();
-            }
-        });
+    private static GeoPickHistory getHistory() {
+        if (GlobalFiles.pickHistoryFile != null) {
+            GeoPickHistory history = new GeoPickHistory(GlobalFiles.pickHistoryFile, Global.pickHistoryMax);
+            history.load();
+            return history;
+        }
+        // null if disabled
+        return null;
     }
 
     @Override
@@ -306,18 +284,41 @@ public class GeoEditActivity extends FilePermissionActivity implements Common {
                     this, GeoEditActivity.RESULT_ID,
                     Intent.createChooser(intent, this.getString(R.string.geo_edit_menu_title)));
         } catch (ActivityNotFoundException ex) {
-            Toast.makeText(this, R.string.geo_picker_err_not_found,Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.geo_picker_err_not_found, Toast.LENGTH_LONG).show();
         }
     }
 
-    private static GeoPickHistory getHistory() {
-        if (Global.pickHistoryFile != null) {
-            GeoPickHistory history = new GeoPickHistory(Global.pickHistoryFile, Global.pickHistoryMax);
-            history.load();
-            return history;
-        }
-        // null if disabled
-        return null;
+    private void onCreateButtos() {
+        this.mLatitudeFrom = findViewById(R.id.edit_latitude_from);
+        this.mLongitudeFrom = findViewById(R.id.edit_longitude_from);
+        mHistory = new HistoryEditText(GeoEditActivity.this, new int[]{
+                R.id.cmd_lat_from_history, R.id.cmd_lon_from_history},
+                mLatitudeFrom, mLongitudeFrom);
+
+        Button cmd = findViewById(R.id.cmd_select_lat_lon);
+        cmd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//              showDirectoryPicker(FotoSql.queryGroupByPlace);
+                showLatLonPicker(fromGui());
+            }
+        });
+
+        this.cmdOk = findViewById(R.id.cmd_ok);
+        cmdOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onOk();
+            }
+        });
+        this.cmdCancel = findViewById(R.id.cmd_cancel);
+        cmdCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(RESULT_NOCHANGE);
+                finish();
+            }
+        });
     }
 
     /**
@@ -378,13 +379,13 @@ public class GeoEditActivity extends FilePermissionActivity implements Common {
             }
         }
 
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mProgressBar = findViewById(R.id.progressBar);
         cmdOk.setVisibility(View.INVISIBLE);
         cmdCancel.setVisibility(View.INVISIBLE);
         mProgressBar.setVisibility(View.VISIBLE);
         mProgressBar.setMax(selectedItems.size() + 1);
 
-        mLblStatusMessage = ((TextView) findViewById(R.id.lbl_status));
+        mLblStatusMessage = findViewById(R.id.lbl_status);
         mLblStatusMessage.setText(R.string.geo_edit_update_in_progress);
 
         GeoPickHistory history = getHistory();

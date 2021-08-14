@@ -30,7 +30,7 @@ import java.io.OutputStream;
  * that can be implemented by android independant de.k3b.io.File
  * and android specific de.k3b.android.io....
  * <p>
- * This interface has the similar method names/sinatures as de.k3b.io.File
+ * This interface has the similar method names/sinatures as java.io.File
  */
 public interface IFile {
     void set(IFile src);
@@ -123,5 +123,6 @@ public interface IFile {
 
     //------- file cache support
     // may be called after delete, renameTo, openOutputStream, mkdirs
+    @Deprecated
     IFile invalidateParentDirCache();
 }

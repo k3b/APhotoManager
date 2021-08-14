@@ -38,6 +38,7 @@ import java.util.List;
 
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.GlobalFiles;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.IntentUtil;
@@ -105,7 +106,7 @@ public abstract class ImageContextController {
     }
 
     private static IFile getPropertiesFile() {
-        return Global.reportDir.createFile(DEFINITION_FILE);
+        return GlobalFiles.reportDir.createFile(DEFINITION_FILE);
     }
 
     protected Properties loadFromFile() {
@@ -157,7 +158,7 @@ public abstract class ImageContextController {
 
     /** opens text editor with the properties file */
     private boolean onEdit(String key, String value, IFile file) {
-        Global.reportDir.mkdirs();
+        GlobalFiles.reportDir.mkdirs();
         saveToFile(file, loadFromFile());
         Intent sendIntent = new Intent();
         IntentUtil.setDataAndTypeAndNormalize(sendIntent, Uri.fromFile(file.getFile()), "text/plain");

@@ -2,11 +2,11 @@ apply plugin: 'com.android.library'
 
 android {
     // appXXX are defined in gradle.properties
-    compileSdkVersion = 29
+    compileSdkVersion = 30
 
     defaultConfig {
         minSdkVersion 4
-        targetSdkVersion 28
+        targetSdkVersion 29
 		// use values from gradle.properties
 //        versionCode=Long.valueOf(VERSION_CODE)
         // versionCode "1.2.9"

@@ -63,6 +63,7 @@ import java.util.Stack;
 
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.GlobalFiles;
 import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
@@ -280,12 +281,12 @@ public class LocationMapFragment extends DialogFragment {
 
         mMapView = view.findViewById(R.id.mapview);
 
-        if ((Global.mapsForgeDir == null) || (!Global.mapsForgeDir.exists()) || (!Global.mapsForgeDir.isDirectory())) {
+        if ((GlobalFiles.mapsForgeDir == null) || (!GlobalFiles.mapsForgeDir.exists()) || (!GlobalFiles.mapsForgeDir.isDirectory())) {
             Global.mapsForgeEnabled = false;
         }
 
         if (Global.mapsForgeEnabled) {
-            MapsForgeSupport.load(getActivity(), mMapView, Global.mapsForgeDir);
+            MapsForgeSupport.load(getActivity(), mMapView, GlobalFiles.mapsForgeDir);
         }
 
         this.mCurrentPhoto = view.findViewById(R.id.image);

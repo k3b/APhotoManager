@@ -17,9 +17,12 @@ import de.k3b.io.filefacade.FileWrapper;
 import de.k3b.io.filefacade.IFile;
 
 /**
- * Inheritance layer to make DocumentFileFacade compatible with IFile
+ * Inheritance layer that make DocumentFileFacade compatible with IFile
  */
 public abstract class DocumentFileFacade extends DocumentFileOrininal implements IFile {
+    /**
+     * the j2se file equivalent to DocumentFileEx. Recalculated on Demand in getFile
+     */
     protected File mFile = null;
 
     protected DocumentFileFacade(@Nullable DocumentFileEx parent) {
@@ -80,7 +83,6 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
 
     @Override
     public void setReadUri(String readUri) {
-
     }
 
     @Override
@@ -158,6 +160,7 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
         return mFile;
     }
 
+    @Deprecated
     @Override
     public IFile invalidateParentDirCache() {
         return null;

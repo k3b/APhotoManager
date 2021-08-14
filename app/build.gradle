@@ -8,7 +8,7 @@ apply plugin: 'ch.raffael.pegdown-doclet'
 
 
 android {
-    compileSdkVersion = 29
+    compileSdkVersion = 30
 
     defaultConfig {
         // fdroid-release 'de.k3b.android.androFotoFinder'
@@ -25,7 +25,7 @@ android {
             to retrieve unredacted Exif metadata from photos, you need to declare the ACCESS_MEDIA_LOCATION
             permission in your app's manifest, then request this permission at runtime.
         * */
-        targetSdkVersion 23  // Android 6.0 Marshmallow (API 23) below compileSdkVersion to enamble more backward-compatibility
+        targetSdkVersion 29  // Android 6.0 Marshmallow (API 23) below compileSdkVersion to enamble more backward-compatibility
 
 		// Releases on f-droid
         // unfortunately fdroid needs magic numbers to detect version infos

@@ -21,7 +21,6 @@ package de.k3b.android.androFotoFinder;
 
 import android.content.Context;
 import android.os.Build;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 
@@ -29,8 +28,6 @@ import java.io.File;
 import java.util.Locale;
 
 import de.k3b.android.util.MenuUtils;
-import de.k3b.io.filefacade.FileFacade;
-import de.k3b.io.filefacade.IFile;
 
 /**
  * Global Settings used throughout the app.
@@ -40,11 +37,16 @@ import de.k3b.io.filefacade.IFile;
  * Created by k3b on 04.06.2015.
  */
 public class Global {
-    /** LOG_CONTEXT is used as logging source for filtering logging messages that belong to this */
-    public static final String LOG_CONTEXT = "k3bFoto";
+    /**
+     * LOG_CONTEXT is used as logging source for filtering logging messages that belong to this
+     */
+    public static final String LOG_CONTEXT = GlobalInit.LOG_CONTEXT;
 
-    /** local settings: which language should the gui use */
+    /**
+     * local settings: which language should the gui use
+     */
     public static final String PREF_KEY_USER_LOCALE = "user_locale";
+    public static final boolean USE_ANDROID_FACADE = false;
 
     /**
      * Global.xxxxx. Non final values may be changed in SettingsActivity
@@ -88,28 +90,8 @@ public class Global {
     // #127: Folderpicker: moving pathbar makes it discoverable. stop animation once the pathbar is touched
     public static final boolean showPathBarAnimation = true;
 
-    private static final File externalStorageDirectory = Environment.getExternalStorageDirectory();
-
-    /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */
-    public static IFile reportDir = (externalStorageDirectory == null)
-            ? null
-            : FileFacade.convert("Global reportDir", new File(externalStorageDirectory, "databases/sql"));
     public static final String reportExt = ".query";
 
-    /** defines the filesystem's directory where crash reports are written to. */
-    public static File logCatDir = (externalStorageDirectory == null)
-            ? null
-            : new File(Environment.getExternalStorageDirectory(), "copy/log");
-
-    /** #60 where osm-mapsforge-offline-maps (*.map) are found. defaults to /extDir/osmdroid/ */
-    public static File mapsForgeDir = (externalStorageDirectory == null)
-            ? null
-            : new File(Environment.getExternalStorageDirectory(), "osmdroid");
-
-    /**
-     * remember last picked geo-s
-     */
-    public static File pickHistoryFile = null; // initialized in app.onCreate with local database file
     public static int pickHistoryMax = 25;
 
     /**

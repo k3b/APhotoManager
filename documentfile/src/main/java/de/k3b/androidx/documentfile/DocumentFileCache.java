@@ -1,3 +1,6 @@
+/*
+ * Copyright 2021 by k3b (Licensed under the GPL v3 (the "License"))
+ */
 package de.k3b.androidx.documentfile;
 
 import android.content.Context;
@@ -13,6 +16,11 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Once all android roots (sd-card, internal-memory,usb-memory) are
+ * {@link DocumentFileCache#register(Context, Uri, File)}-ed and Android-Write permission is granted
+ * DocumentFileCache can translate File to android-TreeDocumentFile
+ */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class DocumentFileCache {
     static final String TAG = DocumentFileEx.TAG;
@@ -21,6 +29,9 @@ public class DocumentFileCache {
 
     private final Map<String, RootTreeDocumentFile> fileRootPath2RootDoc = new HashMap<>();
 
+    /**
+     * translates File to a key for hash-maps
+     */
     private static @NonNull
     String getKey(@NonNull File file) {
         String result = file.getAbsolutePath().toLowerCase();
@@ -32,16 +43,16 @@ public class DocumentFileCache {
     }
 
     /**
-     * Android file system consist of a tree of root file systems that map to a File-Root
+     * Register an Android file system rootUri with a corresponding rootFile.
      */
     public @NonNull
-    TreeDocumentFile register(@NonNull Context context, @NonNull Uri uri, @NonNull File file) {
-        RootTreeDocumentFile result = new RootTreeDocumentFile(context, uri, file);
+    TreeDocumentFile register(@NonNull Context context, @NonNull Uri rootUri, @NonNull File rootFile) {
+        RootTreeDocumentFile rootDoc = new RootTreeDocumentFile(context, rootUri, rootFile);
         if (debug) {
-            Log.i(TAG, "register([" + file + "]) => '" + uri + "' in " + this);
+            Log.i(TAG, "register([" + rootFile + "]) => '" + rootUri + "' in " + this);
         }
-        fileRootPath2RootDoc.put(result.pathPrefix, result);
-        return result;
+        fileRootPath2RootDoc.put(rootDoc.pathPrefix, rootDoc);
+        return rootDoc;
     }
 
     public @Nullable
@@ -132,4 +143,5 @@ public class DocumentFileCache {
             return "'" + pathPrefix + "'(" + this.path2Doc.size() + ") => " + super.toString();
         }
     }
+
 }

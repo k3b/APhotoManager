@@ -82,13 +82,17 @@ public abstract class DocumentFileOrininal {
 
     /**
      * Create a {@link DocumentFileEx} representing the filesystem tree rooted at
-     * the given {@link File}. This doesn't give you any additional access to the
-     * underlying files beyond what your app already has.
-     * <p>
-     * {@link #getUri()} will return {@code file://} Uris for files explored
-     * through this tree.
+     * the given {@link File}. .
      */
     @NonNull
+    public static DocumentFileEx fromFile(@NonNull File file, Context context, @NonNull DocumentFileCache cache) {
+        if (Build.VERSION.SDK_INT >= 21) {
+            return TreeDocumentFile.getOrCreate(file, context, cache);
+        } else {
+            return fromFile(file);
+        }
+    }
+
     public static DocumentFileEx fromFile(@NonNull File file) {
         return new RawDocumentFile(null, file);
     }

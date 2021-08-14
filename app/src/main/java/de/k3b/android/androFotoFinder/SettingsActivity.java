@@ -111,12 +111,12 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putString("actionBarHideTimeInMilliSecs", "" + Global.actionBarHideTimeInMilliSecs);
         prefs.putString("pickHistoryMax", "" + Global.pickHistoryMax);
 
-        prefs.putString("reportDir", Global.reportDir.getAbsolutePath());
-        prefs.putString("logCatDir", (Global.logCatDir != null) ? Global.logCatDir.getAbsolutePath() : null);
+        prefs.putString("reportDir", GlobalFiles.reportDir.getAbsolutePath());
+        prefs.putString("logCatDir", (GlobalFiles.logCatDir != null) ? GlobalFiles.logCatDir.getAbsolutePath() : null);
         prefs.putString("thumbCacheRoot", (Global.thumbCacheRoot != null) ? Global.thumbCacheRoot.getAbsolutePath() : null);
-        prefs.putString("mapsForgeDir", (Global.mapsForgeDir != null) ? Global.mapsForgeDir.getAbsolutePath() : null);
+        prefs.putString("mapsForgeDir", (GlobalFiles.mapsForgeDir != null) ? GlobalFiles.mapsForgeDir.getAbsolutePath() : null);
 
-        prefs.putString("pickHistoryFile", (Global.pickHistoryFile != null) ? Global.pickHistoryFile.getAbsolutePath() : null);
+        prefs.putString("pickHistoryFile", (GlobalFiles.pickHistoryFile != null) ? GlobalFiles.pickHistoryFile.getAbsolutePath() : null);
 
         prefs.putString("mediaUpdateStrategy", LibGlobal.mediaUpdateStrategy);
 
@@ -126,7 +126,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     public static void prefs2Global(Context context) {
         File previousCacheRoot = Global.thumbCacheRoot;
-        File previousMapsForgeDir = Global.mapsForgeDir;
+        File previousMapsForgeDir = GlobalFiles.mapsForgeDir;
 
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context.getApplicationContext());
@@ -181,26 +181,29 @@ public class SettingsActivity extends PreferenceActivity {
         if (Global.allow_emulate_ao10) {
             useAo10MediaImageDbReplacement = getPref(prefs, PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT, Global.useAo10MediaImageDbReplacement);
         }
-        AndroFotoFinderApp.setMediaImageDbReplacement(context.getApplicationContext(), useAo10MediaImageDbReplacement);
+        GlobalInit.setMediaImageDbReplacement(context.getApplicationContext(), useAo10MediaImageDbReplacement);
 
-        Global.imageDetailThumbnailIfBiggerThan = getPref(prefs, "imageDetailThumbnailIfBiggerThan"     , Global.imageDetailThumbnailIfBiggerThan);
+        Global.imageDetailThumbnailIfBiggerThan = getPref(prefs, "imageDetailThumbnailIfBiggerThan", Global.imageDetailThumbnailIfBiggerThan);
 
-        Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap"     , Global.maxSelectionMarkersInMap);
+        Global.maxSelectionMarkersInMap = getPref(prefs, "maxSelectionMarkersInMap", Global.maxSelectionMarkersInMap);
         Global.slideshowIntervalInMilliSecs = getPref(prefs, "slideshowIntervalInMilliSecs", Global.slideshowIntervalInMilliSecs);
-        Global.actionBarHideTimeInMilliSecs     = getPref(prefs, "actionBarHideTimeInMilliSecs" , Global.actionBarHideTimeInMilliSecs);
-        Global.pickHistoryMax = getPref(prefs, "pickHistoryMax"               , Global.pickHistoryMax);
+        Global.actionBarHideTimeInMilliSecs = getPref(prefs, "actionBarHideTimeInMilliSecs", Global.actionBarHideTimeInMilliSecs);
+        Global.pickHistoryMax = getPref(prefs, "pickHistoryMax", Global.pickHistoryMax);
 
-        Global.reportDir = FileFacade.convert("SettingsActivity pref2Global reportDir", getPref(prefs, "reportDir", Global.reportDir.getAbsolutePath()));
-        LibGlobal.zipFileDir                    = Global.reportDir;
+        String reportDir = getPref(prefs, "reportDir", GlobalFiles.reportDir == null ? null : GlobalFiles.reportDir.getAbsolutePath());
+        if (reportDir != null) {
+            GlobalFiles.reportDir = FileFacade.convert("SettingsActivity pref2Global reportDir", reportDir);
+        }
+        LibGlobal.zipFileDir = GlobalFiles.reportDir;
 
-        Global.logCatDir                        = getPref(prefs, "logCatDir", Global.logCatDir);
+        GlobalFiles.logCatDir = getPref(prefs, "logCatDir", GlobalFiles.logCatDir);
 
-        Global.thumbCacheRoot                   = getPref(prefs, "thumbCacheRoot", Global.thumbCacheRoot);
-        Global.mapsForgeDir                     = getPref(prefs, "mapsForgeDir", Global.mapsForgeDir);
+        Global.thumbCacheRoot = getPref(prefs, "thumbCacheRoot", Global.thumbCacheRoot);
+        GlobalFiles.mapsForgeDir = getPref(prefs, "mapsForgeDir", GlobalFiles.mapsForgeDir);
 
-        Global.pickHistoryFile                  = getPref(prefs, "pickHistoryFile", Global.pickHistoryFile);
+        GlobalFiles.pickHistoryFile = getPref(prefs, "pickHistoryFile", GlobalFiles.pickHistoryFile);
 
-        LibGlobal.mediaUpdateStrategy       = getPref(prefs, "mediaUpdateStrategy", LibGlobal.mediaUpdateStrategy);
+        LibGlobal.mediaUpdateStrategy = getPref(prefs, "mediaUpdateStrategy", LibGlobal.mediaUpdateStrategy);
 
         /*
         // bool
@@ -347,11 +350,12 @@ public class SettingsActivity extends PreferenceActivity {
             mustSave = true;
         }
 
-        if (Global.mapsForgeDir == null) // || (!previousMapsForgeDir.exists()))
+        if (GlobalFiles.mapsForgeDir == null) // || (!previousMapsForgeDir.exists()))
         {
             File externalStorageDirectory = Environment.getExternalStorageDirectory();
-            if (externalStorageDirectory == null) externalStorageDirectory = Environment.getDataDirectory();
-            Global.mapsForgeDir = new File(externalStorageDirectory, "osmdroid");
+            if (externalStorageDirectory == null)
+                externalStorageDirectory = Environment.getDataDirectory();
+            GlobalFiles.mapsForgeDir = new File(externalStorageDirectory, "osmdroid");
             mustSave = true;
         }
 
@@ -361,8 +365,8 @@ public class SettingsActivity extends PreferenceActivity {
         if ((previousCacheRoot != null) && (!previousCacheRoot.equals(Global.thumbCacheRoot))) {
             ThumbNailUtils.init(context, previousCacheRoot);
         }
-        TagRepository.setInstance(Global.reportDir);
-        LibGlobal.zipFileDir                    = Global.reportDir;
+        TagRepository.setInstance(GlobalFiles.reportDir);
+        LibGlobal.zipFileDir = GlobalFiles.reportDir;
 
         // true if first run or change
         if ((sOldEnableNonStandardIptcMediaScanner == null) || (sOldEnableNonStandardIptcMediaScanner.booleanValue() != Global.Media.enableIptcMediaScanner)) {

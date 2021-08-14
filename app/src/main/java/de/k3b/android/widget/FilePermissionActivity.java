@@ -34,7 +34,10 @@ import androidx.core.app.ActivityCompat;
 
 import java.io.File;
 
+import de.k3b.android.androFotoFinder.AndroFotoFinderApp;
 import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.GlobalInit;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.io.AndroidFileFacade;
 import de.k3b.android.io.DocumentFileTranslator;
@@ -65,8 +68,6 @@ public abstract class FilePermissionActivity extends ActivityWithAsyncTaskDialog
     private static File currentRootFileRequest = null;
     private DocumentFileTranslator documentFileTranslator = null;
 
-    protected abstract void onCreateEx(Bundle savedInstanceState);
-
     // workflow onCreate() => requestPermission(PERMISSION_WRITE_EXTERNAL_STORAGE) => onRequestPermissionsResult() => abstract onCreateEx()
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,14 +77,23 @@ public abstract class FilePermissionActivity extends ActivityWithAsyncTaskDialog
                 != PackageManager.PERMISSION_GRANTED) {
             requestPermission(PERMISSION_WRITE_EXTERNAL_STORAGE, REQUEST_ID_WRITE_EXTERNAL_STORAGE);
         } else {
-            onCreateEx(null);
+            afterPermissionsGranted(null);
         }
     }
+
+    protected void afterPermissionsGranted(Bundle savedInstanceState) {
+        GlobalInit.initIfNeccessary(AndroFotoFinderApp.instance);
+        onCreateEx(savedInstanceState);
+    }
+
+    protected abstract void onCreateEx(Bundle savedInstanceState);
 
     @Override
     protected void onResume() {
         super.onResume();
-        AndroidFileFacade.initFactory(this);
+        if (Global.USE_ANDROID_FACADE) {
+            AndroidFileFacade.initFactory(this);
+        }
     }
 
     private void requestPermission(final String permission, final int requestCode) {
@@ -105,7 +115,7 @@ public abstract class FilePermissionActivity extends ActivityWithAsyncTaskDialog
                         Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
                                 + ": onRequestPermissionsResult(success) ");
                     }
-                    onCreateEx(null);
+                    afterPermissionsGranted(null);
                 } else {
                     Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
                             + ": " + getText(R.string.permission_error));
