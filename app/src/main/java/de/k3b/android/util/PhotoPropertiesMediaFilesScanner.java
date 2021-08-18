@@ -19,6 +19,29 @@
  
 package de.k3b.android.util;
 
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.EXT_LAST_EXT_SCAN_NO_XMP;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_DESCRIPTION;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_RATING;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_TAGS;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_TITLE;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_LAST_MODIFIED;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_LAT;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_LON;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_PATH;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_PK;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_SIZE;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.addDateAdded;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.execDeleteByPath;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.execGetPathIdMap;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.fixAllPrivate;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.getMediaDBApi;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.getWhereInFileNames;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.queryChangePath;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.setVisibility;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.setWhereFileNames;
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.setXmpFileModifyDate;
+
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -45,6 +68,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -57,29 +81,6 @@ import de.k3b.media.PhotoPropertiesChainReader;
 import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.media.PhotoPropertiesXmpSegment;
 import de.k3b.tagDB.TagRepository;
-
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.EXT_LAST_EXT_SCAN_NO_XMP;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_DESCRIPTION;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_RATING;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_TAGS;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_TITLE;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_LAST_MODIFIED;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_LAT;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_LON;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_PATH;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_PK;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_SIZE;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.addDateAdded;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.execDeleteByPath;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.execGetPathIdMap;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.fixAllPrivate;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.getMediaDBApi;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.getWhereInFileNames;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.queryChangePath;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.setVisibility;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.setWhereFileNames;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.setXmpFileModifyDate;
 
 /**
  * Android Media Scanner for images/photos/jpg compatible with android-5.0 Media scanner.
@@ -506,6 +507,11 @@ public abstract class PhotoPropertiesMediaFilesScanner {
 
             String absoluteJpgPath = jpgFile.getCanonicalPath();
             setPathRelatedFieldsIfNeccessary(values, absoluteJpgPath, null);
+
+            if (values.get(TagSql.SQL_COL_EXT_MEDIA_TYPE) == null) {
+                values.put(TagSql.SQL_COL_EXT_MEDIA_TYPE,
+                        PhotoPropertiesUtil.isImage(absoluteJpgPath, PhotoPropertiesUtil.IMG_TYPE_ALL) ? 1 : 0);
+            }
 
             return dest;
         } catch (FileNotFoundException e) {

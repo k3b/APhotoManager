@@ -262,6 +262,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
     @Override
     protected void onCreateEx(Bundle savedInstanceState) {
+
         SettingsActivity.prefs2Global(this);
         Intent intent = getIntent();
 

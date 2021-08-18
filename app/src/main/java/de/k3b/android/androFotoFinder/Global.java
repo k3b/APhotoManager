@@ -46,7 +46,7 @@ public class Global {
      * local settings: which language should the gui use
      */
     public static final String PREF_KEY_USER_LOCALE = "user_locale";
-    public static final boolean USE_ANDROID_FACADE = false;
+    public static final boolean USE_ANDROID_FACADE = true; //!!! true alte api; false neue
 
     /**
      * Global.xxxxx. Non final values may be changed in SettingsActivity
