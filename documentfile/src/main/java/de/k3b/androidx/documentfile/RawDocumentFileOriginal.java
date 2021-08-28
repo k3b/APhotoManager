@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 /**
  * Sourcecode taken from Android api-29/documentfile-1.0.0-sources.jar
+ * * where DocumentFile is replaced by DocumentFileEx
  */
 class RawDocumentFileOriginal extends DocumentFileEx {
     // private File mFile; // moved as protected to baseclass so all DocumentFileEx successors have mFile

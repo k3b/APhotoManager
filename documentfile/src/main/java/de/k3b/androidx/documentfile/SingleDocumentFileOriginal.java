@@ -14,6 +14,7 @@ import androidx.annotation.RequiresApi;
 
 /**
  * Sourcecode taken from Android api-29/documentfile-1.0.0-sources.jar
+ * * where DocumentFile is replaced by DocumentFileEx
  */
 @RequiresApi(19)
 class SingleDocumentFileOriginal extends DocumentFileEx {

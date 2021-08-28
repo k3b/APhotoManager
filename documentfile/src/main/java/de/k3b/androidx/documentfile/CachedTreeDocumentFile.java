@@ -15,10 +15,13 @@ import androidx.annotation.RequiresApi;
 import java.io.File;
 
 /**
- * This class contains changes made to TreeDocumentFileOriginal
+ * This class contains changes made to TreeDocumentFileOriginal for supporting a cache.
  */
 @RequiresApi(21)
 class CachedTreeDocumentFile extends TreeDocumentFileOriginal {
+    /**
+     * every TreeDocumentFile knows the same cache instance inherited from parent
+     */
     private DocumentFileCache cache;
 
     CachedTreeDocumentFile(@Nullable DocumentFileEx parent, @NonNull Context context, Uri uri) {
@@ -33,9 +36,10 @@ class CachedTreeDocumentFile extends TreeDocumentFileOriginal {
      */
     public static TreeDocumentFile getOrCreate(
             @NonNull File file, @NonNull Context context, @NonNull DocumentFileCache cache) {
-        TreeDocumentFile result = cache.find(file);
-        if (result == null) {
-            TreeDocumentFile parent = cache.find(file.getParentFile());
+        TreeDocumentFile result = cache.findDirectory(file);
+        File parentFile;
+        if (result == null && (parentFile = file.getParentFile()) != null) {
+            TreeDocumentFile parent = cache.findDirectory(parentFile);
             result = new TreeDocumentFile(parent, context, null);
             result.mFile = file;
             ((CachedTreeDocumentFile) result).cache = cache;
@@ -43,8 +47,11 @@ class CachedTreeDocumentFile extends TreeDocumentFileOriginal {
         return result;
     }
 
-    public TreeDocumentFile find(File file) {
-        return cache.find(file);
+    /**
+     * Translates from dirFile to TreeDocumentFile
+     */
+    public TreeDocumentFile findDir(File dirFile) {
+        return cache.findDirectory(dirFile);
     }
 
     /**
@@ -65,7 +72,7 @@ class CachedTreeDocumentFile extends TreeDocumentFileOriginal {
             File parentFile;
             if (parentDocument == null && (parentFile = file.getParentFile()) != null) {
                 parentDocument = getOrCreate(parentFile, mContext, cache);
-                parentDocument.mkdirs();
+                if (parentDocument != null) parentDocument.mkdirs();
             }
 
             if (parentDocument != null) {

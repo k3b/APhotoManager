@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 by k3b (Licensed under the GPL v3 (the "License"))
+ * Copyright 2021 by k3b (Licensed under the GPL v3+ (the "License"))
  */
 package de.k3b.androidx.documentfile;
 
@@ -18,7 +18,7 @@ import java.util.Map;
 
 /**
  * Once all android roots (sd-card, internal-memory,usb-memory) are
- * {@link DocumentFileCache#register(Context, Uri, File)}-ed and Android-Write permission is granted
+ * {@link DocumentFileCache#registerRoodDir(Context, Uri, File)}-ed and Android-Write permission is granted
  * DocumentFileCache can translate File to android-TreeDocumentFile
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -27,14 +27,17 @@ public class DocumentFileCache {
     public static boolean debug = false;
     public static boolean debug_find = false;
 
-    private final Map<String, RootTreeDocumentFile> fileRootPath2RootDoc = new HashMap<>();
+    /**
+     * Translates file-root-dir to saf-DocumentFile-root-dir vor every root-storage-device-directory
+     */
+    private final Map<String, RootTreeDocumentFile> fileRootDirPath2RootDoc = new HashMap<>();
 
     /**
-     * translates File to a key for hash-maps
+     * translates a dirFile to a key for hash-maps
      */
     private static @NonNull
-    String getKey(@NonNull File file) {
-        String result = file.getAbsolutePath().toLowerCase();
+    String getKey(@NonNull File dirFile) {
+        String result = dirFile.getAbsolutePath().toLowerCase();
         if (!result.endsWith("/")) result += "/";
 
         assert result.startsWith("/");
@@ -43,36 +46,39 @@ public class DocumentFileCache {
     }
 
     /**
-     * Register an Android file system rootUri with a corresponding rootFile.
+     * Register an Android file system rootDirUri with a corresponding rootDirFile.
      */
     public @NonNull
-    TreeDocumentFile register(@NonNull Context context, @NonNull Uri rootUri, @NonNull File rootFile) {
-        RootTreeDocumentFile rootDoc = new RootTreeDocumentFile(context, rootUri, rootFile);
+    TreeDocumentFile registerRoodDir(@NonNull Context context, @NonNull Uri rootDirUri, @NonNull File rootDirFile) {
+        RootTreeDocumentFile rootDoc = new RootTreeDocumentFile(context, rootDirUri, rootDirFile);
         if (debug) {
-            Log.i(TAG, "register([" + rootFile + "]) => '" + rootUri + "' in " + this);
+            Log.i(TAG, "register([" + rootDirFile + "]) => '" + rootDirUri + "' in " + this);
         }
-        fileRootPath2RootDoc.put(rootDoc.pathPrefix, rootDoc);
+        fileRootDirPath2RootDoc.put(rootDoc.pathPrefix, rootDoc);
         return rootDoc;
     }
 
+    /**
+     * Translates from dirFile to TreeDocumentFile
+     */
     public @Nullable
-    TreeDocumentFile find(@NonNull File file) {
-        String path = getKey(file);
-        RootTreeDocumentFile root = findRootTreeDocumentFile(path);
+    TreeDocumentFile findDirectory(@NonNull File dirFile) {
+        String path = getKey(dirFile);
+        RootTreeDocumentFile root = findRootDirTreeDocumentFile(path);
         if (root != null) {
-            TreeDocumentFile result = root.find(path);
+            TreeDocumentFile result = root.findDir(path);
             if (debug_find) {
-                Log.d(TAG, "find([" + file + "]) => [" + result + "] in " + this);
+                Log.d(TAG, "find([" + dirFile + "]) => [" + result + "] in " + this);
             }
             return result;
         }
-        Log.w(TAG, "Failed to find root for " + file);
+        Log.w(TAG, "Failed to find root for " + dirFile);
         return null;
     }
 
     private @Nullable
-    RootTreeDocumentFile findRootTreeDocumentFile(@NonNull String path) {
-        for (Map.Entry<String, RootTreeDocumentFile> entry : fileRootPath2RootDoc.entrySet()) {
+    RootTreeDocumentFile findRootDirTreeDocumentFile(@NonNull String path) {
+        for (Map.Entry<String, RootTreeDocumentFile> entry : fileRootDirPath2RootDoc.entrySet()) {
             if (path.startsWith(entry.getKey())) {
                 return entry.getValue();
             }
@@ -80,21 +86,22 @@ public class DocumentFileCache {
         return null;
     }
 
+    /** TreeDocumentFile for a storage root that has a cache of known storage-sub-dirs */
     static class RootTreeDocumentFile extends TreeDocumentFile {
         /**
          * without trailing "/"
          */
-        private final Map<String, TreeDocumentFile> path2Doc = new HashMap<>();
+        private final Map<String, TreeDocumentFile> dirFilePath2Doc = new HashMap<>();
         /**
          * including trailing "/"
          * i.e. /storage/emulated/0/ or /storage/abcd-1234/
          */
         String pathPrefix;
 
-        private RootTreeDocumentFile(@NonNull Context context, @NonNull Uri uri, @NonNull File file) {
-            super(null, context, uri);
-            this.pathPrefix = getKey(file);
-            path2Doc.put(withoutTrailing(this.pathPrefix), this);
+        private RootTreeDocumentFile(@NonNull Context context, @NonNull Uri rootDirUri, @NonNull File rootDirFile) {
+            super(null, context, rootDirUri);
+            this.pathPrefix = getKey(rootDirFile);
+            dirFilePath2Doc.put(withoutTrailing(this.pathPrefix), this);
         }
 
         @NonNull
@@ -106,23 +113,23 @@ public class DocumentFileCache {
         }
 
         @Nullable
-        protected TreeDocumentFile find(@NonNull String path) {
-            assert !path.endsWith("/");
-            assert path.startsWith(pathPrefix);
+        protected TreeDocumentFile findDir(@NonNull String dirFilePath) {
+            assert !dirFilePath.endsWith("/");
+            assert dirFilePath.startsWith(pathPrefix);
 
             String state = "";
-            TreeDocumentFile result = path2Doc.get(path);
+            TreeDocumentFile result = dirFilePath2Doc.get(dirFilePath);
             if (result == null) {
-                int pos = path.lastIndexOf("/");
+                int pos = dirFilePath.lastIndexOf("/");
                 if (pos >= 0) {
-                    String parentPath = path.substring(0, pos);
-                    TreeDocumentFile parent = find(parentPath);
-                    if (parent != null) {
-                        String name = path.substring(pos);
-                        result = parent.findDirByName(name);
+                    String parentPath = dirFilePath.substring(0, pos);
+                    TreeDocumentFile parentDir = findDir(parentPath);
+                    if (parentDir != null) {
+                        String name = dirFilePath.substring(pos);
+                        result = parentDir.findDirByName(name);
                         if (result != null) {
                             state = "added from filesystem";
-                            path2Doc.put(path, result);
+                            dirFilePath2Doc.put(dirFilePath, result);
                         } else {
                             state = "not in filesystem";
                         }
@@ -132,15 +139,14 @@ public class DocumentFileCache {
                 state = "found in cache";
             }
             if (debug_find) {
-                Log.d(TAG, "find('" + path + "') => " + state + "[" + result + "] in " + this);
-                return null;
+                Log.d(TAG, "find('" + dirFilePath + "') => " + state + "[" + result + "] in " + this);
             }
             return result;
         }
 
         @Override
         public String toString() {
-            return "'" + pathPrefix + "'(" + this.path2Doc.size() + ") => " + super.toString();
+            return "'" + pathPrefix + "'(" + this.dirFilePath2Doc.size() + ") => " + super.toString();
         }
     }
 

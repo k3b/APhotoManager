@@ -19,6 +19,7 @@ import java.io.File;
 
 /**
  * Sourcecode taken from Android api-29/documentfile-1.0.0-sources.jar
+ * where DocumentFile is replaced by DocumentFileEx
  * <p>
  * Representation of a document backed by either a
  * {@link android.provider.DocumentsProvider} or a raw file on disk. This is a

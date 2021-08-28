@@ -42,7 +42,7 @@ class TreeDocumentFile extends CachedTreeDocumentFile {
         List<String> params = new ArrayList<>();
         params.add(DocumentsContract.Document.MIME_TYPE_DIR);
         List<String> allowedFileSuffixesLowercase = DirectoryFilter.getAllowedFileSuffixesLowercase();
-        if (allowedFileSuffixesLowercase != null && allowedFileSuffixesLowercase.size() > 0) {
+        if (allowedFileSuffixesLowercase != null && !allowedFileSuffixesLowercase.isEmpty()) {
             query.append(" AND (");
             String delimiter = " ";
             for (String s : allowedFileSuffixesLowercase) {

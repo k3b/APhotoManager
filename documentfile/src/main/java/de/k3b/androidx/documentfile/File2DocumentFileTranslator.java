@@ -26,7 +26,7 @@ public class File2DocumentFileTranslator {
     private final Converter<File, IFile> androidFileFacadeImpl = new Converter<File, IFile>() {
         @Override
         public IFile convert(String dbgContext, File file) {
-            final IFile result = roots.find(file);
+            final IFile result = roots.findDirectory(file);
             if (debugLogSAFFacade) {
                 Log.i(LOG_TAG, dbgContext + " convert => " + result);
             }
@@ -44,7 +44,7 @@ public class File2DocumentFileTranslator {
      */
     public @NonNull
     TreeDocumentFile register(@NonNull Context context, @NonNull Uri rootUri, @NonNull File rootFile) {
-        return roots.register(context, rootUri, rootFile);
+        return roots.registerRoodDir(context, rootUri, rootFile);
     }
 
 }

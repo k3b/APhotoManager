@@ -41,10 +41,8 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
 
     @Override
     public void set(IFile src) {
-        if (src != null) {
-            if (src instanceof FileWrapper) {
-                set(((FileWrapper) src).getChild());
-            }
+        if (src != null && src instanceof FileWrapper) {
+            set(((FileWrapper) src).getChild());
         }
     }
 
@@ -160,6 +158,9 @@ public abstract class DocumentFileFacade extends DocumentFileOrininal implements
         return mFile;
     }
 
+    /**
+     * @deprecated IFile.invalidateParentDirCache() will be removed
+     */
     @Deprecated
     @Override
     public IFile invalidateParentDirCache() {
