@@ -52,11 +52,6 @@ public class LibGlobal extends LibGlobalFile {
     // false while iptc write support is not implemented yet
     public static boolean itpcWriteSupport = false;
 
-    // will be written into exif/xmp if not already set.
-    // Overwritten by android Application.onCreate()
-    public static String appName = null;
-    public static String appVersion = null;
-
     /** true: update jpg-exif does not change file.lastModifiedDate */
     public static boolean preserveJpgFileModificationDate = true;
 

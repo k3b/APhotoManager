@@ -31,7 +31,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-import de.k3b.LibGlobal;
+import de.k3b.LibGlobalFile;
 import de.k3b.TestUtil;
 import de.k3b.io.FileUtils;
 import de.k3b.io.filefacade.IFile;
@@ -55,18 +55,18 @@ public class ExifInterfaceIntegrationTests {
 												"Русский (Russian)" ;
     @BeforeClass
     public static void initDirectories() {
-        LibGlobal.appName = "JUnit";
-        LibGlobal.appVersion = "ExifInterfaceIntegrationTests";
+        LibGlobalFile.appName = "JUnit";
+        LibGlobalFile.appVersion = "ExifInterfaceIntegrationTests";
 
         FileUtils.delete(OUTDIR, null);
         OUTDIR.mkdirs();
 
         testItems.clear();
 
-        testItems.put(ExifInterface.TAG_ARTIST					, "Artist");
-        testItems.put(ExifInterface.TAG_COPYRIGHT				, "Copyright " + specialChars);
-        testItems.put(ExifInterface.TAG_IMAGE_DESCRIPTION		, "ImageDescription " + specialChars);
-        testItems.put(ExifInterface.TAG_DATETIME_DIGITIZED		, "1964:14:07 04:38:44");
+        testItems.put(ExifInterface.TAG_ARTIST, "Artist");
+        testItems.put(ExifInterface.TAG_COPYRIGHT, "Copyright " + specialChars);
+        testItems.put(ExifInterface.TAG_IMAGE_DESCRIPTION, "ImageDescription " + specialChars);
+        testItems.put(ExifInterface.TAG_DATETIME_DIGITIZED, "1964:14:07 04:38:44");
         testItems.put(ExifInterface.TAG_DATETIME_ORIGINAL		, "1965:15:07 05:38:45");
         testItems.put(ExifInterface.TAG_FILE_SOURCE				, "FileSource");
         testItems.put(ExifInterface.TAG_IMAGE_UNIQUE_ID			, "ImageUniqueID");

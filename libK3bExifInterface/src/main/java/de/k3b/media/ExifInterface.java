@@ -1,7 +1,7 @@
 // ExifInterface source code from android-6 - special version without jni
 /*
  * Copyright (C) 2007 The Android Open Source Project under the Apache License, Version 2.0
- * Copyright (C) 2016-2020 by k3b under the GPL-v3+.
+ * Copyright (C) 2016-2021 by k3b under the GPL-v3+.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -51,7 +51,7 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.k3b.io.FileUtils;
+import de.k3b.LibGlobalFile;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 
@@ -731,14 +731,17 @@ public class ExifInterface {
     // The following values are defined for handling JPEG streams. In this implementation, we are
     // not only getting information from EXIF but also from some JPEG special segments such as
     // MARKER_COM for user comment and MARKER_SOFx for image width and height.
+
+    // Android-studio Error StandardCharsets.UTF_XXX Field requires API level 19 (current min is 14): `java.nio.charset.StandardCharsets#UTF_8`
+    // however the code works on my android-4.2 (api 16) Tablet
     private static final Charset ASCII = StandardCharsets.UTF_8; //("US-ASCII");
     private static final Charset UCS2 = StandardCharsets.UTF_16LE;
+    private static final Charset UTF16 = StandardCharsets.UTF_16;
 
     // these have a special attribute string-formatting. must for all double attributes
     private static final HashSet<String> sTagSetForCompatibility = new HashSet<>(Arrays.asList(
             TAG_APERTURE, TAG_DIGITAL_ZOOM_RATIO, TAG_EXPOSURE_TIME, TAG_SUBJECT_DISTANCE,
             TAG_GPS_TIMESTAMP));
-    private static final Charset UTF16 = StandardCharsets.UTF_16;
 
     static {
         sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
@@ -1204,8 +1207,24 @@ public class ExifInterface {
         }
     }
 
-    private void closeSilently(Closeable in, String debugContext) {
-        FileUtils.close(in, debugContext);
+    private void closeSilently(Closeable stream, Object source) {
+        if (stream != null) {
+            try {
+                if (LibGlobalFile.debugEnabled) {
+                    logger.warn(LOG_TAG + "Closing " + source);
+                }
+
+                stream.close();
+            } catch (Exception e) {
+                // catch IOException and in android also NullPointerException
+                // java.lang.NullPointerException: Attempt to invoke virtual method
+                // 'void java.io.InputStream.close()' on a null object reference
+                // where stream is java.io.FilterInputStream whith child-filter "in" = null
+                if (source != null && LibGlobalFile.debugEnabled) {
+                    logger.warn(LOG_TAG + "Error close " + source, e);
+                }
+            }
+        }
     }
 
     @Override

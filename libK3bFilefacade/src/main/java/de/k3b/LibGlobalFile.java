@@ -22,7 +22,7 @@ public class LibGlobalFile {
     /**
      * LOG_CONTEXT is used as logging source for filtering logging messages that belong to this
      */
-    public static final String LOG_TAG = "k3bFotoLib2";
+    public static final String LOG_TAG = "k3bLibFileFacade";
 
     /**
      * Global.xxxxx. Non final values may be changed from outside (SettingsActivity or commandline parameter)
@@ -33,4 +33,10 @@ public class LibGlobalFile {
      * false do not follow symlinks when scanning Directories.
      */
     public static final boolean ignoreSymLinks = false;
+
+
+    // will be written into exif/xmp if not already set.
+    // Overwritten by android Application.onCreate()
+    public static String appName = null;
+    public static String appVersion = null;
 }

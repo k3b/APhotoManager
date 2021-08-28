@@ -1,4 +1,3 @@
 // startParameter.offline = true
 
-// include ':app', 'fotolib2', 'fotoview.library', ':osmdroid-android' , ':k3b-geoHelper' , ':fotoview.library'
-include ':libK3bFilefacade', ':fotolib2', ':app', ':showexif', ':photoview', ':documentfile'
+include ':libK3bFilefacade', ':libK3bExifInterface', ':fotolib2', ':app', ':showexif', ':photoview', ':documentfile'
