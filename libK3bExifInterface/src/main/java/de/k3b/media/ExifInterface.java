@@ -29,6 +29,7 @@ import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -56,6 +57,8 @@ import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 
 /**
+ * gplv3+ dropin replacement for androidx/exifinterface/media/ExifInterface
+ * <p>
  * This is a class for reading and writing Exif tags in a JPEG File through {@link java.io.File},
  * {@link java.io.InputStream}, {@link java.io.OutputStream} or {@link IFile}.
  * <p>
@@ -64,8 +67,10 @@ import de.k3b.io.filefacade.IFile;
  * Improvements:
  * * all dependencies to android removed so it can be used outside android, too.
  * ** android.util.Log is replaced by org.slf4j.Logger
- * * java native code nonly, no jini
+ * * java native code only, no jini
  * * added microsoft exiftags: TAG_WIN_xxxxx
+ * * can be made compatible with android-Documentfile through IFile interface.
+ *
  * <p>
  * Since using java.io.File is heavily restricted in Android it uses de.k3b.io.filefacade.IFile
  * insted (both have same methods with same signatures).
@@ -537,17 +542,17 @@ public class ExifInterface {
             new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG),
 
             // from http://www.exiv2.org/tags.html
-            /** The image title, as used by Windows XP, encoded in UCS2 */
+            /* The image title, as used by Windows XP, encoded in UCS2 */
             new ExifTag(TAG_WIN_TITLE, 40091, IFD_FORMAT_UCS2LE_STRING, IFD_FORMAT_BYTE),
-            /** The image comment, as used by Windows XP, encoded in UCS2 */
+            /* The image comment, as used by Windows XP, encoded in UCS2 */
             new ExifTag(TAG_WIN_COMMENT, 40092, IFD_FORMAT_UCS2LE_STRING, IFD_FORMAT_BYTE),
-            /** The image author, as used by Windows XP (called Artist in the Windows shell). */
+            /* The image author, as used by Windows XP (called Artist in the Windows shell). */
             new ExifTag(TAG_WIN_AUTHOR, 40093, IFD_FORMAT_UCS2LE_STRING, IFD_FORMAT_BYTE),
-            /** The image keywords, as used by Windows XP, encoded in UCS2 */
+            /* The image keywords, as used by Windows XP, encoded in UCS2 */
             new ExifTag(TAG_WIN_KEYWORDS, 40094, IFD_FORMAT_UCS2LE_STRING, IFD_FORMAT_BYTE),
-            /** The image subject, as used by Windows XP, encoded in UCS2 */
+            /* The image subject, as used by Windows XP, encoded in UCS2 */
             new ExifTag(TAG_WIN_SUBJECT, 40095, IFD_FORMAT_UCS2LE_STRING, IFD_FORMAT_BYTE),
-            /** Rating, as used by Windows XP: 0..5. */
+            /* Rating, as used by Windows XP: 0..5. */
             new ExifTag(TAG_WIN_RATING, 18246, IFD_FORMAT_USHORT),
 
 	};
@@ -785,38 +790,11 @@ public class ExifInterface {
     private static final byte MARKER_COM = (byte) 0xfe;
     private static final byte MARKER_EOI = (byte) 0xd9;
 
-    // Prints out attributes for debugging.
-    public String getDebugString(String lineDelimiter, String... _keysToExclude) {
-        StringBuilder sb = new StringBuilder();
-        final List<String> keysToExclude = Arrays.asList(_keysToExclude);
-
-        for (int i = 0; i < mAttributes.length; ++i) {
-            TagName2ExifAttribute exifSegment = mAttributes[i];
-            String[] keys = exifSegment.keySet().toArray(new String[exifSegment.size()]);
-            Arrays.sort(keys);
-            // for display exif tags are sorted by tagName
-            for (String tagName : keys) {
-                if (!keysToExclude.contains(tagName)) {
-                    final ExifAttribute tagValue = exifSegment.get(tagName);
-                    sb.append("EXIF.").append(EXIF_TAG_NAMES[i]).append(".").append(tagName);
-                    if (DEBUG) {
-                        ExifTag tag = tagValue.exifTag;
-                        if (tag != null) {
-                            sb.append("(").append(tag.id).append("=0x")
-                                    .append(Integer.toHexString(tag.id)).append(")");
-                        }
-                    }
-                    sb.append("='").append(tagValue.getStringValue(mExifByteOrder)).append("'");
-                    if (DEBUG) {
-                        sb.append(" : ")
-                                .append(tagValue.getFormatName());
-                    }
-                    sb.append(lineDelimiter);
-                }
-            }
-            sb.append(lineDelimiter);
-        }
-        return sb.toString();
+    /**
+     * Reads Exif tags from the specified image file.
+     */
+    public ExifInterface(IFile jpgFile) throws IOException {
+        loadAttributes(null, jpgFile, jpgFile.getAbsolutePath());
     }
 
     private boolean validJpgExifFormat = true;
@@ -881,15 +859,62 @@ public class ExifInterface {
     private static final Pattern sGpsTimestampPattern =
             Pattern.compile("^([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$");
 
-    /**
-     * @deprecated use {@link #loadAttributes(InputStream, IFile, String)} instead
-     */
-    @Deprecated
-    private ExifInterface(InputStream in, IFile jpgFile, String filename) throws IOException {
-        loadAttributes(in, jpgFile, filename);
+    public ExifInterface() {
     }
 
-    public ExifInterface() {
+    /**
+     * Reads Exif tags from the specified image file.
+     */
+    public ExifInterface(File jpgFile) throws IOException {
+        loadAttributes(new FileInputStream(jpgFile), null, jpgFile.getAbsolutePath());
+    }
+
+    /**
+     * Reads Exif tags from the specified image file.
+     */
+    public ExifInterface(String jpgFile) throws IOException {
+        loadAttributes(null, null, jpgFile);
+    }
+
+    /**
+     * Reads Exif tags from the specified image file.
+     */
+    public ExifInterface(InputStream jpgFile) throws IOException {
+        loadAttributes(jpgFile, null, null);
+    }
+
+    // Prints out attributes for debugging.
+    public String getDebugString(String lineDelimiter, String... _keysToExclude) {
+        StringBuilder sb = new StringBuilder();
+        final List<String> keysToExclude = Arrays.asList(_keysToExclude);
+
+        for (int i = 0; i < mAttributes.length; ++i) {
+            TagName2ExifAttribute exifSegment = mAttributes[i];
+            String[] keys = exifSegment.keySet().toArray(new String[0]);
+            Arrays.sort(keys);
+            // for display exif tags are sorted by tagName
+            for (String tagName : keys) {
+                if (!keysToExclude.contains(tagName)) {
+                    final ExifAttribute tagValue = exifSegment.get(tagName);
+                    sb.append("EXIF.").append(EXIF_TAG_NAMES[i]).append(".").append(tagName);
+                    if (DEBUG) {
+                        ExifTag tag = tagValue.exifTag;
+                        if (tag != null) {
+                            sb.append("(").append(tag.id).append("=0x")
+                                    .append(Integer.toHexString(tag.id)).append(")");
+                        }
+                    }
+                    sb.append("='").append(tagValue.getStringValue(mExifByteOrder)).append("'");
+                    if (DEBUG) {
+                        sb.append(" : ")
+                                .append(tagValue.getFormatName());
+                    }
+                    sb.append(lineDelimiter);
+                }
+            }
+            sb.append(lineDelimiter);
+        }
+        return sb.toString();
     }
 
     protected void reset() {
@@ -932,6 +957,7 @@ public class ExifInterface {
         }
         return null;
     }
+
     /**
      * Returns the value of the specified tagName or {@code null} if there
      * is no such tagName in the image file.
@@ -952,7 +978,7 @@ public class ExifInterface {
                     return null;
                 }
                 Rational[] array = (Rational[]) attribute.getValue(mExifByteOrder);
-                if (array.length != 3) {
+                if (array == null || array.length != 3) {
                     return null;
                 }
                 return String.format("%02d:%02d:%02d",
@@ -1174,17 +1200,21 @@ public class ExifInterface {
         }
         return updated;
     }
+
     /**
      * Remove any values of the specified tag.
      *
      * @param tag the name of the tag.
      */
     public void removeAttribute(String tag) {
-        for (int i = 0 ; i < EXIF_TAGS.length; ++i) {
+        for (int i = 0; i < EXIF_TAGS.length; ++i) {
             mAttributes[i].remove(tag);
         }
     }
 
+    /**
+     * Returns the JPEG compressed thumbnail inside the image file, or null if there is no JPEG compressed thumbnail.
+     */
     public byte[] getThumbnail(InputStream in) throws IOException {
         try {
             if (!mHasThumbnail) {
@@ -1511,6 +1541,7 @@ public class ExifInterface {
     public boolean hasThumbnail() {
         return mHasThumbnail;
     }
+
     /**
      * Returns the thumbnail inside the image file, or {@code null} if there is no thumbnail.
      * The returned data is in JPEG format and can be decoded using
@@ -1534,6 +1565,9 @@ public class ExifInterface {
         return getThumbnail(FileFacade.convert("ExifInterface.getThumbnail", inFile));
     }
 
+    /**
+     * Returns the JPEG compressed thumbnail inside the image file, or null if there is no JPEG compressed thumbnail.
+     */
     public byte[] getThumbnail(IFile inFile) {
         if (!mHasThumbnail) {
             return null;
