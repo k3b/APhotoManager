@@ -1,3 +1,14 @@
+Starting with android-10 google has removed the capability to get geo data from the media database so the main purpose of this app: show/find photos through a geographic map is gone forever.
+
+I spend several months of work to implement a shadow copy of the media database but in the end a gave up.
+
+APhotoManger is dead :-(
+
+RIP
+
+--------
+
+
 # ![](https://raw.githubusercontent.com/k3b/APhotoManager/master/app/src/main/res/drawable-hdpi/foto_gallery.png) "A Photo Manager" with "A Photo Map", AndroFotoFinder
 
 Enhanced, privacy aware Android **[Gallery App](https://github.com/k3b/APhotoManager/wiki/Gallery-View)** to manage local photos: 
