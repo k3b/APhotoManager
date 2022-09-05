@@ -26,13 +26,6 @@ task fatJar(type: Jar, dependsOn: classes) {
     with jar
 }
 
-task proguard(type: proguard.gradle.ProGuardTask, dependsOn: fatJar) {
-  configuration 'proguard-rules.pro'
-
-  injars 'build/libs/showexif-jar-with-dependencies.jar'
-  outjars 'build/libs/showexif-jar-with-dependencies-min.jar'
-}
-
 artifacts {
     archives fatJar
 }

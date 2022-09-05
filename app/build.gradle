@@ -1,7 +1,8 @@
 
 
 apply plugin: 'com.android.application'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
 // markdown in javadoc
 // https://github.com/Abnaxos/pegdown-doclet
 apply plugin: 'ch.raffael.pegdown-doclet'
@@ -85,7 +86,9 @@ android {
             // minifyEnabled true
 			minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
+
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-DEBUG"        }
         release {
 			shrinkResources true
             minifyEnabled true
