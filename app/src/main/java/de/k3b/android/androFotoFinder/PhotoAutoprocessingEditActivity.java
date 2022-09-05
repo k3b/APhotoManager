@@ -361,7 +361,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
 
         mPreview = (TextView) findViewById(R.id.lbl_preview);
         mSpinnerDatePattern = (Spinner) findViewById(R.id.sp_date_pattern);
-        mSpinnerDatePattern.setAdapter(new ArrayAdapter<Pattern>(this, android.R.layout.simple_list_item_1, createDatePatterns()));
+            mSpinnerDatePattern.setAdapter(new ArrayAdapter<Pattern>(this, android.R.layout.simple_list_item_1, createDatePatterns()));
         mSpinnerDatePattern.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

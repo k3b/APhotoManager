@@ -3,12 +3,11 @@
 buildscript {
     repositories {
         google()
-        jcenter()
-        // mavenCentral()
+        mavenCentral()
     }
     dependencies {
 		// see https://jcenter.bintray.com/com/android/tools/build/gradle/
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:7.0.3'
 
 		// markdown & unl-diagrams in javadoc
 		// https://github.com/Abnaxos/pegdown-doclet
@@ -24,16 +23,10 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven { url 'https://jitpack.io' }
     }
 }
-
-// download and generate gradlew which is not part of this repository and is required by travis
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.6'
-}
-
 
 // markdown in javadoc
 // https://github.com/Abnaxos/pegdown-doclet
