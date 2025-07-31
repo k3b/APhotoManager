@@ -41,6 +41,7 @@ import de.k3b.io.DateUtil;
 import de.k3b.io.FileCommands;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.PhotoPropertiesImageReader;
+import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.media.XmpSegment;
 
 /**
@@ -209,7 +210,7 @@ public class ImageDetailMetaDialogBuilder {
     }
 
     private static void getExifInfo_android(StringBuilder builder, String filepath) throws IOException {
-        ExifInterfaceEx exif = new ExifInterfaceEx(filepath, null, null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
+        ExifInterfaceEx exif = PhotoPropertiesUtil.factory().createExifInterface(filepath, null, null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
 
         builder.append(NL).append(line).append(NL);
         builder.append(NL).append(filepath).append(NL).append(NL);

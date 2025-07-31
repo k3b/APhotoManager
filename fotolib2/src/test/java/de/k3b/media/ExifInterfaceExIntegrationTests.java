@@ -140,7 +140,7 @@ public class ExifInterfaceExIntegrationTests {
 
     public static IPhotoProperties getMeta(String fileName) throws IOException {
         InputStream inputStream = TestUtil.getResourceInputStream(fileName);
-        IPhotoProperties result = new ExifInterfaceEx(fileName, inputStream, null, "JUnit");
+        IPhotoProperties result = PhotoPropertiesUtil.factory().createExifInterface(fileName, inputStream, null, "JUnit");
         return result;
     }
 

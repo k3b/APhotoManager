@@ -61,7 +61,7 @@ public class MediaMappingTests {
         }
     }
 
-    private class ExifInterfaceExDummy extends ExifInterfaceEx {
+    private class ExifInterfaceExDummy extends ExifInterfaceExImpl {
         protected boolean isEmpty(Object result, int tryNumber, String debugContext, String debugFieldName) {
             return isEmptyDbgImpl(debugResult, result, tryNumber, debugContext, debugFieldName);
         }

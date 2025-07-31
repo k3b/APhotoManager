@@ -48,6 +48,7 @@ import de.k3b.android.androFotoFinder.queries.MediaContentproviderRepository;
 import de.k3b.android.androFotoFinder.queries.MediaContentproviderRepositoryImpl;
 import de.k3b.android.androFotoFinder.queries.MediaDBRepository;
 import de.k3b.android.androFotoFinder.queries.MergedMediaRepository;
+import de.k3b.android.media.ExifInterfaceExAndroidImpl;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.LogCat;
 import de.k3b.android.util.PhotoChangeNotifyer;
@@ -57,6 +58,7 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.PhotoPropertiesImageReader;
+import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.zip.ZipConfigRepository;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
@@ -143,6 +145,7 @@ public class AndroFotoFinderApp extends Application {
         }
         */
     @Override public void onCreate() {
+        PhotoPropertiesUtil.setFactory(ExifInterfaceExAndroidImpl.factory());
         // StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
         // StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
         FotoSqlBase.init();

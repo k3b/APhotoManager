@@ -74,6 +74,7 @@ public class PhotoPropertiesUtil {
             270,   // 7 = (!) Mirror horizontal and rotate 90 CW
             270};  // 8 = Rotate 270 CW
 
+
     /** copy content from source to destination. @return number of copied properties */
     public static int copy(IPhotoProperties destination, IPhotoProperties source,
                            boolean overwriteExisting, boolean allowSetNull) {
@@ -405,5 +406,19 @@ public class PhotoPropertiesUtil {
         return result;
     }
 
+    /** factory to create an ExifInterface from file or stream */
+    private static ExifInterfaceFactory factory = null;
+    /** factory to create an ExifInterface from file or stream */
+    public static ExifInterfaceFactory factory() {
+        if (PhotoPropertiesUtil.factory == null) {
+            PhotoPropertiesUtil.factory = ExifInterfaceExImpl.factory();
+        }
+        return PhotoPropertiesUtil.factory;
+    }
+
+    /** factory to create an ExifInterface from file or stream */
+    public static void setFactory(ExifInterfaceFactory factory) {
+        PhotoPropertiesUtil.factory = factory;
+    }
 
 }

@@ -58,6 +58,7 @@ import java.util.regex.Pattern;
  * Improvements:
  *  * with dependencies to android removed
  *  * added microsoft exiftags: TAG_WIN_xxxxx
+ *  * added support for reading/writing XMP data
  */
 public class ExifInterface {
     // public to allow error filtering
@@ -1016,12 +1017,13 @@ public class ExifInterface {
     // List of Exif tag groups or subSegments. EXIF_TAGS and EXIF_TAG_NAMES must have the same order.
     private static final ExifTag[][] EXIF_TAGS = new ExifTag[][] {
             IFD_TIFF_TAGS, IFD_EXIF_TAGS, IFD_GPS_TAGS, IFD_INTEROPERABILITY_TAGS,
-            IFD_THUMBNAIL_TAGS
+            IFD_THUMBNAIL_TAGS //!!!,IFD_XMP
     };
 
+    //!!!
     // List of Exif tag groups or subSegments. EXIF_TAGS and EXIF_TAG_NAMES must have the same order.
     private static final String[] EXIF_TAG_NAMES = new String[]{
-            "TIFF", "EXIF", "GPS", "INTEROP", "THUMBNAIL"
+            "TIFF", "EXIF", "GPS", "INTEROP", "THUMBNAIL"//!!!, "http://ns.adobe.com/xap/1.0/"
     };
 
     // List of tags for pointing to the other image file directory offset.
@@ -1060,6 +1062,10 @@ public class ExifInterface {
 
     // Identifier for EXIF APP1 segment in JPEG
     private static final byte[] IDENTIFIER_EXIF_APP1 = "Exif\0\0".getBytes(ASCII);
+
+    private static final byte[] IDENTIFIER_XMP_APP1 =
+            "http://ns.adobe.com/xap/1.0/\0".getBytes(ASCII);
+
     // JPEG segment markers, that each marker consumes two bytes beginning with 0xff and ending with
     // the indicator. There is no SOF4, SOF8, SOF16 markers in JPEG and SOFx markers indicates start
     // of frame(baseline DCT) and the image size info exists in its beginning part.
@@ -1443,7 +1449,7 @@ public class ExifInterface {
         return getDebugString("\n", TAG_DATETIME, TAG_GPS_VERSION_ID);
     }
 
-    // Prints out attributes for debugging.
+    /** Prints out attributes for debugging. **/
     public String getDebugString(String lineDelimiter, String... _keysToExclude) {
         StringBuilder sb = new StringBuilder();
         final List<String> keysToExclude = Arrays.asList(_keysToExclude);
@@ -1821,23 +1827,26 @@ public class ExifInterface {
                     }
                     bytesRead += 6;
                     length -= 6;
-                    if (!Arrays.equals(identifier, IDENTIFIER_EXIF_APP1)) {
-                        // Skip if it's not an EXIF APP1 segment.
-                        break;
+
+                    // standard exif segment
+                    if (Arrays.equals(identifier, IDENTIFIER_EXIF_APP1)) {
+
+                        if (length <= 0) {
+                            throw new IOException("Invalid exif");
+                        }
+                        if (DEBUG_INTERNAL) {
+                            logDebug("readExifSegment with a byte array (length: " + length + ")");
+                        }
+                        byte[] bytes = new byte[length];
+                        if (dataInputStream.read(bytes) != length) {
+                            throw new IOException("Invalid exif");
+                        }
+                        readExifSegment(bytes, bytesRead);
+                        bytesRead += length;
+                        length = 0;
+                    } else {
+                        // xmp handling
                     }
-                    if (length <= 0) {
-                        throw new IOException("Invalid exif");
-                    }
-                    if (DEBUG_INTERNAL) {
-                        logDebug( "readExifSegment with a byte array (length: " + length + ")");
-                    }
-                    byte[] bytes = new byte[length];
-                    if (dataInputStream.read(bytes) != length) {
-                        throw new IOException("Invalid exif");
-                    }
-                    readExifSegment(bytes, bytesRead);
-                    bytesRead += length;
-                    length = 0;
                     break;
                 }
                 case MARKER_COM: {

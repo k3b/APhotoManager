@@ -109,7 +109,8 @@ PhotoProperties.png
 
 /**
  * All Photo-Properties that are supported by "A Photo Manager".
- * Different implementaions for jpg-exif-file, xmp-file, MediaDB-io, csv-io
+ * There are different implementations for jpg-exif-file, xmp-file, MediaDB-io, csv-io.
+ *
  *
  * Created by k3b on 09.10.2016.
  */
@@ -127,7 +128,7 @@ public interface IPhotoProperties {
     Double getLatitude();
     Double getLongitude();
 
-    /** Title = Short Descrioption used as caption */
+    /** Title = Short Description used as caption */
     String getTitle();
     IPhotoProperties setTitle(String title);
 

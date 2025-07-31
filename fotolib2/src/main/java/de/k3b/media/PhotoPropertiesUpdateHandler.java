@@ -58,12 +58,11 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
      * public api: Factory to create PhotoPropertiesUpdateHandler. Settings/ Internal state determine
      * configuration for PhotoPropertiesUpdateHandler.
      *
-     *
-     * @param absoluteJpgInPath     where data is read from
-     * @param absoluteJpgOutPath    where data changes are written to. Null means same as absoluteJpgInPath.
+     * @param absoluteJpgInPath         where data is read from
+     * @param absoluteJpgOutPath        where data changes are written to. Null means same as absoluteJpgInPath.
      * @param deleteOriginalAfterFinish true: after save original jpg/mxp are deleted (move instead of copy)
-     * @param dbg_context           for debug log: who called this
-     * @return                      new loaded instance
+     * @param dbg_context               for debug log: who called this
+     * @return new loaded instance
      * @throws IOException
      */
     public static PhotoPropertiesUpdateHandler create(String absoluteJpgInPath, String absoluteJpgOutPath,
@@ -79,15 +78,14 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
     /**
      * Used by junit tests with no dependency to internal state: factory to create PhotoPropertiesUpdateHandler.
      *
-     *
-     * @param absoluteJpgInPath     where data is read from
-     * @param absoluteJpgOutPath    where data changes are written to. Null means same as absoluteJpgInPath.
+     * @param absoluteJpgInPath         where data is read from
+     * @param absoluteJpgOutPath        where data changes are written to. Null means same as absoluteJpgInPath.
      * @param deleteOriginalAfterFinish true: after save original jpg/mxp are deleted (move instead of copy)
-     * @param dbg_context           for debug log: who called this
-     * @param writeJpg              true: exif changes go into jpg
-     * @param writeXmp              true: exif changes go into xmp
-     * @param createXmpIfNotExist   true: create xmp sidecar file if it does not exist yet
-     * @return                      new loaded instance
+     * @param dbg_context               for debug log: who called this
+     * @param writeJpg                  true: exif changes go into jpg
+     * @param writeXmp                  true: exif changes go into xmp
+     * @param createXmpIfNotExist       true: create xmp sidecar file if it does not exist yet
+     * @return new loaded instance
      * @throws IOException
      */
     public static PhotoPropertiesUpdateHandler create(String absoluteJpgInPath, String absoluteJpgOutPath,
@@ -127,7 +125,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
 
             }
         }
-        ExifInterfaceEx exif = new ExifInterfaceEx(absoluteJpgInPath, null, xmp, dbg_context);
+        ExifInterfaceEx exif = PhotoPropertiesUtil.factory().createExifInterface(absoluteJpgInPath, null, xmp, dbg_context);
         if (exif.isValidJpgExifFormat()) {
             exif.setPath(absoluteJpgInPath);
         } else {

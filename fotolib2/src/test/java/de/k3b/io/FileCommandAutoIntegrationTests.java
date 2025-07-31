@@ -35,6 +35,7 @@ import de.k3b.TestUtil;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.ExifInterfaceEx;
+import de.k3b.media.ExifInterfaceExImpl;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.MediaFormatter.FieldID;
 import de.k3b.media.PhotoPropertiesBulkUpdateService;
@@ -146,7 +147,7 @@ public class FileCommandAutoIntegrationTests {
         int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
                 autoProccessData, null);
 
-        ExifInterfaceEx result = new ExifInterfaceEx(inFile.getAbsolutePath(), null, null, "");
+        ExifInterfaceEx result = new ExifInterfaceExImpl(inFile.getAbsolutePath(), null, null, "");
 
         Assert.assertEquals(tagAdded, true, result.getTags().contains(tagAdded));
 
@@ -206,7 +207,7 @@ public class FileCommandAutoIntegrationTests {
         int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
                 autoProccessData, null);
 
-        ExifInterfaceEx result = new ExifInterfaceEx(inFile.getAbsolutePath(), null, null, "");
+        ExifInterfaceEx result = new ExifInterfaceExImpl(inFile.getAbsolutePath(), null, null, "");
 
         Assert.assertEquals(tagAdded, true, result.getTags().contains(tagAdded));
 
@@ -259,7 +260,7 @@ public class FileCommandAutoIntegrationTests {
         assertFileExist(true, newName + ".jpg");
         assertFileExist(false, originalName + ".jpg"); // do not rename
 
-        ExifInterfaceEx result = new ExifInterfaceEx(new File(OUTDIR, newName + ".jpg").getAbsolutePath(), null, null, "");
+        ExifInterfaceEx result = new ExifInterfaceExImpl(new File(OUTDIR, newName + ".jpg").getAbsolutePath(), null, null, "");
 
         String exprected = PhotoPropertiesFormatter.format(exifChanges, false, null, FieldID.clasz, FieldID.path).toString();
         String current = PhotoPropertiesFormatter.format(result, false, null, FieldID.clasz, FieldID.path).toString();

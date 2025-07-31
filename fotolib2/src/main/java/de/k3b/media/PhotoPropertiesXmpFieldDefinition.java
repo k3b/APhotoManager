@@ -22,7 +22,7 @@ package de.k3b.media;
 import com.adobe.xmp.options.PropertyOptions;
 
 /**
- * Supported predefined Xmp-Fileds for {@MediaXmpSegment}.
+ * Supported predefined Xmp-Fields for {@MediaXmpSegment}.
  *
  * Created by k3b on 10.10.2016.
  */

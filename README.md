@@ -1,4 +1,5 @@
-Starting with android-10 google has removed the capability to get geo data from the media database so the main purpose of this app: show/find photos through a geographic map is gone forever.
+Starting with android-10 google has removed the capability to get geo data from the media 
+database so the main purpose of this app: show/find photos through a geographic map is gone forever.
 
 I spend several months of work to implement a shadow copy of the media database but in the end a gave up.
 

@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.io.File;
+import java.io.IOException;
 
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
@@ -36,7 +37,6 @@ import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
-import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.PhotoPropertiesUtil;
 
 /**
@@ -110,7 +110,12 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
             holder.url =  fullPhotoPathFromArray;
 
             final File file = new File(fullPhotoPathFromArray);
-            int rotationAngle = ExifInterfaceEx.getOrientationId(fullPhotoPathFromArray);
+            int rotationAngle = 0;
+
+            try {
+                rotationAngle = PhotoPropertiesUtil.factory().createExifInterface(fullPhotoPathFromArray, null,null,null).getOrientationId();
+            } catch (IOException ignore) {
+            }
             rotationAngle = PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(rotationAngle, rotationAngle);
             holder.image.setRotation(rotationAngle);
 

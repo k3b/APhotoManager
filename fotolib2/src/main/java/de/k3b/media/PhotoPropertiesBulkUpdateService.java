@@ -34,7 +34,7 @@ import de.k3b.io.VISIBILITY;
 import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
- * apply meta data changes to one ore more jpg and/or xmp file and log.
+ * apply meta data changes to one or more jpg and/or xmp file and log.
  *
  * Created by k3b on 25.08.2015.
  */
@@ -56,10 +56,8 @@ public class PhotoPropertiesBulkUpdateService {
         }
         return sb;
     }
-
     /** overwrite to create a android specific Workflow */
     public PhotoPropertiesBulkUpdateService(TransactionLoggerBase transactionLogger) {
-
         this.transactionLogger = transactionLogger;
     }
     public PhotoPropertiesUpdateHandler saveLatLon(File filePath, Double latitude, Double longitude) {
@@ -220,10 +218,9 @@ public class PhotoPropertiesBulkUpdateService {
      */
     public static int getRotationFromExifOrientation(String fullPathToImageFile, InputStream inputStream) {
         try {
-            ExifInterfaceEx exif = new ExifInterfaceEx(fullPathToImageFile, inputStream, null, "getRotationFromExifOrientation");
+            ExifInterfaceEx exif = PhotoPropertiesUtil.factory().createExifInterface(fullPathToImageFile, inputStream, null, "getRotationFromExifOrientation");
             if (exif.isValidJpgExifFormat()) {
-
-                return PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0), 0);
+                return PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(exif.getOrientationId(), 0);
             }
         }
         catch (Exception e) {
