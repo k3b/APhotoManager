@@ -64,9 +64,10 @@ android {
         // 0.8.1.200212 (45)    Theme Support
         // 0.8.1.200218 (46)    Bugfix Delete Image
         // 0.8.3.200315 (47)    Bugfix Backup to zip
+        // 0.8.4.250731 (50)    Embedded XMP-support
 
-        versionCode = 47
-        versionName = '0.8.3.200315'
+        versionCode = 50
+        versionName = '0.8.4.250731'
 
 		// all supported locales
 		// resConfigs "ar","de","es","fr","hi","in","it","ja","nl","pl","ro","ru","tr","uk","zz","pt-rBR","zh-rCN","zh-rTW"

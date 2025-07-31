@@ -1,0 +1,5 @@
+* !!! add support for embedded XMP to make it compatible with "Aves"
+* !!! bug fix Filter: Show photos without "geo"-infos
+* new translation eu (Basque), da (Danish)
+* translation updates de, pt-BR
+* APhotoManager does not run on Android-10 (api-29) or later.
