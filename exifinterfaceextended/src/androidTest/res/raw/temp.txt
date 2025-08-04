@@ -1,0 +1,208 @@
+ExifTool Version Number         : 13.18
+File Name                       : jpeg_with_exif_modified_in_ms_explorer.jpg
+Directory                       : .
+File Size                       : 107 kB
+File Modification Date/Time     : 2025:02:08 15:48:53+01:00
+File Access Date/Time           : 2025:02:08 15:49:37+01:00
+File Creation Date/Time         : 2025:02:08 15:42:24+01:00
+File Permissions                : -rw-rw-rw-
+File Type                       : JPEG
+File Type Extension             : jpg
+MIME Type                       : image/jpeg
+JFIF Version                    : 1.01
+Resolution Unit                 : inches
+X Resolution                    : 96
+Y Resolution                    : 96
+Exif Byte Order                 : Big-endian (Motorola, MM)
+Processing Software             : UFRaw 0.22
+Subfile Type                    : Reduced-resolution image
+Image Description               : windows title with umlauts äöüÄÖÜß
+Make                            : windows manufacturer with umlauts äöüÄÖÜß
+Camera Model Name               : windows model with umlauts äöüÄÖÜß
+Orientation                     : Horizontal (normal)
+Modify Date                     : 2016:01:28 09:17:34
+Artist                          : windows author with umlauts äöüÄÖÜß
+Y Cb Cr Coefficients            : 0.299 0.587 0.114
+Y Cb Cr Positioning             : Co-sited
+Reference Black White           : 0 255 128 255 128 255
+Copyright                       : windows copyright with umlauts äöüÄÖÜß
+Exposure Time                   : 1/250
+F Number                        : 1.8
+Shutter Speed Value             : 1/250
+Aperture Value                  : 1.8
+Focal Length                    : 4.4 mm
+Color Space                     : sRGB
+GPS Version ID                  : 2.3.0.0
+GPS Time Stamp                  : 18:08:10
+GPS Date Stamp                  : 1970:01:17
+XP Title                        : windows title with umlauts äöüÄÖÜß
+XP Comment                      : windows comments with umlauts äöüÄÖÜß
+XP Author                       : windows author with umlauts äöüÄÖÜß
+XP Subject                      : windows subject with umlauts äöüÄÖÜß
+DNG Backward Version            : 1.4.0.0
+Unique Camera Model             : LG-H815-LGE-lge
+Color Matrix 1                  : 0.6013 0.0561 -0.1283 -0.6654 1.5953 0.0561 -0.2485 0.5772 0.4008
+Color Matrix 2                  : 1.0494 -0.2624 -0.2907 -0.4822 1.4182 0.0567 -0.0709 0.2553 0.5105
+Camera Calibration 1            : 1 0 0 0 1 0 0 0 1.0547
+Camera Calibration 2            : 0.9922 0 0 0 1 0 0 0 1.0547
+Analog Balance                  : 1 1 1
+As Shot Neutral                 : 0.625 1 0.546875
+Baseline Exposure               : 0
+Baseline Noise                  : 1
+Baseline Sharpness              : 1
+Linear Response Limit           : 1
+Shadow Scale                    : 1
+Calibration Illuminant 1        : D65
+Calibration Illuminant 2        : Standard Light A
+Raw Data Unique ID              : EDF7526024DD878FF698A0FA19D105C5
+Profile Name                    : Embedded
+Profile Embed Policy            : Allow Copying
+Forward Matrix 1                : 0.8203 -0.2188 0.3594 0.3438 0.5703 0.0938 0.0156 -0.7266 1.5391
+Forward Matrix 2                : 0.6797 -0.0781 0.3594 0.2109 0.7031 0.0859 -0.0469 -0.8281 1.6953
+Preview Application Name        : Adobe Photoshop Camera Raw
+Preview Application Version     : 9.3.1
+Preview Settings Digest         : a665baa18adbb27e34a92e7f81d81293
+Preview Color Space             : sRGB
+Preview Date Time               : 2016:01:28 09:17:34+01:00
+Noise Profile                   : 0.0033556191 6.313376e-05 0.0033556191 6.313376e-05 0.0033556191 6.313376e-05
+Original Default Final Size     : 5304 2980
+New Raw Image Digest            : 11c049c77fc104a82ca00eac10e71700
+Padding                         : (Binary data 268 bytes, use -b option to extract)
+XMP Toolkit                     : Image::ExifTool 10.73
+Format                          : image/dng
+Creator                         : windows author with umlauts äöüÄÖÜß
+Rights                          : windows copyright with umlauts äöüÄÖÜß
+Title                           : windows title with umlauts äöüÄÖÜß
+Description                     : windows title with umlauts äöüÄÖÜß
+Date Created                    : 2015:11:12 16:46:18
+Compression                     : Lossy JPEG
+Photometric Interpretation      : Linear Raw
+Planar Configuration            : Chunky
+Samples Per Pixel               : 3
+Metadata Date                   : 2016:01:28 09:17:34+01:00
+Rating                          : 3
+Derived From Document ID        : 3F9DD7A46B26513A7C35272F0D623A06
+Derived From Original Document ID: 3F9DD7A46B26513A7C35272F0D623A06
+Document ID                     : xmp.did:041dfd42-0b46-4302-918a-836fba5016ed
+History Action                  : derived, saved
+History Parameters              : saved to new location
+History Changed                 : /
+History Instance ID             : xmp.iid:041dfd42-0b46-4302-918a-836fba5016ed
+History Software Agent          : Adobe Photoshop Camera Raw 9.3.1 (Macintosh)
+History When                    : 2016:01:28 09:17:34+01:00
+Instance ID                     : xmp.iid:041dfd42-0b46-4302-918a-836fba5016ed
+Original Document ID            : 3F9DD7A46B26513A7C35272F0D623A06
+Already Applied                 : False
+Auto Lateral CA                 : 0
+Auto White Version              : 134348800
+Blacks 2012                     : 0
+Blue Hue                        : 0
+Blue Saturation                 : 0
+Camera Profile                  : Embedded
+Camera Profile Digest           : 0140DA916D2466F8A3BFC3DB324526AE
+Clarity 2012                    : 0
+Color Noise Reduction           : 25
+Color Noise Reduction Detail    : 50
+Color Noise Reduction Smoothness: 50
+Contrast 2012                   : 0
+Convert To Grayscale            : False
+Defringe Green Amount           : 0
+Defringe Green Hue Hi           : 60
+Defringe Green Hue Lo           : 40
+Defringe Purple Amount          : 0
+Defringe Purple Hue Hi          : 70
+Defringe Purple Hue Lo          : 30
+Dehaze                          : 0
+Exposure 2012                   : 0.00
+Grain Amount                    : 0
+Green Hue                       : 0
+Green Saturation                : 0
+Has Crop                        : False
+Has Settings                    : True
+Highlights 2012                 : 0
+Hue Adjustment Aqua             : 0
+Hue Adjustment Blue             : 0
+Hue Adjustment Green            : 0
+Hue Adjustment Magenta          : 0
+Hue Adjustment Orange           : 0
+Hue Adjustment Purple           : 0
+Hue Adjustment Red              : 0
+Hue Adjustment Yellow           : 0
+Lens Manual Distortion Amount   : 0
+Lens Profile Enable             : 0
+Lens Profile Setup              : LensDefaults
+Luminance Adjustment Aqua       : 0
+Luminance Adjustment Blue       : 0
+Luminance Adjustment Green      : 0
+Luminance Adjustment Magenta    : 0
+Luminance Adjustment Orange     : 0
+Luminance Adjustment Purple     : 0
+Luminance Adjustment Red        : 0
+Luminance Adjustment Yellow     : 0
+Luminance Smoothing             : 0
+Parametric Darks                : 0
+Parametric Highlight Split      : 75
+Parametric Highlights           : 0
+Parametric Lights               : 0
+Parametric Midtone Split        : 50
+Parametric Shadow Split         : 25
+Parametric Shadows              : 0
+Perspective Aspect              : 0
+Perspective Horizontal          : 0
+Perspective Rotate              : 0.0
+Perspective Scale               : 100
+Perspective Upright             : Off
+Perspective Vertical            : 0
+Post Crop Vignette Amount       : 0
+Process Version                 : 6.7
+Red Hue                         : 0
+Red Saturation                  : 0
+Saturation Adjustment Aqua      : 0
+Saturation Adjustment Blue      : 0
+Saturation Adjustment Green     : 0
+Saturation Adjustment Magenta   : 0
+Saturation Adjustment Orange    : 0
+Saturation Adjustment Purple    : 0
+Saturation Adjustment Red       : 0
+Saturation Adjustment Yellow    : 0
+Shadow Tint                     : 0
+Shadows 2012                    : 0
+Sharpen Detail                  : 25
+Sharpen Edge Masking            : 0
+Sharpen Radius                  : +1.0
+Split Toning Balance            : 0
+Split Toning Highlight Hue      : 0
+Split Toning Highlight Saturation: 0
+Split Toning Shadow Hue         : 0
+Split Toning Shadow Saturation  : 0
+Color Temperature               : 3850
+Tint                            : +14
+Tone Curve                      : 0, 0, 32, 22, 64, 56, 128, 128, 192, 196, 255, 255
+Tone Curve Blue                 : 0, 0, 255, 255
+Tone Curve Green                : 0, 0, 255, 255
+Tone Curve Name                 : Medium Contrast
+Tone Curve Name 2012            : Linear
+Tone Curve PV2012               : 0, 0, 255, 255
+Tone Curve PV2012 Blue          : 0, 0, 255, 255
+Tone Curve PV2012 Green         : 0, 0, 255, 255
+Tone Curve PV2012 Red           : 0, 0, 255, 255
+Tone Curve Red                  : 0, 0, 255, 255
+Tone Map Strength               : 0
+Version                         : 9.3.1
+Vibrance                        : 0
+Vignette Amount                 : 0
+Whites 2012                     : 0
+Warning                         : [minor] Fixed incorrect URI for xmlns:MicrosoftPhoto
+Rating Percent                  : 50
+Image Width                     : 600
+Image Height                    : 337
+Encoding Process                : Baseline DCT, Huffman coding
+Bits Per Sample                 : 8
+Color Components                : 3
+Y Cb Cr Sub Sampling            : YCbCr4:4:4 (1 1)
+Aperture                        : 1.8
+Image Size                      : 600x337
+Megapixels                      : 0.202
+Shutter Speed                   : 1/250
+GPS Date/Time                   : 1970:01:17 18:08:10Z
+Focal Length                    : 4.4 mm

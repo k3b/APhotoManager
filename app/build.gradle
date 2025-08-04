@@ -132,6 +132,8 @@ dependencies {
     implementation project(':fotolib2')
     implementation project(':libK3bFilefacade')
     implementation project(':libK3bExifInterface')
+    implementation project(':exifinterfaceextended')
+
     // implementation project(':k3b-geoHelper')
     implementation 'com.github.k3b:k3b-geoHelper:1.1.5'
 

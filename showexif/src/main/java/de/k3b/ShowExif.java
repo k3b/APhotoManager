@@ -28,6 +28,10 @@ import de.k3b.media.PhotoPropertiesFormatter;
 import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.media.PhotoPropertyFileReader;
 
+import de.k3b.media.PhotoPropertiesImageReader;
+import de.k3b.media.PhotoPropertiesUtil;
+import de.k3b.media.PhotoPropertiesXmpSegment;
+
 /** simple commandline tool to show  */
 public class ShowExif {
     private static final String usage = "usage java -jar ShowExif.jar [-d(ebug)] [file.jpg [file.jpg] ..]";

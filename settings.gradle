@@ -1,3 +1,5 @@
 // startParameter.offline = true
 
+// include ':app', ':fotolib2', ':showexif'
 include ':libK3bFilefacade', ':libK3bExifInterface', ':fotolib2', ':app', ':showexif', ':photoview', ':documentfile'
+include ':exifinterfaceextended'
