@@ -2,3 +2,4 @@
 
 // include ':app', 'fotolib2', 'fotoview.library', ':osmdroid-android' , ':k3b-geoHelper' , ':fotoview.library'
 include ':app', ':fotolib2', ':showexif'
+include ':exifinterfaceextended'

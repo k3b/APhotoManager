@@ -25,6 +25,7 @@ import de.k3b.media.IPhotoProperties;
 import de.k3b.media.MediaFormatter;
 import de.k3b.media.PhotoPropertiesFormatter;
 import de.k3b.media.PhotoPropertiesImageReader;
+import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.media.PhotoPropertiesXmpSegment;
 
 /** simple commandline tool to show  */

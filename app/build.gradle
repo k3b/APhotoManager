@@ -133,6 +133,7 @@ dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':fotolib2')
+    implementation project(':exifinterfaceextended')
 
     // implementation project(':k3b-geoHelper')
     implementation 'com.github.k3b:k3b-geoHelper:1.1.5'
