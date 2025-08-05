@@ -1496,23 +1496,27 @@ public class ExifInterface {
     }
 
     /** repairs wrong/missing attributes */
-    protected void fixAttributes() {
+    protected boolean fixAttributes() {
+        boolean modified = false;
         if (ExifInterface.fixDateOnSave) {
             // The value of DATETIME tag has the same value of DATETIME_ORIGINAL tag.
             String valueOfDateTimeOriginal = getAttribute(TAG_DATETIME_ORIGINAL);
             if (valueOfDateTimeOriginal != null) {
                 setAttribute(IFD_TIFF_HINT, TAG_DATETIME,
                         ExifAttribute.createString(EXIF_TAG_DATETIME, valueOfDateTimeOriginal));
+                modified = true;
             }
         }
 
         if (getExifAttribute(TAG_IMAGE_WIDTH) == null) {
             setAttribute(IFD_TIFF_HINT,TAG_IMAGE_WIDTH,
                     ExifAttribute.createULong(EXIF_TAG_IMAGE_WIDTH, 0, mExifByteOrder));
+            modified = true;
         }
         if (getExifAttribute(TAG_IMAGE_LENGTH) == null) {
             setAttribute(IFD_TIFF_HINT,TAG_IMAGE_LENGTH,
                     ExifAttribute.createULong(EXIF_TAG_IMAGE_LENGTH, 0, mExifByteOrder));
+            modified = true;
         }
         if (getExifAttribute(TAG_ORIENTATION) == null) {
             setAttribute(IFD_TIFF_HINT,TAG_ORIENTATION,
@@ -1521,6 +1525,7 @@ public class ExifInterface {
         if (getExifAttribute(TAG_LIGHT_SOURCE) == null) {
             setAttribute(IFD_EXIF_HINT, TAG_LIGHT_SOURCE,
                     ExifAttribute.createULong(EXIF_TAG_LIGHT_SOURCE, 0, mExifByteOrder));
+            modified = true;
         }
 
         // add missing TAG_GPS_VERSION_ID if there is gps info included
@@ -1533,7 +1538,9 @@ public class ExifInterface {
                 the tag value is 02000000.H).*/
             setAttribute(IFD_GPS_HINT,TAG_GPS_VERSION_ID,
                     new ExifAttribute(EXIF_TAG_GPS_VERSION_ID, IFD_FORMAT_BYTE, GPS_VERSION_DEFAULT.length, GPS_VERSION_DEFAULT));
+            modified = true;
         }
+        return modified;
     }
 
     /**

@@ -191,22 +191,29 @@ public class ExifInterface6ExImpl extends ExifInterface
             // #29 set data if not in exif: date, make model
             if (lastModified != 0) {
                 setDateTimeTaken(new Date(lastModified));
+                return true;
             }
         }
+        return false;
     }
 
     @Override
-    protected void fixAttributes() {
-        fixDateTakenIfNeccessary(mExifFile);
+    public boolean fixAttributes() {
+        boolean modified = fixDateTakenIfNeccessary(mExifFile);
 
         if ((LibGlobal.appName != null) && (null == getAttribute(ExifInterface6ExImpl.TAG_MAKE))) {
             setAttribute(ExifInterface6ExImpl.TAG_MAKE, LibGlobal.appName);
+            modified = true;
         }
 
         if ((LibGlobal.appVersion != null) && (null == getAttribute(ExifInterface6ExImpl.TAG_MODEL))) {
             setAttribute(ExifInterface6ExImpl.TAG_MODEL, LibGlobal.appVersion);
+            modified = true;
         }
-        super.fixAttributes();
+        if (super.fixAttributes()) {
+            modified = true;
+        }
+        return modified;
     }
 
     @Override

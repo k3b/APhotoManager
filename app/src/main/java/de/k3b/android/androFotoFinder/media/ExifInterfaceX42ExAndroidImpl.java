@@ -12,15 +12,21 @@ import de.k3b.media.ExifInterface6ExImpl;
 import de.k3b.media.ExifInterfaceFactory;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.TimeZone;
 
 import de.k3b.LibGlobal;
+import de.k3b.io.FileUtils;
 import de.k3b.io.ListUtils;
+import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.ExifInterfaceEx;
@@ -28,6 +34,8 @@ import de.k3b.media.IPhotoProperties;
 import de.k3b.media.MediaFormatter;
 import de.k3b.media.PhotoPropertiesFormatter;
 import de.k3b.media.PhotoPropertiesUtil;
+import de.k3b.media.PhotoPropertiesXmpSegment;
+import de.k3b.tagDB.TagConverter;
 import io.github.tommygeenexus.exifinterfaceextended.ExifInterfaceExtended;
 
 /**
@@ -37,6 +45,9 @@ import io.github.tommygeenexus.exifinterfaceextended.ExifInterfaceExtended;
 public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended implements ExifInterfaceEx{
     // public to allow error filtering
     public static final String LOG_TAG = "ExifInterface";
+
+    // xmp as string must be longer than this to be processed
+    public static final int MIN_XMP_STRING_LEN = 100;
 
     // false for unittests because UserComment = null is not implemented for COM - Marker
     protected static boolean fixDateOnSave = true;
@@ -62,6 +73,9 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
     /** if not null content of xmp sidecar file */
     private final IPhotoProperties xmpExtern;
 
+    /** if not null content of embedded xmp  */
+    private IPhotoProperties xmpIntern = null;
+
     // content of file.lastModified used if there is no exif-date
     private long initialLastModified = 0;
 
@@ -83,7 +97,16 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
         if (absoluteJpgPath != null) {
             this.initialLastModified = new File(absoluteJpgPath).lastModified();
         }
+
         setPath(absoluteJpgPath);
+
+        PhotoPropertiesXmpSegment xmpSegment = new PhotoPropertiesXmpSegment();
+        String xmp = getAttribute(TAG_XMP);
+        if (xmp != null && xmp.length() > MIN_XMP_STRING_LEN) {
+            xmpSegment.load(FileUtils.streamFromStringContent(xmp), dbgContext);
+        }
+        this.xmpIntern = xmpSegment;
+
         if (LibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(this.mDbg_context +
                     " load: " + PhotoPropertiesFormatter.format(this, false, null, MediaFormatter.FieldID.path, MediaFormatter.FieldID.clasz));
@@ -107,7 +130,13 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
 
     @Override
     public void saveAttributes() throws IOException {
-        fixDateTakenIfNeccessary();
+        fixAttributes();
+        if (xmpIntern instanceof PhotoPropertiesXmpSegment) {
+            String xmp = xmpIntern.toString();
+            if (xmp.length() > MIN_XMP_STRING_LEN) {
+                setAttribute(TAG_XMP, xmp);
+            }
+        }
         super.saveAttributes();
     }
 
@@ -146,24 +175,80 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
         }
     }
 
-    private void fixDateTakenIfNeccessary() {
+    /**
+     * @return true if photo file was modified.
+     */
+    private boolean fixDateTakenIfNeccessary() {
         // donot fix in unittests
         if (fixDateOnSave && (null == getDateTimeTaken()) && (this.initialLastModified != 0)) {
             // #29 set data if not in exif: date, make model
             setDateTimeTaken(new Date(this.initialLastModified));
+            return true;
         }
+        return false;
     }
 
-    protected void fixAttributes() {
-        fixDateTakenIfNeccessary();
+    /**
+     * {@inheritDoc}
+     * @return true if photo file was modified because auf missing exif-Attributes.
+     */
+    @Override
+    public boolean  fixAttributes() {
+        boolean modified = fixDateTakenIfNeccessary();
 
+        if (LibGlobal.embeddedXmpEnforceFixTags && this.xmpIntern != null && mustFixXmpTags(getTagsInternal(), this.xmpIntern.getTags())) {
+            // #207 embedded xmp inside jpg fix tags (subject) inside xmp if they differ from exif . */
+            // set all xmpIntern properties
+            PhotoPropertiesUtil.copy(xmpIntern, this, true, false);
+
+            // tags in exif and xmpIntern are the same
+            this.setTags(xmpIntern.getTags());
+            modified = true;
+        }
+
+        // TAG_MAKE/TAG_MODEL will become appName+appVersion (if not set)
         if ((LibGlobal.appName != null) && (null == getAttribute(TAG_MAKE))) {
             setAttribute(TAG_MAKE, LibGlobal.appName);
+            modified = true;
         }
 
         if ((LibGlobal.appVersion != null) && (null == getAttribute(TAG_MODEL))) {
             setAttribute(TAG_MODEL, LibGlobal.appVersion);
+            modified = true;
         }
+        return modified;
+    }
+
+    /**
+     *
+     * @param tagsExif
+     * @param tagsXmp
+     * @return true if
+     */
+    private boolean mustFixXmpTags(List<String> tagsExif, List<String> tagsXmp) {
+        // no Exif tag as source
+        boolean noExif = tagsExif == null || tagsExif.isEmpty();
+
+        // no xmp tag as destination
+        boolean noXmp = tagsXmp == null || tagsXmp.isEmpty();
+
+        // one has tags while the other has none.
+        if (noExif != noXmp) return true;
+
+        // no tag infos. Nothing to do.
+        if (noExif) return false;
+
+        // both tags exist but number of tags differ
+        if (tagsXmp.size() != tagsXmp.size()) return true;
+
+        Collections.sort(tagsXmp);
+        String csvXmp = TagConverter.asDbString(null, tagsXmp);
+
+        Collections.sort(tagsExif);
+        String csvExif = TagConverter.asDbString(null, tagsExif);
+
+        // both tags have the same number of items but tag-content differ
+        return csvExif.compareTo(csvXmp) != 0;
     }
 
     @Override
@@ -174,6 +259,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
     @Override
     public IPhotoProperties setPath(String filePath) {
         mExifFile = (filePath != null) ? new File(filePath) : null;
+        if (xmpIntern != null) xmpIntern.setPath(filePath);
         if (xmpExtern != null) xmpExtern.setPath(filePath);
         return this;
     }
@@ -185,6 +271,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
         Date result = null;
         if (isEmpty(result, ++i, debugContext, "Exif.DATETIME_ORIGINAL")) result = getAttributeDate(TAG_DATETIME_ORIGINAL);
         if (isEmpty(result, ++i, debugContext, "Exif.DATETIME")) result = getAttributeDate(TAG_DATETIME);
+        if ((isEmpty(result, ++i, debugContext, "xmp.i.DateTimeTaken")) && (xmpIntern != null)) result = xmpIntern.getDateTimeTaken();
         if ((isEmpty(result, ++i, debugContext, "xmp.DateTimeTaken")) && (xmpExtern != null)) result = xmpExtern.getDateTimeTaken();
         isEmpty(result, ++i, null, null);
         return result;
@@ -195,6 +282,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
         String dateInExifFormat = toExifDateTimeString(value);
         setAttribute(TAG_DATETIME, dateInExifFormat);
         setAttribute(TAG_DATETIME_ORIGINAL, dateInExifFormat);
+        if (xmpIntern != null) xmpIntern.setDateTimeTaken(value);
         if (xmpExtern != null) xmpExtern.setDateTimeTaken(value);
         return this;
     }
@@ -257,7 +345,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
         setAttribute(TAG_GPS_LONGITUDE, convert(longitude));
         setAttribute(TAG_GPS_LONGITUDE_REF, longitudeRef(longitude));
         mLongitude = longitude;
-
+        if (xmpIntern != null) xmpIntern.setLatitudeLongitude(latitude, longitude);
         if (xmpExtern != null) xmpExtern.setLatitudeLongitude(latitude, longitude);
 
         return this;
@@ -273,6 +361,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
             result = this.mLatitude;
         }
 
+        if ((isEmpty(result, ++i, debugContext, "xmp.i.Latitude")) && (xmpIntern != null)) return xmpIntern.getLatitude();
         if ((isEmpty(result, ++i, debugContext, "xmp.Latitude")) && (xmpExtern != null)) return xmpExtern.getLatitude();
 
         isEmpty(result, ++i, null, null);
@@ -288,6 +377,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
             result = this.mLongitude;
         }
 
+        if ((isEmpty(result, ++i, debugContext, "xmp.i.Longitude")) && (xmpIntern != null)) return xmpIntern.getLongitude();
         if ((isEmpty(result, ++i, debugContext, "xmp.Longitude")) && (xmpExtern != null)) return xmpExtern.getLongitude();
 
         isEmpty(result, ++i, null, null);
@@ -299,6 +389,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
         int i=0;String debugContext = "getTitle";
 
         String result = null;
+        if ((isEmpty(result, ++i, debugContext, "xmp.i.Title")) && (xmpIntern != null)) result = xmpIntern.getTitle();
         if ((isEmpty(result, ++i, debugContext, "xmp.Title")) && (xmpExtern != null)) result = xmpExtern.getTitle();
         if (isEmpty(result, ++i, debugContext, "Exif.XPTITLE")) result = getAttribute(TAG_WIN_TITLE);
         // iptc:Headline
@@ -309,6 +400,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
     @Override
     public IPhotoProperties setTitle(String value) {
         setAttribute(TAG_WIN_TITLE, value);
+        if (xmpIntern != null) xmpIntern.setTitle(value);
         if (xmpExtern != null) xmpExtern.setTitle(value);
         return this;
     }
@@ -322,6 +414,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
         if (isEmpty(result, ++i, debugContext, "Exif.IMAGE_DESCRIPTION")) result = getAttribute(TAG_IMAGE_DESCRIPTION);
 
         // XMP-dc:Description
+        if (isEmpty(result, ++i, debugContext, "xmp.i.Description") && (xmpIntern != null)) result = xmpIntern.getDescription();
         if (isEmpty(result, ++i, debugContext, "xmp.Description") && (xmpExtern != null)) result = xmpExtern.getDescription();
 
         if (isEmpty(result, ++i, debugContext, "Exif.XPSUBJECT")) result = getAttribute(TAG_WIN_SUBJECT);
@@ -346,7 +439,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
     public IPhotoProperties setDescription(String value) {
         setAttribute(TAG_IMAGE_DESCRIPTION, value);
         setAttribute(TAG_WIN_SUBJECT, value);
-
+        if (xmpIntern != null) xmpIntern.setDescription(value);
         if (xmpExtern != null) xmpExtern.setDescription(value);
         setAttribute(TAG_WIN_COMMENT, value);
 
@@ -358,27 +451,31 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
     /** not implemented in {@link ExifInterface} */
     @Override
     public List<String> getTags() {
-        int i=0;String debugContext = "getTags";
+        int i=0;
+        String debugContext = "getTags";
 
-        List<String> result = null;
-        if (isEmpty(result, ++i, debugContext, "xmp.Tags") && (xmpExtern != null)) result = xmpExtern.getTags();
-        if (isEmpty(result, ++i, debugContext, "Exif.XPKEYWORDS") || (result.size() == 0)) {
-            result = getTagsInternal();
-        }
+        Set<String> result = new HashSet<>();
+
+        if (xmpIntern != null) result.addAll( xmpIntern.getTags());
+        if (xmpExtern != null) result.addAll( xmpExtern.getTags());
+        result.addAll(getTagsInternal());
         isEmpty(result, ++i, null, null);
-        return result;
+        List<String> list = new ArrayList<>(result);
+        Collections.sort(list);
+        return list;
     }
 
     private List<String> getTagsInternal() {
         String s = getAttribute(TAG_WIN_KEYWORDS);
         if (s != null) return ListUtils.fromString(s, LIST_DELIMITER);
-        return null;
+        return new ArrayList<>();
     }
 
     /** not implemented in {@link ExifInterface} */
     @Override
     public IPhotoProperties setTags(List<String> value) {
         setAttribute(TAG_WIN_KEYWORDS, (value == null) ? null : ListUtils.toString(LIST_DELIMITER, value));
+        if (xmpIntern != null) xmpIntern.setTags(value);
         if (xmpExtern != null) xmpExtern.setTags(value);
         return this;
     }
@@ -388,6 +485,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
     public Integer getRating() {
         int i=0;String debugContext = "getRating";
         Integer result = null;
+        if (isEmpty(result, ++i, debugContext, "xmp.i.Rating") && (xmpIntern != null)) result = xmpIntern.getRating();
         if (isEmpty(result, ++i, debugContext, "xmp.Rating") && (xmpExtern != null)) result = xmpExtern.getRating();
         if (isEmpty(result, ++i, debugContext, "Exif.XPRATING")) {
             int r = getAttributeInt(TAG_WIN_RATING, -1);
@@ -401,6 +499,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
     @Override
     public IPhotoProperties setRating(Integer value) {
         setAttribute(TAG_WIN_RATING, (value != null) ? value.toString() : null);
+        if (xmpIntern != null) xmpIntern.setRating(value);
         if (xmpExtern != null) xmpExtern.setRating(value);
         return this;
     }

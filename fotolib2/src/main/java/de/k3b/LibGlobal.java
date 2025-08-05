@@ -63,4 +63,8 @@ public class LibGlobal extends LibGlobalFile {
 
     /** make debugging easier by avoiding async processing */
     public static final boolean debugAvoidAsync = false;
+
+    /** #207 embedded xmp inside jpg: true: fix tags (subject) inside xmp if they differ from exif . */
+    public static final boolean embeddedXmpEnforceFixTags = true;
+
 }
