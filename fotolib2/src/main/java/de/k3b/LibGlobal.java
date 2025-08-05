@@ -76,4 +76,8 @@ public class LibGlobal {
 
     /** progressbar advances after processing x photos */
     public static final int itemsPerProgress = 10;
+
+    /** #207 embedded xmp inside jpg: true: fix tags (subject) inside xmp if they differ from exif . */
+    public static final boolean embeddedXmpEnforceFixTags = true;
+
 }

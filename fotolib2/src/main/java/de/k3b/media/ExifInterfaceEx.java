@@ -16,6 +16,11 @@ public interface ExifInterfaceEx extends IPhotoProperties {
     /** return image orinentation in degrees (0, 90,180,270) or 0 if inknown */
     int getOrientationInDegrees();
 
+    /**
+     * @return true if photo file was modified.
+     */
+    boolean  fixAttributes();
+
     void saveAttributes() throws IOException;
     void saveAttributes(File inFile, File outFile, boolean deleteInFileOnFinish) throws IOException;
 

@@ -33,6 +33,7 @@ import com.adobe.xmp.properties.XMPPropertyInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -226,7 +227,7 @@ public class XmpSegment {
     }
 
     public XmpSegment load(File file, String dbg_context) throws FileNotFoundException {
-        FileInputStream stream = null;
+        InputStream stream = null;
         try {
             stream = new FileInputStream(file);
             setXmpMeta(XMPMetaFactory.parse(stream), dbg_context + " file:" + file);
@@ -250,6 +251,14 @@ public class XmpSegment {
         return this;
     }
 
+    /**
+     * saves the xml content to a file
+     * @param file
+     * @param humanReadable false compact format i.e. use  LibGlobal.debugEnabledJpgMetaIo
+     * @param dbg_context for debug output why this method was called
+     * @return this to allow method chaining.
+     * @throws FileNotFoundException
+     */
     public XmpSegment save(File file, boolean humanReadable, String dbg_context) throws FileNotFoundException {
         FileOutputStream stream = null;
         try {

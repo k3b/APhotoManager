@@ -133,29 +133,36 @@ public class ExifInterfaceExImpl extends ExifInterface implements ExifInterfaceE
         return result;
     }
 
-    private void fixDateTakenIfNeccessary(File inFile) {
+    private boolean fixDateTakenIfNeccessary(File inFile) {
         // donot fix in unittests
         if (ExifInterfaceExImpl.fixDateOnSave && (null == getDateTimeTaken()) && (inFile != null)) {
             long lastModified = inFile.lastModified();
             // #29 set data if not in exif: date, make model
             if (lastModified != 0) {
                 setDateTimeTaken(new Date(lastModified));
+                return true;
             }
         }
+        return false;
     }
 
     @Override
-    protected void fixAttributes() {
-        fixDateTakenIfNeccessary(mExifFile);
+    public boolean fixAttributes() {
+        boolean modified = fixDateTakenIfNeccessary(mExifFile);
 
         if ((LibGlobal.appName != null) && (null == getAttribute(ExifInterfaceExImpl.TAG_MAKE))) {
             setAttribute(ExifInterfaceExImpl.TAG_MAKE, LibGlobal.appName);
+            modified = true;
         }
 
         if ((LibGlobal.appVersion != null) && (null == getAttribute(ExifInterfaceExImpl.TAG_MODEL))) {
             setAttribute(ExifInterfaceExImpl.TAG_MODEL, LibGlobal.appVersion);
+            modified = true;
         }
-        super.fixAttributes();
+        if (super.fixAttributes()) {
+            modified = true;
+        }
+        return modified;
     }
 
     @Override

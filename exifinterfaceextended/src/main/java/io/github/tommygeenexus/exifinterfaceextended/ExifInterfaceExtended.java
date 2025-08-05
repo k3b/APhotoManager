@@ -71,6 +71,8 @@ import java.util.regex.Pattern;
 /**
  * This is a class for reading and writing Exif tags in various image file formats.
  *
+ * It is based on the sourcecode of https://developer.android.com/jetpack/androidx/releases/exifinterface#1.4.1 .
+ *
  * <p>Supported for reading: JPEG, PNG, WebP, HEIC, DNG, CR2, NEF, NRW, ARW, RW2, ORF, PEF, SRW,
  * RAF, AVIF (on API 31+).
  *
