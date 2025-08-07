@@ -243,7 +243,10 @@ public class SettingsActivity extends PreferenceActivity {
             Log.d(Global.LOG_CONTEXT, "SettingsActivity onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
 
-        if (FileFacade.debugLogSAFFacade) {
+        this.addPreferencesFromResource(R.xml.preferences);
+
+        if (Global.USE_ANDROID_SAF) {
+            // button to reset cached SAF-Translations
             this.addPreferencesFromResource(R.xml.preferences_saf169_test);
             findPreference("debugClearSafCache").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -257,7 +260,6 @@ public class SettingsActivity extends PreferenceActivity {
             });
         }
 
-        this.addPreferencesFromResource(R.xml.preferences);
         prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(this);
         global2Prefs(this.getApplication());

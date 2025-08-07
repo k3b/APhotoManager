@@ -37,6 +37,7 @@ import java.io.Serializable;
 import java.net.URLDecoder;
 import java.util.Date;
 
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.ProgressActivity;
@@ -54,7 +55,7 @@ public class BackupProgressActivity extends ProgressActivity<IZipConfig> {
     /**
      * document tree supported since andrid-5.0. For older devices use folder picker
      */
-    public static final boolean USE_DOCUMENT_PROVIDER = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
+    public static final boolean USE_DOCUMENT_PROVIDER =  Global.USE_ANDROID_SAF;
 
     protected static final String EXTRA_STATE_ZIP_CONFIG = "zip_config";
     private static final String mDebugPrefix = "BuProgressActivity: ";

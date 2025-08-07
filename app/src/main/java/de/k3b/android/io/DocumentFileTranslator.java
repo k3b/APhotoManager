@@ -326,9 +326,10 @@ public class DocumentFileTranslator {
         return (root != null) ? root.getRoots() : null;
     }
 
+    /** called from Settings: "DIAGNOSTOCS: Clear SAF cache" */
     public static void clearCache() {
         if (root != null) {
-            root.dir2uri.clear();
+            root.clearCache();
         }
     }
 
@@ -437,8 +438,16 @@ public class DocumentFileTranslator {
             return dir2uri.keySet().toArray(new String[dir2uri.size()]);
         }
 
+        /** called from Settings: "DIAGNOSTOCS: Clear SAF cache" */
         public void clearCache() {
+            String before = this.toString();
             dir2uri.clear();
+            saveToPrefs();
+            loadFromPrefs();
+            invalidateDirCache(null);
+            if (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache) {
+                Log.i(TAG, "DocumentFileTranslator.Root.clearCache(" + before + "->" + this + ")");
+            }
         }
     }
 }

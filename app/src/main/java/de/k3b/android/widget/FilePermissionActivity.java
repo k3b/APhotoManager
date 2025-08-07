@@ -91,7 +91,7 @@ public abstract class FilePermissionActivity extends ActivityWithAsyncTaskDialog
     @Override
     protected void onResume() {
         super.onResume();
-        if (Global.USE_ANDROID_FACADE) {
+        if (Global.DISABLE_MEDIA_DB_MIRROR) {
             AndroidFileFacade.initFactory(this);
         }
     }
@@ -162,7 +162,6 @@ public abstract class FilePermissionActivity extends ActivityWithAsyncTaskDialog
             File rootFile, IOnDirectoryPermissionGrantedHandler permissionGrantedHandler) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         currentPermissionGrantedHandler = permissionGrantedHandler;
         currentRootFileRequest = rootFile;

@@ -46,7 +46,12 @@ public class Global {
      * local settings: which language should the gui use
      */
     public static final String PREF_KEY_USER_LOCALE = "user_locale";
-    public static final boolean USE_ANDROID_FACADE = true; //!!! true alte api; false neue
+
+    /** true Media-DB-api (up to android 9 or "R"); false mirror of Media-Db-api (since Android 10 or "R") */
+    public static final boolean DISABLE_MEDIA_DB_MIRROR = (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q);
+
+    /** false: use File picker api (pre android-5 LOLLIPOP); true use SYSTEN-DIR_PICKER with document files */
+    public static final boolean USE_ANDROID_SAF = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
 
     /**
      * Global.xxxxx. Non final values may be changed in SettingsActivity

@@ -22,7 +22,6 @@ package de.k3b.android.androFotoFinder;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
-import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -106,10 +105,11 @@ public class AndroFotoFinderApp extends Application {
 
         super.onCreate();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (Global.USE_ANDROID_FACADE) {
+        if (Global.USE_ANDROID_SAF) {
+            if (Global.DISABLE_MEDIA_DB_MIRROR) {
                 AndroidFileFacade.initFactory(this);
             } else {
+                // since android-10 querying the media DB is not possible anymore. Use a copy of media DB instead.
                 file2DocumentFileTranslator = new File2DocumentFileTranslator(new DocumentFileCache());
             }
         }
