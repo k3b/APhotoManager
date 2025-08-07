@@ -130,10 +130,6 @@ public class Global {
     // #153: Feature-Toggel: set to false while rename multible is not implemented completely
     public final static boolean allowRenameMultible = false;
 
-    // #155: Feature-Toggel: set to false while android10 incompatibility is not fixed
-    public final static boolean allow_emulate_ao10 = !isAndroid10OrAbove() && false;
-    // #155: fix android10 incompatibility
-    // Build.VERSION_CODES.??ANDROID10?? = 29
     public static boolean useAo10MediaImageDbReplacement = isAndroid10OrAbove();
 
     // #169 Android SAF DocumentFileEx performance improvements fast find.

@@ -18,7 +18,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
 
 -->
 
-<!-- Expewrimental settings for #169: StorageAccessFramework -->
+<!-- Experimental settings for #169: StorageAccessFramework -->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="preferences">
     <PreferenceCategory

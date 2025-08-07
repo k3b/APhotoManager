@@ -98,9 +98,6 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
         prefs.putBoolean("debugLogFacade", FileFacade.debugLogSAFFacade);
-        if (Global.allow_emulate_ao10) {
-            prefs.putBoolean(PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT, Global.useAo10MediaImageDbReplacement);
-        }
 
         prefs.putBoolean("locked", Global.locked);
         prefs.putString("passwordHash", Global.passwordHash);
@@ -175,13 +172,6 @@ public class SettingsActivity extends PreferenceActivity {
 
         Global.mapsForgeEnabled = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
         FileFacade.debugLogSAFFacade = getPref(prefs, "debugLogFacade", FileFacade.debugLogSAFFacade);
-
-
-        boolean useAo10MediaImageDbReplacement = Global.useAo10MediaImageDbReplacement;
-        if (Global.allow_emulate_ao10) {
-            useAo10MediaImageDbReplacement = getPref(prefs, PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT, Global.useAo10MediaImageDbReplacement);
-        }
-        GlobalInit.setMediaImageDbReplacement(context.getApplicationContext(), useAo10MediaImageDbReplacement);
 
         Global.imageDetailThumbnailIfBiggerThan = getPref(prefs, "imageDetailThumbnailIfBiggerThan", Global.imageDetailThumbnailIfBiggerThan);
 
