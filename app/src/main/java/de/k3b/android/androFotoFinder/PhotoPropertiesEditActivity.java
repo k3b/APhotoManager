@@ -89,7 +89,6 @@ import de.k3b.tagDB.TagConverter;
  * Modes: else if data-url/SelectedFiles is not null: modify the referenced jpg files.
  */
 public class PhotoPropertiesEditActivity extends BaseActivity implements Common {
-    private static final boolean SYNC_UPDATE_EXIF = false; // for sync debugging. false: asynch task
     private static final String mDebugPrefix = "ExifEdit-";
     private static final String DLG_NAVIGATOR_TAG = mDebugPrefix;
 
@@ -858,12 +857,13 @@ public class PhotoPropertiesEditActivity extends BaseActivity implements Common 
 
         Intent intent = getIntent();
         Activity ctx = this;
-        if (!SYNC_UPDATE_EXIF) {
+        if (!LibGlobal.debugAvoidAsync) {
+            // non debugging mode: gui is more responsive if updates are processed in async task
             this.exifUpdate = new UpdateTask(R.string.exif_menu_title, ctx, cmd, exifChanges);
             exifUpdate.execute(items);
             finish = false;
         } else {
-            // for debugging: sync debugging is easier
+            // for debugging: sync debugging is much easier
             cmd.applyExifChanges(true, exifChanges, items, null);
 
             this.setResult(EXIF_RESULT_ID, intent);

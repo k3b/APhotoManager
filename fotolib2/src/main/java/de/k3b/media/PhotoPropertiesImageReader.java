@@ -50,7 +50,7 @@ import de.k3b.io.VISIBILITY;
 import de.k3b.io.filefacade.IFile;
 
 /**
- * com.drewnoakes:metadata-extractor based reader for image meta data files
+ * com.drewnoakes:metadata-extractor based readonly reader for image meta data files with support for exif,iptc,xmp
  * Created by k3b on 27.03.2017.
  */
 
@@ -100,6 +100,10 @@ public class PhotoPropertiesImageReader implements IPhotoProperties, IPhotoPrope
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     * implements interface {link IPhotoPropertyFileReader}
+     */
     @Override
     public IPhotoProperties load(IFile jpgFile, IPhotoProperties childProperties, String dbg_context) {
         try {

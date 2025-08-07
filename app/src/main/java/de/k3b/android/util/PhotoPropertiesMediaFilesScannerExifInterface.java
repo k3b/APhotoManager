@@ -33,6 +33,7 @@ import de.k3b.io.filefacade.IFile;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesImageReader;
+import de.k3b.media.PhotoPropertiesUtil;
 
 /**
  * PhotoPropertiesMediaFilesScanner based on android ExifInterface.
@@ -51,7 +52,9 @@ public class PhotoPropertiesMediaFilesScannerExifInterface extends PhotoProperti
     protected IPhotoProperties loadNonMediaValues(ContentValues destinationValues, IFile jpgFile, IPhotoProperties xmpContent) {
         ExifInterfaceEx exif = null;
         try {
-            exif = ExifInterfaceEx.create(jpgFile, null, xmpContent, "PhotoPropertiesMediaFilesScannerExifInterface.loadNonMediaValues");
+            String absoluteJpgPath = jpgFile == null ? null : jpgFile.getAbsolutePath();
+            exif = PhotoPropertiesUtil.factory().createExifInterface().loadAttributes(null, jpgFile, absoluteJpgPath, xmpContent, "PhotoPropertiesMediaFilesScannerExifInterface.loadNonMediaValues");
+
             if (!exif.isValidJpgExifFormat()) exif = null;
         } catch (IOException ex) {
             // exif is null
@@ -69,7 +72,7 @@ public class PhotoPropertiesMediaFilesScannerExifInterface extends PhotoProperti
     public IGeoPointInfo getPositionFromFile(String absoluteJpgPath, String id) {
         ExifInterfaceEx exif = null;
         try {
-            exif = ExifInterfaceEx.create(absoluteJpgPath, null, null, "PhotoPropertiesMediaFilesScannerExifInterface.getPositionFromFile");
+            exif = PhotoPropertiesUtil.factory().createExifInterface().loadAttributes(null, null, absoluteJpgPath, null, "PhotoPropertiesMediaFilesScannerExifInterface.getPositionFromFile");
             if (!exif.isValidJpgExifFormat()) exif = null;
         } catch (IOException ex) {
             // exif is null

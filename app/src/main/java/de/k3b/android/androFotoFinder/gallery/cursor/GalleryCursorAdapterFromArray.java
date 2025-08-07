@@ -35,8 +35,7 @@ import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItemIds;
 import de.k3b.io.filefacade.IFile;
-import de.k3b.media.ExifInterfaceEx;
-import de.k3b.media.PhotoPropertiesUtil;
+import de.k3b.media.PhotoPropertiesBulkUpdateService;
 
 /**
  * Created by k3b on 30.05.2016.
@@ -113,8 +112,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
             holder.url =  fullPhotoPathFromArray.getAsUriString();
             IFile file = fullPhotoPathFromArray;
 
-            int rotationAngle = ExifInterfaceEx.getOrientationId(fullPhotoPathFromArray);
-            rotationAngle = PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(rotationAngle, rotationAngle);
+            int rotationAngle = PhotoPropertiesBulkUpdateService.getRotationFromExifOrientation(file,null);
             holder.image.setRotation(rotationAngle);
 
             Bitmap bitmap = HugeImageLoader.loadImage(file, 32, 32);

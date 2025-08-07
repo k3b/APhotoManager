@@ -252,6 +252,10 @@ public class PhotoPropertiesXmpSegment extends XmpSegment
         return xmpContent;
     }
 
+    /**
+     * {@inheritDoc}
+     * implements interface {link IPhotoPropertyFileReader}
+     */
     @Override
     public IPhotoProperties load(IFile jpgFile, IPhotoProperties ignore, String dbg_context) {
         return loadXmpSidecarContentOrNull(jpgFile, dbg_context);

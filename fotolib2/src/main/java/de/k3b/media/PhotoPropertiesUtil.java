@@ -460,5 +460,24 @@ public class PhotoPropertiesUtil {
         return result;
     }
 
+    /** factory to create an ExifInterface */
+    private static ExifInterfaceFactory factory = null;
+    /** factory to create an ExifInterface.
+     * All instances of {@link ExifInterfaceExImpl} should be created through this factory method.
+     * <p>
+     * Use {@link #setFactory(ExifInterfaceFactory)} if you want to use a derived class
+     * of {@link ExifInterfaceExImpl} globally.
+    */
+    public static ExifInterfaceFactory factory() {
+        if (PhotoPropertiesUtil.factory == null) {
+            PhotoPropertiesUtil.factory = ExifInterfaceExImpl.factory();
+        }
+        return PhotoPropertiesUtil.factory;
+    }
+
+    /** factory to create an ExifInterface from file or stream */
+    public static void setFactory(ExifInterfaceFactory factory) {
+        PhotoPropertiesUtil.factory = factory;
+    }
 
 }

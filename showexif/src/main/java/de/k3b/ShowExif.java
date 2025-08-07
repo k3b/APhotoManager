@@ -22,10 +22,10 @@ import java.io.IOException;
 
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
-import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.MediaFormatter;
 import de.k3b.media.PhotoPropertiesFormatter;
+import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.media.PhotoPropertyFileReader;
 
 /** simple commandline tool to show  */
@@ -58,7 +58,7 @@ public class ShowExif {
             final IFile file = FileFacade.convert(dbg_context, fileName);
             IPhotoProperties jpg = photoPropertyFileReader.load(file, null, dbg_context);
 
-            IPhotoProperties exif = ExifInterfaceEx.create(file, null, photoPropertyFileReader.getXmp(), dbg_context);
+            IPhotoProperties exif = PhotoPropertiesUtil.factory().createExifInterface().loadAttributes(null, file, fileName, photoPropertyFileReader.getXmp(), dbg_context);
 
             // PhotoPropertiesImageReader jpg = new PhotoPropertiesImageReader().load(fileName, xmp, dbg_context);
             show(jpg, debug);

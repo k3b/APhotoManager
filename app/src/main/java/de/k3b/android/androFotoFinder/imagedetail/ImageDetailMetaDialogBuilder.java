@@ -46,6 +46,7 @@ import de.k3b.io.XmpFile;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.PhotoPropertiesImageReader;
+import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.media.XmpSegment;
 
 /**
@@ -253,19 +254,18 @@ public class ImageDetailMetaDialogBuilder {
 
     private static void appendExifInfoFromFile_android(Activity context, StringBuilder builder, IFile filepath, Uri imageUri) throws IOException {
         Object fileId = filepath;
-        ExifInterfaceEx exif = null;
+        ExifInterfaceEx exif = PhotoPropertiesUtil.factory().createExifInterface();
         if (filepath != null && filepath.exists()) {
-            exif = ExifInterfaceEx.create(filepath, null, null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
+            exif.loadAttributes(null, filepath, filepath.getAbsolutePath(), null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
         } else if (imageUri != null) {
             fileId = imageUri;
-            exif = ExifInterfaceEx.create(
-                    (IFile) null,
-                    context.getContentResolver().openInputStream(imageUri),
-                    null, "ImageDetailMetaDialogBuilder.getExifInfo_android(" +
+            exif.loadAttributes(
+                    context.getContentResolver().openInputStream(imageUri), (IFile) null,
+                    null,null, "ImageDetailMetaDialogBuilder.getExifInfo_android(" +
                             imageUri + ")");
         }
 
-        if (exif != null) {
+        if (exif.isValidJpgExifFormat()) {
             builder.append(NL).append(line).append(NL);
             appendFileMessage(builder, fileId, NL);
             if (exif.isValidJpgExifFormat()) builder.append(exif.getDebugString(NL));

@@ -36,7 +36,7 @@ import de.k3b.io.filefacade.IFile;
 import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
- * apply meta data changes to one ore more jpg and/or xmp file and log.
+ * apply meta data changes to one or more jpg and/or xmp file and log.
  *
  * Created by k3b on 25.08.2015.
  */
@@ -243,10 +243,12 @@ public class PhotoPropertiesBulkUpdateService {
      */
     public static int getRotationFromExifOrientation(IFile file, InputStream inputStream) {
         try {
-            ExifInterfaceEx exif = ExifInterfaceEx.create(file, inputStream, null, "getRotationFromExifOrientation");
-            if (exif.isValidJpgExifFormat()) {
+            ExifInterfaceEx exif = PhotoPropertiesUtil.factory().createExifInterface();
+            String absoluteJpgPath = file == null ? null : file.getAbsolutePath();
+            exif.loadAttributes(null, file, absoluteJpgPath, null, "getRotationFromExifOrientation");
 
-                return PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0), 0);
+            if (exif.isValidJpgExifFormat()) {
+                return PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(exif.getOrientationId(), 0);
             }
         }
         catch (Exception e) {

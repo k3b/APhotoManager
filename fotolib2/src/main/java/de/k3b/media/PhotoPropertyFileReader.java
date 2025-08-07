@@ -40,6 +40,10 @@ public class PhotoPropertyFileReader implements IPhotoPropertyFileReader {
     public PhotoPropertyFileReader() {
     }
 
+    /**
+     * {@inheritDoc}
+     * Implements interface {@link IPhotoPropertyFileReader}
+     */
     @Override
     public IPhotoProperties load(IFile jpgFile, IPhotoProperties childProperties, String dbg_context) {
         // PhotoPropertiesXmpSegment xmp = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(jpgFile, dbg_context);

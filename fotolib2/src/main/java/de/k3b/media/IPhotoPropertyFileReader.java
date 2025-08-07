@@ -25,5 +25,11 @@ import de.k3b.io.filefacade.IFile;
  * A Class that is capable to read {@link IPhotoProperties} from an {@link IFile}
  */
 public interface IPhotoPropertyFileReader {
+    /**
+     * @param jpgFile the file where data is read from
+     * @param childProperties null or additional properties (i.e. from external xmp file).
+     * @param dbg_context used log output: why IFile was loaded
+     * @return loaded properties from jpgFile or null if there is an error or the file has no meta data.
+     */
     IPhotoProperties load(IFile jpgFile, IPhotoProperties childProperties, String dbg_context);
 }

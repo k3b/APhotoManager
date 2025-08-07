@@ -55,7 +55,7 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
 
     @Test
     public void emptyWriteEmptyExifXmpCreate() throws IOException {
-        ExifInterfaceEx.fixDateOnSave = false;
+        ExifInterfaceExImpl.fixDateOnSave = false;
 
         IFile out = OUTDIR.createFile("emptyWriteEmptyExifXmpCreate.jpg");
         TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_NO_EXIF, out);
@@ -76,14 +76,14 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
         // System.out.printf(sut.toString());
         // logger.info(sut.toString());
 
-        ExifInterfaceEx.fixDateOnSave = true;
+        ExifInterfaceExImpl.fixDateOnSave = true;
     }
 
     @Test
     public void existingWriteEmptyExifXmp() throws IOException {
         // workaround UserComment=null is not implemented
-        ExifInterfaceEx.useUserComment = false;
-        ExifInterfaceEx.fixDateOnSave = false;
+        ExifInterfaceExImpl.useUserComment = false;
+        ExifInterfaceExImpl.fixDateOnSave = false;
 
         IFile out = OUTDIR.createFile("existingWriteEmptyExifXmp.jpg");
         TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_EXIF, out);
@@ -105,8 +105,8 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
 
         sut.save("JUnit");
         assertEqual(out, empty, empty, sut);
-        ExifInterfaceEx.useUserComment = true;
-        ExifInterfaceEx.fixDateOnSave = true;
+        ExifInterfaceExImpl.useUserComment = true;
+        ExifInterfaceExImpl.fixDateOnSave = true;
     }
 
     @Test

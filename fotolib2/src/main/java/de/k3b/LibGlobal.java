@@ -60,4 +60,7 @@ public class LibGlobal extends LibGlobalFile {
 
     /** progressbar advances after processing x photos */
     public static final int itemsPerProgress = 10;
+
+    /** make debugging easier by avoiding async processing */
+    public static final boolean debugAvoidAsync = false;
 }
