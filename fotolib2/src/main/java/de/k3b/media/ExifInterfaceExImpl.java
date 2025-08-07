@@ -44,8 +44,8 @@ import de.k3b.io.filefacade.IFile;
 import de.k3b.media.MediaFormatter.FieldID;
 
 /**
- * Thin Wrapper around Android-s ExifInterface to read/write exif data as {@link IPhotoProperties}
- * from jpg {@link java.io.File} or {@link IFile}
+ * Thin Wrapper around Android6-s ExifInterface to read/write exif data as {@link IPhotoProperties}
+ * from jpg {@link InputStream} or {@link IFile}
  * <p>
  * Created by k3b on 08.10.2016.
  */

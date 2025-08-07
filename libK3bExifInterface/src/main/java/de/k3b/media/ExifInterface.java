@@ -69,7 +69,7 @@ import de.k3b.io.filefacade.IFile;
  * ** android.util.Log is replaced by org.slf4j.Logger
  * * java native code only, no jini
  * * added microsoft exiftags: TAG_WIN_xxxxx
- * * can be made compatible with android-Documentfile through IFile interface.
+ * * can be made compatible with android-Documentfile through the new IFile interface.
  *
  * <p>
  * Since using java.io.File is heavily restricted in Android it uses de.k3b.io.filefacade.IFile
