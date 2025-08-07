@@ -794,7 +794,8 @@ public class ExifInterface {
      * Reads Exif tags from the specified image file.
      */
     public ExifInterface(IFile jpgFile) throws IOException {
-        loadAttributes(null, jpgFile, jpgFile.getAbsolutePath());
+        String absoluteJpgPath = jpgFile == null ? null : jpgFile.getAbsolutePath();
+        loadAttributes(null, jpgFile, absoluteJpgPath);
     }
 
     private boolean validJpgExifFormat = true;
