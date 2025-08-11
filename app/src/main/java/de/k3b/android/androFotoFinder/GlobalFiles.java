@@ -11,25 +11,25 @@ public class GlobalFiles extends Global {
     // is null for android-10 or later
     private static final File externalStorageDirectory = getExternalStorageDirectory();
     /**
-     * defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from.
+     * defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. Modified via Settings activity.
      */
     public static IFile reportDir = (externalStorageDirectory == null)
             ? null
             : FileFacade.convert("Global reportDir", new File(externalStorageDirectory, "databases/sql"));
     /**
-     * defines the filesystem's directory where crash reports are written to.
+     * defines the filesystem's directory where crash reports are written to. Modified via Settings activity.
      */
     public static File logCatDir = (externalStorageDirectory == null)
             ? null
             : new File(Environment.getExternalStorageDirectory(), "copy/log");
     /**
-     * #60 where osm-mapsforge-offline-maps (*.map) are found. defaults to /extDir/osmdroid/
+     * #60 where osm-mapsforge-offline-maps (*.map) are found. defaults to /extDir/osmdroid/. Modified via Settings activity.
      */
     public static File mapsForgeDir = (externalStorageDirectory == null)
             ? null
             : new File(Environment.getExternalStorageDirectory(), "osmdroid");
     /**
-     * remember last picked geo-s
+     * remember last picked geo-s. Modified via Settings activity.
      */
     public static File pickHistoryFile = null; // initialized in app.onCreate with local database file
 

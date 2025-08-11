@@ -45,7 +45,9 @@ import de.k3b.io.filefacade.FileFacade;
  */
 public class DocumentFileTranslator {
     public static final String TAG = "k3b.DocFileTranslator";
-    public static final boolean debugLogSAFCache = true;
+
+    /** true means verbose log DocumentFileTranslator */
+    public static final boolean debugLogSAFCache = false;
 
     // used by android.support.v4.provider.DocumentFileEx
     public static final String TAG_DOCFILE = "DocumentFileEx";
@@ -163,15 +165,12 @@ public class DocumentFileTranslator {
 
     private DocumentFileEx getFromDirCache(String debugContext, File fileOrDir, boolean isDir) {
         DocumentFileEx result = getDirCache().get(fileOrDir);
-        if (result == null && DocumentFileTranslator.debugLogSAFCache) {
-            Log.i(FileFacade.LOG_TAG,
-                    ((debugContext == null) ? "" : debugContext)
+        logProgress(((debugContext == null) ? "" : debugContext)
                             + this.getClass().getSimpleName()
-                            + ".getFromCache(" + fileOrDir
+                            + ".getFromDirCache(" + fileOrDir
                             + ",dir=" + isDir
-                            + ") ==> failed");
+                            + ") ==> " + result);
 
-        }
         return result;
     }
 
@@ -180,11 +179,10 @@ public class DocumentFileTranslator {
      */
     private DocumentFileTranslator add2DirCache(String debugContext, File directory, DocumentFileEx documentFileDir) {
         if ((documentFileDir != null) && documentFileDir.isDirectory()) {
-            if (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache) {
-                Uri uri = (documentFileDir != null) ? documentFileDir.getUri() : null;
-                Log.d(TAG, mDebugPrefix + "dirCache.put(" + directory +
+            Uri uri = (documentFileDir != null) ? documentFileDir.getUri() : null;
+            logProgress( mDebugPrefix + " add2DirCache dirCache.put(" + directory +
                         " -> " + uri + ") because of " + debugContext);
-            }
+
             getDirCache().put(directory, documentFileDir);
         }
         return this;
@@ -207,6 +205,9 @@ public class DocumentFileTranslator {
     private DocumentFileEx findFile(String debugContext, DocumentFileEx parentDoc, File fileOrDir, boolean isDir) {
         String displayName = fileOrDir.getName();
         File parentFile = fileOrDir.getParentFile();
+        String debugContextLocal = debugContext + " " + this.getClass().getSimpleName() + ".findFile(parentDoc='" + parentDoc + "', file ='" +
+                fileOrDir + "', isDir=" + isDir + ", displayName='" + displayName + "')";
+
         if (isDir) {
             // The original parentDoc.findFile(fileOrDir.getName()) is implemented
             // as expensive, frequent called parentDoc.listFiles().
@@ -216,14 +217,19 @@ public class DocumentFileTranslator {
                 String childDocName = childDoc.getName();
                 if (foundDoc == null && displayName.equals(childDocName)) {
                     foundDoc = childDoc;
-                }
-                if (childDoc.isDirectory()) {
-                    add2DirCache(debugContext + " findFile ", new File(parentFile, childDocName), foundDoc);
+                    logProgress(debugContextLocal + " found " + foundDoc);
+                } else if (childDoc.isDirectory()) {
+                    add2DirCache(debugContext + " found dir ", new File(parentFile, childDocName), childDoc);
                 }
             }
+
+            if (foundDoc == null) {
+                logProgress(debugContextLocal + " not found found in parentFile " + parentFile);
+            }
+
             return foundDoc;
         } else {
-            return documentFileCache.findFile(debugContext + " findFile ", parentDoc, parentFile, displayName);
+            return documentFileCache.findFile(debugContextLocal + " documentFileCache.findFile ", parentDoc, parentFile, displayName);
         }
     }
 
@@ -234,27 +240,38 @@ public class DocumentFileTranslator {
      */
     public DocumentFileEx getOrCreateDirectory(String debugContext, File directory) {
         DocumentFileEx result = null;
+        String debugContextLocal = debugContext + " " + this.getClass().getSimpleName() + ".getOrCreateDirectory('" + directory + "')";
         if (directory != null) {
             result = getFromDirCache(debugContext, directory, true);
             if (result == null) {
-                DocumentFileEx parent = getOrCreateDirectory(debugContext, directory.getParentFile());
+                logProgress(debugContextLocal + " not found. recurse  ");
+                DocumentFileEx parent = getOrCreateDirectory(debugContext+"-r", directory.getParentFile());
                 if ((parent != null) && parent.isDirectory()) {
                     result = findFile(debugContext, parent, directory, true);
 
                     if (result == null) {
-                        if ((Global.android_DocumentFile_find_cache && FileFacade.debugLogSAFFacade) || DocumentFileTranslator.debugLogSAFCache) {
-                            Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
-                                    + " CreateDirectory: enableCache(false)");
-                        }
-
-                        Global.android_DocumentFile_find_cache = false;
+                        // ??? disable on error
+                        // Global.android_DocumentFile_find_cache = false;
                         result = parent.createDirectory(directory.getName());
-                        add2DirCache(debugContext + " created dir ", directory, result);
+                        add2DirCache(debugContext + " created dir getOrCreateDirectory ", directory, result);
                     }
                 }
             }
+
         }
+        debugContextLocal += ": found " + result;
+        logProgress(debugContextLocal);
         return result;
+    }
+
+    /**
+     * execute progress loggining (if enabled)
+     * @param debugContext log message
+     */
+    private static void logProgress(String debugContext) {
+        if (FileFacade.debugLogSAFFacade || Global.android_DocumentFile_find_cache || DocumentFileTranslator.debugLogSAFCache) {
+            Log.i(FileFacade.LOG_TAG, debugContext);
+        }
     }
 
     /**
@@ -345,9 +362,7 @@ public class DocumentFileTranslator {
         public Root(Context context) {
             this.context = context.getApplicationContext();
             loadFromPrefs();
-            if (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache) {
-                Log.i(TAG, "DocumentFileTranslator.Root.loaded(" + this + ")");
-            }
+            logProgress("DocumentFileTranslator.Root.loaded(" + this + ")");
         }
 
         protected void loadFromPrefs() {
@@ -408,10 +423,7 @@ public class DocumentFileTranslator {
                 Log.e(TAG, "err saveToPrefs(" + dir2uri + ")", ex);
             } finally {
                 edit.commit();
-                if (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache) {
-                    Log.i(TAG, "DocumentFileTranslator.Root.saveToPrefs(" + this + ")");
-                }
-
+                logProgress("DocumentFileTranslator.Root.saveToPrefs(" + this + ")");
             }
         }
 
@@ -445,9 +457,7 @@ public class DocumentFileTranslator {
             saveToPrefs();
             loadFromPrefs();
             invalidateDirCache(null);
-            if (FileFacade.debugLogSAFFacade || DocumentFileTranslator.debugLogSAFCache) {
-                Log.i(TAG, "DocumentFileTranslator.Root.clearCache(" + before + "->" + this + ")");
-            }
+            logProgress("DocumentFileTranslator.Root.clearCache(" + before + "->" + this + ")");
         }
     }
 }

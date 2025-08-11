@@ -97,7 +97,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
         prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
-        prefs.putBoolean("debugLogFacade", FileFacade.debugLogSAFFacade);
+        prefs.putBoolean("debugLogSAFFacade", FileFacade.debugLogSAFFacade);
 
         prefs.putBoolean("locked", Global.locked);
         prefs.putString("passwordHash", Global.passwordHash);
@@ -171,7 +171,7 @@ public class SettingsActivity extends PreferenceActivity {
         LibGlobal.preferLongXmpFormat       = getPref(prefs, "xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
         Global.mapsForgeEnabled = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
-        FileFacade.debugLogSAFFacade = getPref(prefs, "debugLogFacade", FileFacade.debugLogSAFFacade);
+        FileFacade.debugLogSAFFacade = getPref(prefs, "debugLogSAFFacade", FileFacade.debugLogSAFFacade);
 
         Global.imageDetailThumbnailIfBiggerThan = getPref(prefs, "imageDetailThumbnailIfBiggerThan", Global.imageDetailThumbnailIfBiggerThan);
 

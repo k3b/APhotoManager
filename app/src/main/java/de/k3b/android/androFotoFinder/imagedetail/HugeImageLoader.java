@@ -26,7 +26,7 @@ public class HugeImageLoader {
     // public to allow crash-report to filter logcat for this
     public static final String LOG_TAG = "HugeImageLoader";
 
-    // public to allow customer settings-activity to change this
+    /** public to allow customer settings-activity to change this. Modified via Settings activity. */
     public static boolean DEBUG = false; //!!! Log.isLoggable(LOG_TAG, Log.DEBUG);
 
     @TargetApi(Build.VERSION_CODES.FROYO)

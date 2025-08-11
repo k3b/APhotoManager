@@ -61,10 +61,12 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
     static final int EDGE_LEFT = 0;
     static final int EDGE_RIGHT = 1;
     static final int EDGE_BOTH = 2;
-    // let debug flag be dynamic, but still Proguard can be used to remove from
-    // release builds
-    // contoll logging via LogManager.setDebugEnabled(boolean enabled);
-    // public to allow customer settings-activity to change this
+    /* let debug flag be dynamic, but still Proguard can be used to remove from
+        release builds
+        contoll logging via LogManager.setDebugEnabled(boolean enabled);
+        public to allow customer settings-activity to change this
+        Modified via Settings activity.
+     */
     public static boolean DEBUG = true; //!!! Log.isLoggable(LOG_TAG, Log.DEBUG);
     static int SINGLE_TOUCH = 1;
     /**

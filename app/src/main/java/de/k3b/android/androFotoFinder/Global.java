@@ -59,31 +59,40 @@ public class Global {
 
     /** #64: {@link Global#showEditChooser} : true => open editor via chooser. false: donot present chooser */
     public static boolean showEditChooser = false;
+
+    /** Modified via Settings activity. */
     public static boolean debugEnabled = false;
+    /** Modified via Settings activity. */
     public static boolean debugEnabledViewItem = false;
+    /** Modified via Settings activity. */
     public static boolean debugEnabledSql = false;
+    /** Modified via Settings activity. */
     public static boolean debugEnabledMap = false;
+    /** Modified via Settings activity. */
     public static boolean debugEnabledMemory = false;
+    /** Modified via Settings activity. */
     public static boolean locked = false; // true: modification is password-locked
+    /** Modified via Settings activity. */
     public static String passwordHash = ""; // password to unlock
 
-    /** The maximum number of **Blue selection markers** in the [Geographic-Map](geographic-map). */
+    /** The maximum number of **Blue selection markers** in the [Geographic-Map](geographic-map). Modified via Settings activity. */
     public static int maxSelectionMarkersInMap = 255;
 
     /** #53, #83 if image-width-height is bigger than this show thumbnail in image detail view.
-     * (memoryefficient, fast, but low-quality). -1: default to screenresolution */
+     * (memoryefficient, fast, but low-quality). -1: default to screenresolution. Modified via Settings activity. */
     public static int imageDetailThumbnailIfBiggerThan = -1;
 
-    /** where thumbnails are strored. defaults to /extDir/DCIM/.thumbCache */
+    /** where thumbnails are strored. defaults to /extDir/DCIM/.thumbCache. Modified via Settings activity.  */
     public static File thumbCacheRoot = null;
 
-    /** defines the [Image-View's](Image-View) timing of menu command **slideshow** */
+    /** defines the [Image-View's](Image-View) timing of menu command **slideshow**. Modified via Settings activity. */
     public static int slideshowIntervalInMilliSecs = 1500;
 
-    /** defines the timespan after which the [Image-View's](Image-View) ActionBar is hidden */
+    /** defines the timespan after which the [Image-View's](Image-View) ActionBar is hidden. Modified via Settings activity. */
     public static int actionBarHideTimeInMilliSecs = 2000;
 
-    /** If checked [multi selection mode](Gallery-View#Multiselection) in [Gallery-View](Gallery-View) is canceled after a command from Actionbar or Menu */
+    /** If checked [multi selection mode](Gallery-View#Multiselection) in [Gallery-View](Gallery-View) is
+     * canceled after a command from Actionbar or Menu. Modified via Settings activity. */
     public static boolean clearSelectionAfterCommand = false;
 
     /** true update only if media scanner is not running. false=risky=always allow.  */
@@ -97,6 +106,7 @@ public class Global {
 
     public static final String reportExt = ".query";
 
+    /** Modified via Settings activity. */
     public static int pickHistoryMax = 25;
 
     /**
@@ -123,8 +133,9 @@ public class Global {
         public static final boolean enableXmpNone = enableIptcMediaScanner && true;
     }
 
-    /** #26 which image resolution should the "non zoomed imageView" have? */
+    /** #26 which image resolution should the "non zoomed imageView" have? Modified via Settings activity. */
     public static boolean initialImageDetailResolutionHigh = false; // false: MediaStore.Images.Thumbnails.MINI_KIND; true: FULL_SCREEN_KIND;
+    /** Modified via Settings activity. */
     public static boolean mapsForgeEnabled = false;
 
     // #153: Feature-Toggel: set to false while rename multible is not implemented completely
@@ -135,7 +146,7 @@ public class Global {
     // #169 Android SAF DocumentFileEx performance improvements fast find.
     // automatically Disabled, if there are saf-Write operations
     // automatically Enabled, if there are listFiles or listDirs
-    public static boolean android_DocumentFile_find_cache = true;
+    public static boolean android_DocumentFile_find_cache = false;
 
     /**
      * map with blue selection markers: how much to area to increase

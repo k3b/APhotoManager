@@ -26,24 +26,24 @@ import de.k3b.io.filefacade.IFile;
  * Created by k3b on 03.03.2016.
  */
 public class LibGlobal extends LibGlobalFile {
-    /** if debugEnabledJpg jpg files (copy/move/delete/exif) */
+    /** if debugEnabledJpg jpg files (copy/move/delete/exif) . Modified via Settings activity. */
     public static boolean debugEnabledJpg = false;
 
-    /** if debugEnabledJpgMetaIo debug read/write jpg/exif/iptc/xmp io */
+    /** if debugEnabledJpgMetaIo debug read/write jpg/exif/iptc/xmp io. Modified via Settings activity.  */
     public static boolean debugEnabledJpgMetaIo = false;
 
     /** datePickerUseDecade true add decade in date picker */
     public static boolean datePickerUseDecade = false;
 
-    /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  */
+    /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  Modified via Settings activity. */
     public static boolean renamePrivateJpg = true;
 
-    /** #84 true: file.jpg.xmp; false: file.xmp.  */
+    /** #84 true: file.jpg.xmp; false: file.xmp. Modified via Settings activity. */
     public static boolean preferLongXmpFormat = false;
 
     public static boolean visibilityShowPrivateByDefault = false;
 
-    /** defines the filesystem's directory where zip file definitions are stored.  */
+    /** defines the filesystem's directory where zip file definitions are stored. Modified via Settings activity.  */
     public static IFile zipFileDir = null;
 
     /** strategy config how to read/write meta data: (J)pg, (X)mp, (C)reate. Global to allow changing these via a settings dialog */

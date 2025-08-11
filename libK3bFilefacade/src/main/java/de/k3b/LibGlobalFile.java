@@ -25,7 +25,7 @@ public class LibGlobalFile {
     public static final String LOG_TAG = "k3bLibFileFacade";
 
     /**
-     * Global.xxxxx. Non final values may be changed from outside (SettingsActivity or commandline parameter)
+     * Global.xxxxx. Non final values may be changed from outside (SettingsActivity or commandline parameter) Modified via Settings activity.
      */
     public static boolean debugEnabled = false;
 

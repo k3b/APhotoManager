@@ -43,7 +43,10 @@ import de.k3b.io.FileUtilsBase;
 public class FileFacade implements IFile {
     public static final String LOG_TAG = "k3b.FileFacade";
     private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
+
+    /** modified via Settings activity. if true verbose logging of SAF-Facade. Modified via Settings activity. */
     public static boolean debugLogSAFFacade = false;
+
     private static Converter<File, IFile> fileFacade = new Converter<File, IFile>() {
         @Override
         public IFile convert(String dbgContext, File file) {
