@@ -6,6 +6,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+
+import de.k3b.io.StringUtils;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.ExifInterfaceFactory;
 import java.io.IOException;
 import java.io.InputStream;
@@ -115,6 +119,7 @@ public class ExifInterfaceExAndroidImpl extends ExifInterfaceExtended implements
     }
 
     /**
+     * {@inheritDoc}
      * Read the image without tag data from inFile and save image plus tag data into the outFile image file.
      * <p>
      * This method is supported for JPEG, PNG, and WebP formats.
@@ -131,13 +136,15 @@ public class ExifInterfaceExAndroidImpl extends ExifInterfaceExtended implements
      * "Extensions to the PNG 1.2 Specification, Version 1.5.0".
      */
     @Override
-    public void saveAttributes(File inFile, File outFile, boolean deleteInFileOnFinish) throws IOException {
+    public void saveAttributes(IFile inFile, IFile outFile, boolean deleteInFileOnFinish, Boolean hasXmp) throws IOException {
         if (inFile == null || outFile == null || inFile.equals(outFile)) {
             throw new IOException(
                     "ExifInterface does not support saving attributes for the current input.");
         }
         try {
-            super.saveAttributes(new FileInputStream(inFile), new FileOutputStream(outFile));
+            fixDateTakenIfNeccessary();
+
+            super.saveAttributes(inFile.openInputStream(), outFile.openOutputStream());
             if (deleteInFileOnFinish) {
                 inFile.delete();
             }
@@ -405,12 +412,16 @@ public class ExifInterfaceExAndroidImpl extends ExifInterfaceExtended implements
         return this;
     }
 
-    public static int getOrientationId(String fullPath) {
-        try {
-            return PhotoPropertiesUtil.factory().createExifInterface(fullPath, null, null, "getOrientationId").getOrientationId();
-        } catch (IOException e) {
-        }
-        return 0;
+    /**
+     * {@inheritDoc}
+     * @param inputStream
+     * @param outputStream
+     * @param thumbnail
+     * @throws IOException
+     */
+    @Override
+    public void saveJpegAttributes(InputStream inputStream, OutputStream outputStream, byte[] thumbnail) throws IOException {
+        saveAttributes(inputStream,outputStream);
     }
 
     /** return the image orinentation as id (one of the ORIENTATION_ROTATE_XXX constants) */
@@ -478,6 +489,56 @@ public class ExifInterfaceExAndroidImpl extends ExifInterfaceExtended implements
     @Override
     public String toString() {
         return PhotoPropertiesFormatter.format(this).toString();
+    }
+
+
+    /**
+     * {@inheritDoc}
+     * implements interface {link IPhotoPropertyFileReader}
+     */
+    @Override
+    public IPhotoProperties load(IFile jpgFile, IPhotoProperties childProperties, String dbg_context) {
+        try {
+            final String absolutePath = (jpgFile != null) ? jpgFile.getAbsolutePath() : null;
+            return loadAttributes(null, jpgFile, absolutePath, childProperties, dbg_context);
+        } catch (IOException e) {
+            if (LibGlobal.debugEnabledJpgMetaIo) {
+                logger.info(StringUtils.appendMessage(
+                        dbg_context, getClass().getSimpleName(), "load failed",
+                        jpgFile, e.getMessage()).toString(), e);
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Reads Exif tags from the specified source.
+     *
+     * @param in              if not null: input stream where data comes from
+     * @param jpgFile         if not null: input IFile where data comes from
+     * @param absoluteJpgPath
+     * @param xmpExtern       if not null content of xmp sidecar file
+     * @param dbg_context     info for debug log why attributes are loaded.
+     * @return
+     * @throws IOException
+     */
+    @Override
+    public ExifInterfaceEx loadAttributes(InputStream in, IFile jpgFile, String absoluteJpgPath, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
+        IFile mExifFile = (jpgFile != null)
+                ? jpgFile
+                : (absoluteJpgPath != null)
+                ? FileFacade.convert(dbg_context, absoluteJpgPath)
+                : null;
+
+        setPath(absoluteJpgPath);
+        if (in != null) {
+            loadAttributes(in);
+            return this;
+        } else if (mExifFile != null) {
+            loadAttributes(mExifFile.openInputStream());
+            return this;
+        }
+        return null;
     }
 
 

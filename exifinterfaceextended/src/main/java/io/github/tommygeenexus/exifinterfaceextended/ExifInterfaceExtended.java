@@ -4510,7 +4510,7 @@ public class ExifInterfaceExtended {
      * This function decides which parser to read the image data according to the given input stream
      * type and the content of the input stream.
      */
-    private void loadAttributes(@NonNull InputStream in) {
+    protected void loadAttributes(@NonNull InputStream in) {
         ExifInterfaceExtendedUtils.requireNonNull(in, "inputstream shouldn't be null");
         try {
             // Initialize mAttributes.
@@ -4762,7 +4762,7 @@ public class ExifInterfaceExtended {
         }
         if (in == null || out == null) {
             throw new IOException(
-                    "ExifInterface does not support saving attributes for the current input.");
+                    "ExifInterface does not support saving attributes for the current input/output null.");
         }
         if (mHasThumbnail && mHasThumbnailStrips && !mAreThumbnailStripsConsecutive) {
             throw new IOException("ExifInterface does not support saving attributes when the image "

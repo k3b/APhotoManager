@@ -9,7 +9,7 @@ apply plugin: 'ch.raffael.pegdown-doclet'
 
 
 android {
-    compileSdkVersion = 30
+    compileSdkVersion = 34
 
     defaultConfig {
         // fdroid-release 'de.k3b.android.androFotoFinder'
@@ -19,14 +19,14 @@ android {
 
         minSdkVersion 14		// Android 4.0 Ice Cream Sandwich (API 14); Android 4.4 KitKat (API 19);  Android 5.0 Lollipop (API 21); 
 								// Android 6.0 Marshmallow (API 23); Android 7.0 Nougat (API 24)
-        // maxSdkVersion 28        // #155: android-10=api29
+        // maxSdkVersion 28        //!!! #155: android-10=api29
 
         /* from https://developer.android.com/training/data-storage/shared/media
             If your app targets Android 10 (API level 29) or higher, in order for your app
             to retrieve unredacted Exif metadata from photos, you need to declare the ACCESS_MEDIA_LOCATION
             permission in your app's manifest, then request this permission at runtime.
         * */
-        targetSdkVersion 29  // Android 6.0 Marshmallow (API 23) below compileSdkVersion to enamble more backward-compatibility
+        // targetSdkVersion 29  // Android 6.0 Marshmallow (API 23) below compileSdkVersion to enamble more backward-compatibility
 
 		// Releases on f-droid
         // unfortunately fdroid needs magic numbers to detect version infos
@@ -62,10 +62,11 @@ android {
         // 0.8.1.200212 (45)    Theme Support
         // 0.8.1.200218 (46)    Bugfix Delete Image
         // 0.8.3.200315 (47)    Bugfix Backup to zip
-        // 0.8.4.210419 (48)    SD-Card support via SAF
+        // 0.8.4.210419 (48)    SD-Card support via SAF (own branch not released on fdroid)
+        // 0.8.5.250811 (50)    replaced android-6-based ExifInterface with AndroidX-ExifInterfaceImpl-4.2 based.  (own branch not released on fdroid)
 
-        versionCode = 48
-        versionName = '0.8.4.210419'
+        versionCode = 50
+        versionName = '0.8.5.250811'
 
 		// all supported locales
 		// resConfigs "ar","de","es","fr","hi","in","it","ja","nl","pl","ro","ru","tr","uk","zz","pt-rBR","zh-rCN","zh-rTW"
@@ -77,8 +78,8 @@ android {
     // sourceSets.main.res.filter.exclude '**/res/values-de/**'
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     buildTypes {
         debug {
@@ -107,6 +108,7 @@ android {
 
         abortOnError false
     }
+    namespace 'de.k3b.android.androFotoFinder'
 }
 
 // task from https://stackoverflow.com/questions/45848521/how-to-sync-android-project-by-gradle-task/45856729#45856729

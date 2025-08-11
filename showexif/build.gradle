@@ -10,22 +10,16 @@ dependencies {
     implementation 'org.slf4j:slf4j-simple:1.7.7'
 }
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
-task fatJar(type: Jar, dependsOn: classes) {
-    manifest.attributes['Implementation-Title'] = 'shoexif'
-    manifest.attributes['Implementation-Version'] = '1.0'
-    manifest.attributes(
-            // 'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
-            'Main-Class': 'de.k3b.ShowExif'
-    )
-    classifier = 'jar-with-dependencies'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+jar {
+    manifest {
+        attributes 'Main-Class': 'de.k3b.ShowExif'
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
     exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
-    with jar
-}
-
-artifacts {
-    archives fatJar
 }
