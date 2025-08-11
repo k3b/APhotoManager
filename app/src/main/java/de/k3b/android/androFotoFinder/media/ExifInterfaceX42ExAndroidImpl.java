@@ -4,21 +4,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 
 import de.k3b.io.StringUtils;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
+import de.k3b.media.ExifInterface6ExImpl;
 import de.k3b.media.ExifInterfaceFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -27,15 +24,17 @@ import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.ExifInterfaceEx;
-import de.k3b.media.ExifInterfaceExImpl;
-import de.k3b.media.ExifInterfaceFactory;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.MediaFormatter;
 import de.k3b.media.PhotoPropertiesFormatter;
 import de.k3b.media.PhotoPropertiesUtil;
 import io.github.tommygeenexus.exifinterfaceextended.ExifInterfaceExtended;
 
-public class ExifInterfaceExAndroidImpl extends ExifInterfaceExtended implements ExifInterfaceEx{
+/**
+ * Android specific Version of {@link ExifInterface6ExImpl} that updates the
+ * Database, when saving exif changes based on AndroidX-ExifInterface-version4.2.
+ */
+public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended implements ExifInterfaceEx{
     // public to allow error filtering
     public static final String LOG_TAG = "ExifInterface";
 
@@ -75,7 +74,7 @@ public class ExifInterfaceExAndroidImpl extends ExifInterfaceExtended implements
      * @param xmpExtern if not null content of extern xmp sidecar file
      * @param dbgContext String added to the debug-output
      */
-    public ExifInterfaceExAndroidImpl(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbgContext) throws IOException {
+    public ExifInterfaceX42ExAndroidImpl(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbgContext) throws IOException {
         // super(absoluteJpgPath, in, xmpExtern, dbgContext);
         super(absoluteJpgPath, in);
 
@@ -98,14 +97,8 @@ public class ExifInterfaceExAndroidImpl extends ExifInterfaceExtended implements
         if (factory == null) {
             factory = new ExifInterfaceFactory() {
                 @Override
-                public ExifInterfaceEx createExifInterface() {
-                    return null;
-                }
-
-                /** {@inheritDoc} */
-                // @Override
-                public ExifInterfaceEx createExifInterface(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
-                    return new ExifInterfaceExAndroidImpl(absoluteJpgPath, in, xmpExtern, dbg_context);
+                public ExifInterfaceEx createExifInterface() throws IOException {
+                    return new ExifInterfaceX42ExAndroidImpl(null, null, null, null);
                 }
             };
         }

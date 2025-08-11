@@ -881,7 +881,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     private void cmdShowDetails(final CharSequence title, final IFile file, final long currentImageId) {
         if (file != null) {
             File missingRoot = getMissingRootDirFileOrNull(
-                    "ImageDetailActivityViewPager.osRenameTo", file.getFile());
+                    "ImageDetailActivityViewPager.cmdShowDetails", file.getFile());
             if (missingRoot != null) {
                 // ask for needed permissions
                 requestRootUriDialog(missingRoot, title,
@@ -1058,7 +1058,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
     private boolean onEditExif(final MenuItem menuItem, final SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
         File missingRoot = getMissingRootDirFileOrNull(
-                "ImageDetailActivityViewPager.osRenameTo", currentFoto.getFiles());
+                "ImageDetailActivityViewPager.onEditExif", currentFoto.getFiles());
         if (missingRoot != null) {
             // ask for needed permissions
             requestRootUriDialog(missingRoot, menuItem.getTitle(),

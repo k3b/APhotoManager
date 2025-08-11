@@ -34,15 +34,15 @@ import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.filefacade.IFile;
-import de.k3b.media.ExifInterfaceExImpl;
+import de.k3b.media.ExifInterface6ExImpl;
 import de.k3b.media.ExifInterfaceFactory;
 import de.k3b.media.PhotoPropertiesUtil;
 
 /**
- * Android specific Version of {@link ExifInterfaceExImpl} that updates the
- * Database, when saving exif changes.
+ * Android specific Version of {@link ExifInterface6ExImpl} that updates the
+ * Database, when saving exif changes based on Android6-s ExifInterface.
  */
-public class AndroidExifInterfaceEx extends ExifInterfaceExImpl {
+public class AndroidExifInterface6Ex extends ExifInterface6ExImpl {
     // set to true to log what happens to database-ID when changing exif
     private static final boolean DBG_RENAME_IN_DB_ENABLED = true;
 
@@ -56,8 +56,8 @@ public class AndroidExifInterfaceEx extends ExifInterfaceExImpl {
     public static void init() {
         PhotoPropertiesUtil.setFactory(new ExifInterfaceFactory() {
             @Override
-            public ExifInterfaceExImpl createExifInterface() {
-                return new AndroidExifInterfaceEx();
+            public ExifInterface6ExImpl createExifInterface() {
+                return new AndroidExifInterface6Ex();
             }
         });
     }

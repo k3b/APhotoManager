@@ -61,7 +61,7 @@ public class MediaMappingTests {
         }
     }
 
-    private class ExifInterfaceExDummy extends ExifInterfaceExImpl {
+    private class ExifInterface6ExDummy extends ExifInterface6ExImpl {
         protected boolean isEmpty(Object result, int tryNumber, String debugContext, String debugFieldName) {
             return isEmptyDbgImpl(debugResult, result, tryNumber, debugContext, debugFieldName);
         }
@@ -137,7 +137,7 @@ public class MediaMappingTests {
 
     @Test
     public void dump2ExifInterfaceExDummy() {
-        IPhotoProperties sut = new ExifInterfaceExDummy();
+        IPhotoProperties sut = new ExifInterface6ExDummy();
         dump(sut);
 
     }

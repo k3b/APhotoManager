@@ -256,16 +256,16 @@ public class ImageDetailMetaDialogBuilder {
         Object fileId = filepath;
         ExifInterfaceEx exif = PhotoPropertiesUtil.factory().createExifInterface();
         if (filepath != null && filepath.exists()) {
-            exif.loadAttributes(null, filepath, filepath.getAbsolutePath(), null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
+            exif = exif.loadAttributes(null, filepath, filepath.getAbsolutePath(), null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
         } else if (imageUri != null) {
             fileId = imageUri;
-            exif.loadAttributes(
+            exif = exif.loadAttributes(
                     context.getContentResolver().openInputStream(imageUri), (IFile) null,
                     null,null, "ImageDetailMetaDialogBuilder.getExifInfo_android(" +
                             imageUri + ")");
         }
 
-        if (exif.isValidJpgExifFormat()) {
+        if (exif != null) {
             builder.append(NL).append(line).append(NL);
             appendFileMessage(builder, fileId, NL);
             if (exif.isValidJpgExifFormat()) builder.append(exif.getDebugString(NL));

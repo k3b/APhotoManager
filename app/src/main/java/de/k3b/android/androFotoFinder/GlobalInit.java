@@ -34,11 +34,17 @@ public class GlobalInit {
 
             ThumbNailUtils.init(applicationContext, null);
 
+            setMediaImageDbReplacement(applicationContext, Global.useAo10MediaImageDbReplacement);
+
             // #60: configure some of the mapsforge settings first
             MapsForgeSupport.createInstance(applicationContext);
         }
     }
 
+    /**
+     *
+     * @param useMediaImageDbReplacement true use ao10 workaround with mirror database; false use android-contentprovider-Database
+     */
     public static void setMediaImageDbReplacement(Context context, boolean useMediaImageDbReplacement) {
         final IMediaRepositoryApi oldMediaDBApi = FotoSql.getMediaDBApi();
         if ((oldMediaDBApi == null) || (Global.useAo10MediaImageDbReplacement != useMediaImageDbReplacement)) {

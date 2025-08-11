@@ -38,7 +38,8 @@ import java.util.Date;
 import de.k3b.LibGlobal;
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
-import de.k3b.android.androFotoFinder.media.AndroidExifInterfaceEx;
+import de.k3b.android.androFotoFinder.media.AndroidExifInterface6Ex;
+import de.k3b.android.androFotoFinder.media.ExifInterfaceX42ExAndroidImpl;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
 import de.k3b.android.androFotoFinder.queries.MediaContent2DBUpdateService;
@@ -56,6 +57,7 @@ import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.PhotoPropertiesImageReader;
+import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.zip.ZipConfigRepository;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
@@ -100,7 +102,10 @@ public class AndroFotoFinderApp extends Application {
     public void onCreate() {
         // StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
         // StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
-        AndroidExifInterfaceEx.init();
+        // AndroidExifInterface6Ex.init(); // old android-6 version
+
+        // use AndroidX-4.2 based ExifInterface
+        PhotoPropertiesUtil.setFactory(ExifInterfaceX42ExAndroidImpl.factory());
         FotoSqlBase.init();
 
         super.onCreate();

@@ -49,7 +49,7 @@ import de.k3b.media.MediaFormatter.FieldID;
  * <p>
  * Created by k3b on 08.10.2016.
  */
-public class ExifInterfaceExImpl extends ExifInterface
+public class ExifInterface6ExImpl extends ExifInterface
         implements ExifInterfaceEx {
     private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
 
@@ -79,7 +79,7 @@ public class ExifInterfaceExImpl extends ExifInterface
     /**
      * use {@link #loadAttributes(InputStream, IFile, String, IPhotoProperties, String)} to get exif content.
      */
-    public ExifInterfaceExImpl() {
+    public ExifInterface6ExImpl() {
         try {
             loadAttributes(null, null, null, null, null);
         } catch (IOException e) {
@@ -96,7 +96,7 @@ public class ExifInterfaceExImpl extends ExifInterface
                 /** {@inheritDoc} */
                 @Override
                 public ExifInterfaceEx createExifInterface() {
-                    return new ExifInterfaceExImpl();
+                    return new ExifInterface6ExImpl();
                 }
             };
         }
@@ -122,7 +122,7 @@ public class ExifInterfaceExImpl extends ExifInterface
         setFilelastModified(mExifFile);
 
         this.xmpExtern = xmpExtern;
-        this.mDbg_context = dbg_context + "->ExifInterfaceExImpl(" + absoluteJpgPath + ") ";
+        this.mDbg_context = dbg_context + "->ExifInterface6ExImpl(" + absoluteJpgPath + ") ";
         if (LibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(this.mDbg_context +
                     " load: " + PhotoPropertiesFormatter.format(this, false, null, FieldID.path, FieldID.clasz));
@@ -186,7 +186,7 @@ public class ExifInterfaceExImpl extends ExifInterface
 
     protected void fixDateTakenIfNeccessary(IFile inFile) {
         // donot fix in unittests
-        if (ExifInterfaceExImpl.fixDateOnSave && (null == getDateTimeTaken()) && (inFile != null)) {
+        if (ExifInterface6ExImpl.fixDateOnSave && (null == getDateTimeTaken()) && (inFile != null)) {
             long lastModified = inFile.lastModified();
             // #29 set data if not in exif: date, make model
             if (lastModified != 0) {
@@ -199,12 +199,12 @@ public class ExifInterfaceExImpl extends ExifInterface
     protected void fixAttributes() {
         fixDateTakenIfNeccessary(mExifFile);
 
-        if ((LibGlobal.appName != null) && (null == getAttribute(ExifInterfaceExImpl.TAG_MAKE))) {
-            setAttribute(ExifInterfaceExImpl.TAG_MAKE, LibGlobal.appName);
+        if ((LibGlobal.appName != null) && (null == getAttribute(ExifInterface6ExImpl.TAG_MAKE))) {
+            setAttribute(ExifInterface6ExImpl.TAG_MAKE, LibGlobal.appName);
         }
 
-        if ((LibGlobal.appVersion != null) && (null == getAttribute(ExifInterfaceExImpl.TAG_MODEL))) {
-            setAttribute(ExifInterfaceExImpl.TAG_MODEL, LibGlobal.appVersion);
+        if ((LibGlobal.appVersion != null) && (null == getAttribute(ExifInterface6ExImpl.TAG_MODEL))) {
+            setAttribute(ExifInterface6ExImpl.TAG_MODEL, LibGlobal.appVersion);
         }
         super.fixAttributes();
     }
@@ -226,8 +226,8 @@ public class ExifInterfaceExImpl extends ExifInterface
         int i=0;String debugContext = "getDateTimeTaken";
 
         Date result = null;
-        if (isEmpty(result, ++i, debugContext, "Exif.DATETIME_ORIGINAL")) result = getAttributeDate(ExifInterfaceExImpl.TAG_DATETIME_ORIGINAL);
-        if (isEmpty(result, ++i, debugContext, "Exif.DATETIME")) result = getAttributeDate(ExifInterfaceExImpl.TAG_DATETIME);
+        if (isEmpty(result, ++i, debugContext, "Exif.DATETIME_ORIGINAL")) result = getAttributeDate(ExifInterface6ExImpl.TAG_DATETIME_ORIGINAL);
+        if (isEmpty(result, ++i, debugContext, "Exif.DATETIME")) result = getAttributeDate(ExifInterface6ExImpl.TAG_DATETIME);
         if ((isEmpty(result, ++i, debugContext, "xmp.DateTimeTaken")) && (xmpExtern != null)) result = xmpExtern.getDateTimeTaken();
         isEmpty(result, ++i, null, null);
         return result;
@@ -236,8 +236,8 @@ public class ExifInterfaceExImpl extends ExifInterface
     @Override
     public ExifInterfaceEx setDateTimeTaken(Date value) {
         String dateInExifFormat = toExifDateTimeString(value);
-        setAttribute(ExifInterfaceExImpl.TAG_DATETIME, dateInExifFormat);
-        setAttribute(ExifInterfaceExImpl.TAG_DATETIME_ORIGINAL, dateInExifFormat);
+        setAttribute(ExifInterface6ExImpl.TAG_DATETIME, dateInExifFormat);
+        setAttribute(ExifInterface6ExImpl.TAG_DATETIME_ORIGINAL, dateInExifFormat);
         if (xmpExtern != null) xmpExtern.setDateTimeTaken(value);
         return this;
     }
@@ -293,12 +293,12 @@ public class ExifInterfaceExImpl extends ExifInterface
     private Double mLongitude = null;
     /** latitude, in degrees north. (-90 .. +90); longitude, in degrees east.  (-180 .. + 180)    */
     @Override public IPhotoProperties setLatitudeLongitude(Double latitude, Double longitude) {
-        setAttribute(ExifInterfaceExImpl.TAG_GPS_LATITUDE, convert(latitude));
-        setAttribute(ExifInterfaceExImpl.TAG_GPS_LATITUDE_REF, latitudeRef(latitude));
+        setAttribute(ExifInterface6ExImpl.TAG_GPS_LATITUDE, convert(latitude));
+        setAttribute(ExifInterface6ExImpl.TAG_GPS_LATITUDE_REF, latitudeRef(latitude));
         mLatitude = latitude;
 
-        setAttribute(ExifInterfaceExImpl.TAG_GPS_LONGITUDE, convert(longitude));
-        setAttribute(ExifInterfaceExImpl.TAG_GPS_LONGITUDE_REF, longitudeRef(longitude));
+        setAttribute(ExifInterface6ExImpl.TAG_GPS_LONGITUDE, convert(longitude));
+        setAttribute(ExifInterface6ExImpl.TAG_GPS_LONGITUDE_REF, longitudeRef(longitude));
         mLongitude = longitude;
 
         if (xmpExtern != null) xmpExtern.setLatitudeLongitude(latitude, longitude);
@@ -456,7 +456,7 @@ public class ExifInterfaceExImpl extends ExifInterface
     @Override
     public int getOrientationId() {
         return getAttributeInt(
-                ExifInterfaceExImpl.TAG_ORIENTATION, 0);
+                ExifInterface6ExImpl.TAG_ORIENTATION, 0);
     }
 
     /** return image orinentation in degrees (0, 90,180,270) or 0 if inknown */

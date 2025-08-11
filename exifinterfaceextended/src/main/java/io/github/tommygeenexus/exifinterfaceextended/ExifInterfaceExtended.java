@@ -3938,11 +3938,10 @@ public class ExifInterfaceExtended {
     public ExifInterfaceExtended(String absoluteJpgPath, InputStream in) throws IOException {
         if (in != null) {
             init(in, STREAM_TYPE_FULL_IMAGE_DATA);
-        } else {
+        } else if (absoluteJpgPath != null) {
             initForFilename(absoluteJpgPath);
         }
     }
-
 
     /**
      * Reads Exif tags from the specified image input stream based on the stream type. Attribute
