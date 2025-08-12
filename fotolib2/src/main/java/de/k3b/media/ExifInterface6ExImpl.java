@@ -45,7 +45,9 @@ import de.k3b.media.MediaFormatter.FieldID;
 
 /**
  * Thin Wrapper around Android6-s ExifInterface to read/write exif data as {@link IPhotoProperties}
- * from jpg {@link InputStream} or {@link IFile}
+ * from jpg {@link InputStream} or {@link IFile}.
+ * ExifInterfaceX41ExAndroidImpl is based on AndroidX-ExifInterface-version4.1 (android-only, XMP support) while
+ * {@link ExifInterface6ExImpl} is based on Android6-ExifInterface and works on j2se (non android, no XMP support).
  * <p>
  * Created by k3b on 08.10.2016.
  */
@@ -184,7 +186,7 @@ public class ExifInterface6ExImpl extends ExifInterface
         fixDateTakenIfNeccessary(FileFacade.convert("ExifInterfaceEx.fixDateTakenIfNeccessary", inFile));
     }
 
-    protected void fixDateTakenIfNeccessary(IFile inFile) {
+    protected boolean fixDateTakenIfNeccessary(IFile inFile) {
         // donot fix in unittests
         if (ExifInterface6ExImpl.fixDateOnSave && (null == getDateTimeTaken()) && (inFile != null)) {
             long lastModified = inFile.lastModified();

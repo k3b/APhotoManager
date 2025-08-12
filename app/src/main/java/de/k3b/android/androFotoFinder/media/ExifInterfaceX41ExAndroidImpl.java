@@ -1,5 +1,9 @@
 package de.k3b.android.androFotoFinder.media;
 
+import com.adobe.internal.xmp.XMPException;
+import com.adobe.internal.xmp.XMPMeta;
+import com.adobe.internal.xmp.XMPMetaFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +16,7 @@ import de.k3b.media.ExifInterface6ExImpl;
 import de.k3b.media.ExifInterfaceFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,14 +24,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 
 import de.k3b.LibGlobal;
-import de.k3b.io.FileUtils;
 import de.k3b.io.ListUtils;
-import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.ExifInterfaceEx;
@@ -39,10 +41,12 @@ import de.k3b.tagDB.TagConverter;
 import io.github.tommygeenexus.exifinterfaceextended.ExifInterfaceExtended;
 
 /**
- * Android specific Version of {@link ExifInterface6ExImpl} that updates the
- * Database, when saving exif changes based on AndroidX-ExifInterface-version4.2.
+ * Android specific Version of {@link ExifInterface} that updates the
+ * Database, when saving exif changes.
+ * {@link ExifInterfaceX41ExAndroidImpl} is based on AndroidX-ExifInterface-version4.1 (android-only, XMP support) while
+ * {@link ExifInterface6ExImpl} is based on Android6-ExifInterface and works on j2se (non android, no XMP support).
  */
-public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended implements ExifInterfaceEx{
+public class ExifInterfaceX41ExAndroidImpl extends ExifInterfaceExtended implements ExifInterfaceEx{
     // public to allow error filtering
     public static final String LOG_TAG = "ExifInterface";
 
@@ -88,24 +92,16 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
      * @param xmpExtern if not null content of extern xmp sidecar file
      * @param dbgContext String added to the debug-output
      */
-    public ExifInterfaceX42ExAndroidImpl(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbgContext) throws IOException {
+    public ExifInterfaceX41ExAndroidImpl(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbgContext) throws IOException {
         // super(absoluteJpgPath, in, xmpExtern, dbgContext);
         super(absoluteJpgPath, in);
 
         this.xmpExtern = xmpExtern;
         this.mDbg_context = dbgContext + "->ExifInterfaceEx(" + absoluteJpgPath+ ") ";
-        if (absoluteJpgPath != null) {
-            this.initialLastModified = new File(absoluteJpgPath).lastModified();
-        }
 
-        setPath(absoluteJpgPath);
-
-        PhotoPropertiesXmpSegment xmpSegment = new PhotoPropertiesXmpSegment();
-        String xmp = getAttribute(TAG_XMP);
-        if (xmp != null && xmp.length() > MIN_XMP_STRING_LEN) {
-            xmpSegment.load(FileUtils.streamFromStringContent(xmp), dbgContext);
+        if (in != null || absoluteJpgPath != null) {
+            loadInternalXmp(absoluteJpgPath, dbgContext);
         }
-        this.xmpIntern = xmpSegment;
 
         if (LibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(this.mDbg_context +
@@ -115,13 +111,37 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
 
     }
 
+    protected void loadInternalXmp(String absoluteJpgPath, String dbgContext) {
+        setPath(absoluteJpgPath);
+
+        if (absoluteJpgPath != null) {
+            this.initialLastModified = new File(absoluteJpgPath).lastModified();
+        }
+
+        PhotoPropertiesXmpSegment xmpSegment = new PhotoPropertiesXmpSegment();
+        String xmp = getAttribute(TAG_XMP);
+
+        if (xmp != null && xmp.length() > MIN_XMP_STRING_LEN) {
+            try {
+                XMPMeta xmpMeta = XMPMetaFactory.parseFromString(xmp);
+                xmpSegment.setXmpMeta(xmpMeta, dbgContext);
+            } catch (XMPException e) {
+                logger.warn(this.mDbg_context +
+                        " loadInternalXmp('" + absoluteJpgPath + "', xml='" + xmp + "') : "
+                        + e.getLocalizedMessage());
+
+            }
+        }
+        this.xmpIntern = xmpSegment;
+    }
+
     /** factory to create an ExifInterface from file or stream */
     public static ExifInterfaceFactory factory() {
         if (factory == null) {
             factory = new ExifInterfaceFactory() {
                 @Override
                 public ExifInterfaceEx createExifInterface() throws IOException {
-                    return new ExifInterfaceX42ExAndroidImpl(null, null, null, null);
+                    return new ExifInterfaceX41ExAndroidImpl(null, null, null, null);
                 }
             };
         }
@@ -132,7 +152,7 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
     public void saveAttributes() throws IOException {
         fixAttributes();
         if (xmpIntern instanceof PhotoPropertiesXmpSegment) {
-            String xmp = xmpIntern.toString();
+            String xmp = ((PhotoPropertiesXmpSegment) xmpIntern).toXmlString(false, "ExifInterfaceX41ExAndroidImpl.saveAttributes()");
             if (xmp.length() > MIN_XMP_STRING_LEN) {
                 setAttribute(TAG_XMP, xmp);
             }
@@ -159,16 +179,23 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
      */
     @Override
     public void saveAttributes(IFile inFile, IFile outFile, boolean deleteInFileOnFinish, Boolean hasXmp) throws IOException {
-        if (inFile == null || outFile == null || inFile.equals(outFile)) {
+        if (inFile == null) {
             throw new IOException(
                     "ExifInterface does not support saving attributes for the current input.");
         }
         try {
-            fixDateTakenIfNeccessary();
+            fixAttributes();
 
-            super.saveAttributes(inFile.openInputStream(), outFile.openOutputStream());
-            if (deleteInFileOnFinish) {
-                inFile.delete();
+            boolean isSameFile = (outFile == null) || inFile.equals(outFile);
+            if (isSameFile) {
+                saveAttributes();
+            } else {
+
+
+                super.saveAttributes(inFile.openInputStream(), outFile.openOutputStream());
+                if (deleteInFileOnFinish) {
+                    inFile.delete();
+                }
             }
         } catch (Exception ex) {
             outFile.delete();
@@ -622,12 +649,17 @@ public class ExifInterfaceX42ExAndroidImpl extends ExifInterfaceExtended impleme
                 ? FileFacade.convert(dbg_context, absoluteJpgPath)
                 : null;
 
+        if (absoluteJpgPath == null && jpgFile != null) {
+            absoluteJpgPath = jpgFile.getAbsolutePath();
+        }
         setPath(absoluteJpgPath);
         if (in != null) {
             loadAttributes(in);
+            loadInternalXmp(absoluteJpgPath, dbg_context);
             return this;
         } else if (mExifFile != null) {
             loadAttributes(mExifFile.openInputStream());
+            loadInternalXmp(absoluteJpgPath, dbg_context);
             return this;
         }
         return null;

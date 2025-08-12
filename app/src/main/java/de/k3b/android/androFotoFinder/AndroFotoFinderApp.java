@@ -38,8 +38,7 @@ import java.util.Date;
 import de.k3b.LibGlobal;
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
-import de.k3b.android.androFotoFinder.media.AndroidExifInterface6Ex;
-import de.k3b.android.androFotoFinder.media.ExifInterfaceX42ExAndroidImpl;
+import de.k3b.android.androFotoFinder.media.ExifInterfaceX41ExAndroidImpl;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
 import de.k3b.android.androFotoFinder.queries.MediaContent2DBUpdateService;
@@ -105,7 +104,7 @@ public class AndroFotoFinderApp extends Application {
         // AndroidExifInterface6Ex.init(); // old android-6 version
 
         // use AndroidX-4.2 based ExifInterface
-        PhotoPropertiesUtil.setFactory(ExifInterfaceX42ExAndroidImpl.factory());
+        PhotoPropertiesUtil.setFactory(ExifInterfaceX41ExAndroidImpl.factory());
         FotoSqlBase.init();
 
         super.onCreate();

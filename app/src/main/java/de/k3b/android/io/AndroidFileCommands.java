@@ -472,15 +472,14 @@ public class AndroidFileCommands extends AndroidFileCommandsDbImpl {
                                  Bundle savedInstanceState) {
             View result = super.onCreateView(inflater, container, savedInstanceState);
 
-            chkFullScan = result.findViewById(R.id.chkFullScan);
-            chkFullScan.setVisibility(View.VISIBLE);
-
             chkRescanNeverScannedByAPM = result.findViewById(R.id.chkRescanNeverScannedByAPM);
             chkRescanNeverScannedByAPM.setVisibility(View.VISIBLE);
 
             chkScanForDeleted = result.findViewById(R.id.chkScanForDeleted);
             chkScanForDeleted.setVisibility(View.VISIBLE);
 
+            chkFullScan = result.findViewById(R.id.chkFullScan);
+            chkFullScan.setVisibility(View.VISIBLE);
             chkFullScan.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

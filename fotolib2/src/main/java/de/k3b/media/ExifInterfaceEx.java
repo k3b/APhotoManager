@@ -41,6 +41,8 @@ public interface ExifInterfaceEx extends IPhotoProperties, IPhotoPropertyFileWri
      */
     boolean isValidJpgExifFormat();
 
+    /** @return true if photo was modified and must be saved therefore */
+    boolean fixAttributes();
 
     /** Prints out attributes for debugging. **/
     String getDebugString(String lineDelimiter, String... _keysToExclude);

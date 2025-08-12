@@ -216,10 +216,13 @@ public class XmpSegment {
     }
 
     public XmpSegment load(InputStream is, String dbg_context) {
+        String old = XmpSegment.dbg_context;
         try {
             setXmpMeta(XMPMetaFactory.parse(is), dbg_context);
         } catch (XMPException e) {
             onError("->XmpSegment.load", e);
+        } finally {
+            XmpSegment.dbg_context = old;
         }
         return this;
     }
@@ -236,17 +239,23 @@ public class XmpSegment {
         return this;
     }
 
-    public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
-        if (dbg_context != null) {
-            XmpSegment.dbg_context = dbg_context + DBG_PREFIX;
-        }
-
-        // humanReadable = false;
+    public String toXmlString(boolean humanReadable, String dbg_context) {
+        String old = XmpSegment.dbg_context;
         try {
-            SerializeOptions options = new SerializeOptions(0);
-            options.setPadding(1);
-            if (!humanReadable) options.setIndent("");
-            XMPMetaFactory.serialize(getXmpMeta(), os, options);
+            // workaround: my android-4.2 tahblet cannot re-read it-s xmp without this. on my android-4.4 handset this is not neccessary
+            return XMPMetaFactory.serializeToString(getXmpMeta(), createOptions(humanReadable, dbg_context)) + "\n";
+        } catch (XMPException e) {
+            onError("toXmlString", e);
+        } finally {
+            XmpSegment.dbg_context = old;
+        }
+        return null;
+    }
+
+    public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
+        String old = XmpSegment.dbg_context;
+        try {
+            XMPMetaFactory.serialize(getXmpMeta(), os, createOptions(humanReadable, dbg_context));
 
             // workaround: my android-4.2 tahblet cannot re-read it-s xmp without this. on my android-4.4 handset this is not neccessary
             os.write("\n".getBytes());
@@ -254,8 +263,21 @@ public class XmpSegment {
             onError("save", e);
         } catch (XMPException e) {
             onError("save", e);
+        } finally {
+            XmpSegment.dbg_context = old;
         }
         return this;
+    }
+
+    private static SerializeOptions createOptions(boolean humanReadable, String dbg_context) throws XMPException {
+        if (dbg_context != null) {
+            XmpSegment.dbg_context = dbg_context + DBG_PREFIX;
+        }
+
+        SerializeOptions options = new SerializeOptions(0);
+        options.setPadding(1);
+        if (!humanReadable) options.setIndent("");
+        return options;
     }
 
     public String toString() {
