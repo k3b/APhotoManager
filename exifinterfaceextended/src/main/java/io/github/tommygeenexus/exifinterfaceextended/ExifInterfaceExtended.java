@@ -3962,7 +3962,7 @@ public class ExifInterfaceExtended {
         init(inputStream, streamType);
     }
 
-    private void init(@NonNull InputStream inputStream, @ExifStreamType int streamType) throws IOException {
+    protected void init(@NonNull InputStream inputStream, @ExifStreamType int streamType) throws IOException {
         ExifInterfaceExtendedUtils.requireNonNull(inputStream, "inputStream cannot be null");
         mFilename = null;
         mIsExifDataOnly = streamType == STREAM_TYPE_EXIF_DATA_ONLY;
@@ -5382,7 +5382,7 @@ public class ExifInterfaceExtended {
         }
     }
 
-    private void initForFilename(String filename) throws IOException {
+    protected void initForFilename(String filename) throws IOException {
         if (filename == null) {
             throw new NullPointerException("filename cannot be null");
         }

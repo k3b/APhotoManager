@@ -653,12 +653,16 @@ public class ExifInterfaceX41ExAndroidImpl extends ExifInterfaceExtended impleme
             absoluteJpgPath = jpgFile.getAbsolutePath();
         }
         setPath(absoluteJpgPath);
-        if (in != null) {
-            loadAttributes(in);
+        if (absoluteJpgPath != null) {
+            initForFilename(absoluteJpgPath);
+            loadInternalXmp(absoluteJpgPath, dbg_context);
+            return this;
+        } else if (in != null) {
+            init(in, STREAM_TYPE_FULL_IMAGE_DATA);
             loadInternalXmp(absoluteJpgPath, dbg_context);
             return this;
         } else if (mExifFile != null) {
-            loadAttributes(mExifFile.openInputStream());
+            init(mExifFile.openInputStream(), STREAM_TYPE_FULL_IMAGE_DATA);
             loadInternalXmp(absoluteJpgPath, dbg_context);
             return this;
         }

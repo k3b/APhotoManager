@@ -246,12 +246,15 @@ public class PhotoPropertiesBulkUpdateService {
         try {
             ExifInterfaceEx exif = PhotoPropertiesUtil.factory().createExifInterface();
             String absoluteJpgPath = file == null ? null : file.getAbsolutePath();
-            exif.loadAttributes(null, file, absoluteJpgPath, null, "getRotationFromExifOrientation");
+            exif = exif.loadAttributes(inputStream, file, absoluteJpgPath, null, "getRotationFromExifOrientation");
 
             if (exif != null && exif.isValidJpgExifFormat()) {
                 rotation =  PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(exif.getOrientationId(), 0);
-                if (LibGlobal.embeddedXmpEnforceFixTags && exif.fixAttributes()) {
-                    exif.saveAttributes();
+                if (file != null && LibGlobal.embeddedXmpEnforceFixTags && exif.fixAttributes()) {
+                    // #207: update exif in jpg file to avoid data loss due to android-aves changes that do not support all properties
+					exif.saveAttributes(file, file,false,false);
+                    //!!! todo update media db database
+
                 }
             }
         }

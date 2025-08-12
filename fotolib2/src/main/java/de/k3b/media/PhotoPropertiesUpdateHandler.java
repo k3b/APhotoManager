@@ -140,8 +140,8 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper
         }
         ExifInterfaceEx exif = PhotoPropertiesUtil.factory().createExifInterface();
         String absoluteJpgPath = jpgInFile == null ? null : jpgInFile.getAbsolutePath();
-        exif.loadAttributes(null, jpgInFile, absoluteJpgPath, xmp, dbg_context);
-        if (exif.isValidJpgExifFormat()) {
+        exif = exif.loadAttributes(null, jpgInFile, absoluteJpgPath, xmp, dbg_context);
+        if (exif != null) {
             exif.setPath(absoluteJpgPath);
         } else {
             exif = null;
