@@ -168,7 +168,8 @@ public class FotoSql extends FotoSqlBase {
 
     private static final String FILTER_EXPR_LAT_MAX = SQL_COL_LAT + " < ?";
     private static final String FILTER_EXPR_LAT_MIN = SQL_COL_LAT + " >= ?";
-    private static final String FILTER_EXPR_NO_GPS = SQL_COL_LAT + " is null AND " + SQL_COL_LON + " is null";
+    private static final String FILTER_EXPR_NO_GPS = "(" + SQL_COL_LAT + " is null OR " + SQL_COL_LAT + "= 0)" +
+            " AND (" + SQL_COL_LON + " is null OR "+SQL_COL_LON+"= 0)";
     private static final String FILTER_EXPR_LON_MAX = SQL_COL_LON + " < ?";
     private static final String FILTER_EXPR_LON_MIN = SQL_COL_LON + " >= ?";
     protected static final String FILTER_EXPR_RATING_MIN = SQL_COL_EXT_RATING + " >= ?";

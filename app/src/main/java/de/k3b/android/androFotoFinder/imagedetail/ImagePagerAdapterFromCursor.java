@@ -310,7 +310,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
 
     public boolean hasGeo(int position) {
         Cursor cursor = getCursorAt(position);
-        return !DBUtils.isNull(cursor, FotoSql.SQL_COL_GPS, true);
+        return DBUtils.getDouble(cursor,FotoSql.SQL_COL_GPS,0.0d) != 0.0d;
     }
 
     /**

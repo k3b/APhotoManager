@@ -123,7 +123,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements PhotoChangeNo
         final GridCellViewHolder holder = (GridCellViewHolder) view.getTag();
 
         long count = DBUtils.getLong(cursor, FotoSql.SQL_COL_COUNT, 0);
-        boolean gps = !DBUtils.isNull(cursor,FotoSql.SQL_COL_GPS,true);
+        boolean gps = DBUtils.getDouble(cursor,FotoSql.SQL_COL_GPS,0.0d) != 0.0d;
 
         // new col id for with since ver 0.6.3
         long imageSize = DBUtils.getLong(cursor, FotoSql.SQL_COL_WIDTH, 0);

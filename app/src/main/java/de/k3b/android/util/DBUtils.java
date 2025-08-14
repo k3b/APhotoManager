@@ -48,16 +48,21 @@ public class DBUtils {
 
     public static String getString(Cursor cursor, String colId, String notFoundValue) {
         int columnIndex = (cursor == null) ? -1 : cursor.getColumnIndex(colId);
-        return (columnIndex == -1)  ? notFoundValue : cursor.getString(columnIndex);
+        return (columnIndex == -1 || cursor.isNull(columnIndex))  ? notFoundValue : cursor.getString(columnIndex);
     }
 
     public static long getLong(Cursor cursor, String colId, long notFoundValue) {
         int columnIndex = (cursor == null) ? -1 : cursor.getColumnIndex(colId);
-        return (columnIndex == -1)  ? notFoundValue : cursor.getLong(columnIndex);
+        return (columnIndex == -1 || cursor.isNull(columnIndex))  ? notFoundValue : cursor.getLong(columnIndex);
     }
 
     public static int getInt(Cursor cursor, String colId, int notFoundValue) {
         int columnIndex = (cursor == null) ? -1 : cursor.getColumnIndex(colId);
-        return (columnIndex == -1)  ? notFoundValue : cursor.getInt(columnIndex);
+        return (columnIndex == -1 || cursor.isNull(columnIndex))  ? notFoundValue : cursor.getInt(columnIndex);
+    }
+
+    public static double getDouble(Cursor cursor, String colId, double notFoundValue) {
+        int columnIndex = (cursor == null) ? -1 : cursor.getColumnIndex(colId);
+        return (columnIndex == -1 || cursor.isNull(columnIndex))  ? notFoundValue : cursor.getDouble(columnIndex);
     }
 }
